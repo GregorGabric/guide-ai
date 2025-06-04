@@ -2,7 +2,7 @@ import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import * as Haptics from 'expo-haptics';
 import { ArrowUpRight, Clock3, MapPin, Navigation, Phone, Volume2 } from 'lucide-react-native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { TAB_BAR_HEIGHT } from '~/app/(drawer)/(tabs)/_layout';
 import { Badge } from '~/components/ui/badge';
@@ -91,8 +91,6 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
 
   const distance = getDistance();
   const priceLevel = getPriceLevel();
-
-  const snapPoints = useMemo(() => ['70%', '80%', '90%'], []);
 
   return (
     <BottomSheet
