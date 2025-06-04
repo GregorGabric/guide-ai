@@ -1,0 +1,49 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Development Workflow & Commands
+
+## Getting Started
+Check [package.json](mdc:package.json) for available scripts and dependencies.
+
+## Common Development Commands
+```bash
+# Start development server
+npx expo start -c
+
+# Run on specific platforms
+npx expo start --ios
+npx expo start --android
+npx expo start --web
+
+# Build for production
+eas build --platform ios
+eas build --platform android
+
+# Update app over-the-air
+eas update
+
+# Run TypeScript check
+npx tsc --noEmit
+```
+
+## Configuration Files to Reference
+- [app.json](mdc:app.json) - Expo app configuration and metadata
+- [eas.json](mdc:eas.json) - Build and update configurations
+- [metro.config.js](mdc:metro.config.js) - Metro bundler settings
+- [babel.config.js](mdc:babel.config.js) - Babel transpilation setup
+
+## Styling Development
+- Reference [tailwind.config.js](mdc:tailwind.config.js) for NativeWind configuration
+- Check [global.css](mdc:global.css) for global styles
+- Use Tailwind CSS IntelliSense extension for better autocomplete
+
+## File References for Common Tasks
+- **Adding new routes**: Create files in [app/](mdc:app) directory
+- **New components**: Add to [components/](mdc:components) or feature-specific `_components/`
+- **API integration**: Add services and query factories to [services/](mdc:services) directory
+- **TanStack Query setup**: Configure queries, mutations, and query factories in services
+- **Global state**: Implement in [store/](mdc:store) directory for client-side state
+- **Utilities**: Add to [utils/](mdc:utils) directory

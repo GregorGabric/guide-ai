@@ -1,0 +1,209 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# TanStack Query Patterns & Best Practices
+
+## Query Options API (v5+)
+Use the modern Query Options API with single object parameters:
+
+```typescript
+// ✅ Modern approach
+useQuery({
+  queryKey: ['todos'],
+  queryFn: fetchTodos,
+  staleTime: 5000
+})
+
+// ❌ Old approach (v4 and below)
+useQuery(['todos'], fetchTodos, { staleTime: 5000 })
+```
+
+## Query Factories Pattern
+Implement query factories for better type safety and code organization, as recommended by [TkDodo's Query Options API guide](mdc:https:/tkdodo.eu/blog/the-query-options-api):
+
+```typescript
+const todoQueries = {
+  all: () => ['todos'],
+  lists: () => [...todoQueries.all(), 'list'],
+  list: (filters: string) =>
+    queryOptions({
+      queryKey: [...todoQueries.lists(), filters],
+      queryFn: () => fetchTodos(filters),
+    }),
+  details: () => [...todoQueries.all(), 'detail'],
+  detail: (id: number) =>
+    queryOptions({
+      queryKey: [...todoQueries.details(), id],
+      queryFn: () => fetchTodo(id),
+      staleTime: 5000,
+    }),
+}
+```
+
+## Type-Safe Query Options
+Use the `queryOptions` helper for enhanced type safety:
+
+```typescript
+import { queryOptions } from '@tanstack/react-query'
+
+const attractionQuery = queryOptions({
+  queryKey: ['attraction', id],
+  queryFn: () => fetchAttraction(id),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+})
+
+// ✅ Type-safe usage
+useQuery(attractionQuery)
+queryClient.prefetchQuery(attractionQuery)
+
+// ✅ Tagged query keys provide automatic type inference
+const attraction = queryClient.getQueryData(attractionQuery.queryKey)
+// ^? Automatically typed based on queryFn return type
+```
+
+## React Native Specific Patterns
+
+### Network-Aware Queries
+```typescript
+import { useNetInfo } from '@react-native-async-storage/async-storage'
+
+const attractionsQuery = queryOptions({
+  queryKey: ['attractions'],
+  queryFn: fetchAttractions,
+  enabled: netInfo.isConnected,
+  staleTime: 10 * 60 * 1000, // 10 minutes for mobile
+})
+```
+
+### Background Refresh
+```typescript
+import { AppState } from 'react-native'
+import { focusManager } from '@tanstack/react-query'
+
+// Set up focus manager for React Native
+focusManager.setEventListener((handleFocus) => {
+  const handleAppStateChange = (nextAppState: string) => {
+    if (nextAppState === 'active') {
+      handleFocus()
+    }
+  }
+  
+  AppState.addEventListener('change', handleAppStateChange)
+  return () => AppState.removeEventListener('change', handleAppStateChange)
+})
+```
+
+## Service Integration
+Organize queries in [services/](mdc:services) directories:
+
+```typescript
+// services/places/queries.ts
+export const placesQueries = {
+  all: () => ['places'],
+  attractions: () => [...placesQueries.all(), 'attractions'],
+  attraction: (id: string) =>
+    queryOptions({
+      queryKey: [...placesQueries.attractions(), id],
+      queryFn: () => fetchAttraction(id),
+    }),
+  nearby: (coordinates: Coordinates) =>
+    queryOptions({
+      queryKey: [...placesQueries.attractions(), 'nearby', coordinates],
+      queryFn: () => fetchNearbyAttractions(coordinates),
+      staleTime: 5 * 60 * 1000,
+    }),
+}
+```
+
+## Mutations with Optimistic Updates
+```typescript
+const useCreateAttractionMutation = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: createAttraction,
+    onMutate: async (newAttraction) => {
+      await queryClient.cancelQueries({ queryKey: placesQueries.attractions() })
+      
+      const previousAttractions = queryClient.getQueryData(placesQueries.attractions())
+      
+      queryClient.setQueryData(placesQueries.attractions(), (old: Attraction[]) => [
+        ...old,
+        { ...newAttraction, id: Date.now().toString() }
+      ])
+      
+      return { previousAttractions }
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousAttractions) {
+        queryClient.setQueryData(placesQueries.attractions(), context.previousAttractions)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: placesQueries.attractions() })
+    },
+  })
+}
+```
+
+## Error Handling
+```typescript
+const attractionQuery = queryOptions({
+  queryKey: ['attraction', id],
+  queryFn: async () => {
+    const response = await fetchAttraction(id)
+    if (!response.ok) {
+      throw new Error('Failed to fetch attraction')
+    }
+    return response.json()
+  },
+  retry: (failureCount, error) => {
+    // Don't retry on 404s
+    if (error.status === 404) return false
+    return failureCount < 3
+  },
+  retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+})
+```
+
+## Infinite Queries for Lists
+```typescript
+const attractionsInfiniteQuery = queryOptions({
+  queryKey: ['attractions', 'infinite', filters],
+  queryFn: ({ pageParam = 0 }) => fetchAttractions({ page: pageParam, ...filters }),
+  getNextPageParam: (lastPage, pages) => {
+    return lastPage.hasNextPage ? pages.length : undefined
+  },
+  initialPageParam: 0,
+})
+
+// Usage in component
+const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useInfiniteQuery(attractionsInfiniteQuery)
+```
+
+## Query Client Setup
+Configure the query client in your app root:
+
+```typescript
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      retry: (failureCount, error) => {
+        if (error.status === 404 || error.status === 403) return false
+        return failureCount < 3
+      },
+    },
+  },
+})
+```

@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Overview
+
+This is a React Native/Expo project called **guide-ai** that appears to be a travel/guide application with attraction features.
+
+## Tech Stack
+- **React Native** with Expo
+- **TypeScript** for type safety
+- **TanStack Query** for server state management and data fetching
+- **NativeWind** for Tailwind CSS styling in React Native
+- **Expo Router** for navigation (file-based routing)
+
+## Project Structure
+- [app/](mdc:app) - Main application code with Expo Router file-based routing
+- [components/](mdc:components) - Reusable UI components
+- [services/](mdc:services) - Business logic and API interactions
+- [context/](mdc:context) - React Context providers
+- [store/](mdc:store) - State management
+- [utils/](mdc:utils) - Utility functions
+- [lib/](mdc:lib) - Shared libraries and configurations
+
+## Key Configuration Files
+- [package.json](mdc:package.json) - Dependencies and scripts
+- [app.json](mdc:app.json) - Expo app configuration
+- [eas.json](mdc:eas.json) - Expo Application Services configuration
+- [metro.config.js](mdc:metro.config.js) - Metro bundler configuration
+- [tailwind.config.js](mdc:tailwind.config.js) - Tailwind CSS configuration for NativeWind
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration

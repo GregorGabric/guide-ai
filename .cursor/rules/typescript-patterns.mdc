@@ -1,0 +1,66 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# TypeScript Patterns & Best Practices
+
+## Type Definitions
+- Use **interfaces over types** for component props and data structures
+- Create type files with `.type.ts` extension in relevant directories
+- Define prop interfaces with clear, descriptive names ending in `Props`
+
+```typescript
+interface AttractionCardProps {
+  attraction: Attraction
+  onPress: (id: string) => void
+  isLoading?: boolean
+}
+```
+
+## Component Typing
+- Use `function` keyword for components, not `const`
+- Properly type component props and return types
+- Use generic types for reusable components
+
+```typescript
+function AttractionCard({ attraction, onPress, isLoading = false }: AttractionCardProps) {
+  // Component implementation
+}
+```
+
+## React Native Specific Types
+- Import types from `react-native` when needed
+- Use proper typing for navigation props with Expo Router
+- Type platform-specific code appropriately
+
+```typescript
+import { ViewStyle, TextStyle } from 'react-native'
+import { useRouter } from 'expo-router'
+import { queryOptions, UseQueryResult } from '@tanstack/react-query'
+```
+
+## API and Service Types
+- Define API response types in [services/](mdc:services) directories
+- Use proper error typing for service functions
+- Implement type-safe patterns with TanStack Query's `queryOptions`
+- Leverage tagged query keys for automatic type inference
+
+## Utility Types
+- Leverage TypeScript utility types (`Partial`, `Pick`, `Omit`, etc.)
+- Create custom utility types for common patterns
+- Use discriminated unions for state management
+
+## Configuration Files
+- Reference [tsconfig.json](mdc:tsconfig.json) for project TypeScript configuration
+- Check [app-env.d.ts](mdc:app-env.d.ts) and [nativewind-env.d.ts](mdc:nativewind-env.d.ts) for type declarations
+
+## Error Handling Types
+- Define custom error types for different failure scenarios
+- Use Result/Either patterns for functions that can fail
+- Type async operations properly with Promise types
+
+## State Management Types
+- Use proper typing in [store/](mdc:store) for state management
+- Type Zustand actions and reducers appropriately
+- Implement type-safe context providers in [context/](mdc:context)
