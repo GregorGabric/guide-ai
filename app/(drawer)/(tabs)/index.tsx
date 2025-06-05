@@ -1,5 +1,5 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { skipToken, useQuery } from '@tanstack/react-query';
+import { useAction } from 'convex/react';
 import * as Location from 'expo-location';
 import { Navigation, Settings, SparklesIcon, Zap } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -7,21 +7,72 @@ import { Animated, Linking, Platform, Text, TouchableOpacity, View } from 'react
 import MapView, { MapMarker } from 'react-native-maps';
 import AttractionBottomSheet from '~/app/(drawer)/(tabs)/_components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/app/(drawer)/(tabs)/_components/attraction-carousel/attraction-carousel';
-import { mockData } from '~/app/(drawer)/(tabs)/mock-data';
 import Header from '~/components/header';
 import LoadingOverlay from '~/components/loading-overlay';
 import { useSheetRef } from '~/components/ui/sheet';
+import { api } from '~/convex/_generated/api';
 import { COLORS } from '~/lib/theme/colors';
 import type { PlacesResponse } from '~/services/places/types';
 
 export default function MapScreen() {
   const tabBarHeight = useBottomTabBarHeight();
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [data, setData] = useState<PlacesResponse['places']>([]);
+  const [location] = useState<Location.LocationObject | null>({
+    coords: {
+      heading: 0,
+      speed: 0,
+      latitude: 52.520008,
+      longitude: 13.404954,
+      altitude: 10,
+      accuracy: 10,
+      altitudeAccuracy: 0,
+    },
+    timestamp: 1717564800000,
+  });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
   >(null);
+
+  const action = useAction(api.placesActions.getNearbyPlaces);
+
+  useEffect(() => {
+    async function test() {
+      if (!location?.coords.latitude || !location.coords.longitude) {
+        return;
+      }
+
+      try {
+        const val = await action({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          radius: 50,
+        });
+        setData(val.places);
+        console.log(val, 'val');
+      } catch (error) {
+        console.error('Error in useEffect:', error);
+      }
+    }
+
+    void test();
+  }, [action, location, location?.coords.latitude, location?.coords.longitude]);
+
+  // const places = useQuery(api.places.getPlaces, {
+  //   latitude: location?.coords.latitude ?? 0,
+  //   longitude: location?.coords.longitude ?? 0,
+  //   radius: 50,
+  // });
+
+  // console.log('places', places);
+
+  // const places = useQuery(api.places.fetchAndCachePlaces, {
+  //   latitude: location?.coords.latitude ?? 0,
+  //   longitude: location?.coords.longitude ?? 0,
+  //   radius: 1000,
+  //   maxResults: 10,
+  // });
 
   const [retryCount, setRetryCount] = useState(0);
   const mapRef = useRef<MapView>(null);
@@ -69,7 +120,7 @@ export default function MapScreen() {
         timeInterval: 10000,
       });
       console.log('Current location obtained:', currentLocation.coords);
-      setLocation(currentLocation);
+      // setLocation(currentLocation);
 
       // Fetch nearby attractions
       console.log('Fetching nearby attractions...');
@@ -82,7 +133,7 @@ export default function MapScreen() {
 
   useEffect(() => {
     void initializeLocationAndAttractions();
-  }, [retryCount]);
+  }, []);
 
   const handleAttractionPress = (attraction: PlacesResponse['places'][number]) => {
     setSelectedAttraction(attraction);
@@ -124,30 +175,10 @@ export default function MapScreen() {
     setSelectedAttraction(null);
     sheetRef.current?.dismiss();
   };
-  const { data, isPending } = useQuery({
-    queryKey: ['attractions', location?.coords.latitude, location?.coords.longitude],
-    queryFn: location
-      ? () => {
-          // const params = new URLSearchParams({
-          //   latitude: location.coords.latitude.toString(),
-          //   longitude: location.coords.longitude.toString(),
-          //   radius: '1000',
-          //   maxResults: '10',
-          // });
-          // const response = await fetch(`/hello?${params.toString()}`, {
-          //   method: 'GET',
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //   },
-          // });
-          // const data = await response.json();
-
-          return mockData.places as PlacesResponse['places'];
-          // return data.places as PlacesResponse['places'];
-        }
-      : skipToken,
-    enabled: !!location,
-  });
+  // For now, use mock data until Convex functions are generated
+  // TODO: Replace with Convex query once functions are deployed
+  // const data = location ? (mockData.places as PlacesResponse['places']) : undefined;
+  const isPending = !location || data === undefined;
 
   if (isPending) {
     return <LoadingOverlay message="🗺️ Discovering amazing places nearby..." />;

@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as React from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { QueryProvider } from '~/context/query-context';
+import { ConvexClientProvider } from '~/context/convex-provider';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 
@@ -54,7 +54,7 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
+    <ConvexClientProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
           <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
@@ -66,7 +66,7 @@ export default function RootLayout() {
           </ThemeProvider>
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
-    </QueryProvider>
+    </ConvexClientProvider>
   );
 }
 
