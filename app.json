@@ -21,9 +21,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gregorgabric.guide-ai",
@@ -54,7 +52,12 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": ["node_modules/@expo-google-fonts/sora/400Regular/Sora_400Regular.ttf"]
+        }
+      ],
       "expo-web-browser",
       [
         "expo-location",
@@ -71,9 +74,7 @@
       [
         "expo-asset",
         {
-          "assets": [
-            "./assets/"
-          ]
+          "assets": ["./assets/"]
         }
       ],
       [

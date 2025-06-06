@@ -18,12 +18,18 @@ const _translateXGap = 25;
 interface Props {
   index: number;
   scrollOffsetX: SharedValue<number>;
-  onPressOut: () => void;
   place: PlacesResponse['places'][number];
   width: number;
+  onOpenAttraction: (attraction: PlacesResponse['places'][number]) => void;
 }
 
-export const InfoItem = ({ index, scrollOffsetX, place, width: itemWidth, onPressOut }: Props) => {
+export const InfoItem = ({
+  index,
+  scrollOffsetX,
+  place,
+  width: itemWidth,
+  onOpenAttraction,
+}: Props) => {
   const scale = useSharedValue(1);
 
   // const rCardStyle = useAnimatedStyle(() => {
@@ -77,7 +83,9 @@ export const InfoItem = ({ index, scrollOffsetX, place, width: itemWidth, onPres
       style={{ width: itemWidth }}
       onPressIn={() => {
         scale.set(withTiming(0.99, { duration: 100 }));
-        // onPressOut();
+      }}
+      onPress={() => {
+        onOpenAttraction(place);
       }}
       onPressOut={() => {
         scale.set(withTiming(1));

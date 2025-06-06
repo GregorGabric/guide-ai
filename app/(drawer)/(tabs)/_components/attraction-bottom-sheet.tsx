@@ -97,8 +97,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
       enableDynamicSizing={false}
       detached
       bottomInset={TAB_BAR_HEIGHT}
-      // ref={sheetRef}
-      // index={2}
+      ref={sheetRef}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
@@ -107,9 +106,9 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
       }}>
       <BottomSheetScrollView className="flex-  1 rounded-t-3xl">
         {attraction && (
-          <BottomSheetView className="flex-1">
+          <BottomSheetView className="flex-1 font-mono">
             <View className="mb-6 px-6">
-              <H3 className="mb-3 leading-tight text-slate-900">
+              <H3 className="mb-3 font-thin leading-tight text-slate-900">
                 {attraction.displayName.text || attraction.name}
               </H3>
 

@@ -7,6 +7,10 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Sora_400Regular', 'sans-serif'],
+        serif: ['Sora_400Regular', 'serif'],
+      },
       colors: {
         border: withOpacity('border'),
         input: withOpacity('input'),

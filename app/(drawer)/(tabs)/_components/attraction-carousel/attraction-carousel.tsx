@@ -50,12 +50,8 @@ export const AttractionCarousel = ({
         onMomentumScrollEnd={(event) => {
           const index = Math.round(event.nativeEvent.contentOffset.x / width);
           const nextLocation = data[index];
-          setSelectedAttraction(nextLocation);
+          // setSelectedAttraction(nextLocation);
           runOnJS(onPressOut)(nextLocation);
-          // console.log(nextLocation.title);
-          // if (nextLocation.title !== location.title) {
-          //   setLocation(nextLocation);
-          // }
         }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}>
@@ -63,7 +59,10 @@ export const AttractionCarousel = ({
           <InfoItem
             width={width}
             place={place}
-            onPressOut={() => onAttractionPress?.(place)}
+            onOpenAttraction={(attraction) => {
+              onAttractionPress?.(attraction);
+              setSelectedAttraction(attraction);
+            }}
             key={place.id}
             index={index}
             scrollOffsetX={scrollOffsetX}

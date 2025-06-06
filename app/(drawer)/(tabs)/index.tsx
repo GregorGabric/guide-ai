@@ -1,8 +1,9 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as Location from 'expo-location';
 import { Navigation, Settings, SparklesIcon, Zap } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Animated, Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import AttractionBottomSheet from '~/app/(drawer)/(tabs)/_components/attraction-bottom-sheet';
@@ -11,149 +12,42 @@ import Header from '~/components/header';
 import LoadingOverlay from '~/components/loading-overlay';
 import { useSheetRef } from '~/components/ui/sheet';
 import { api } from '~/convex/_generated/api';
+import { useLocation } from '~/lib/hooks';
 import { COLORS } from '~/lib/theme/colors';
 import type { PlacesResponse } from '~/services/places/types';
+import { currentLocation } from '~/services/queries';
 
 export default function MapScreen() {
   const tabBarHeight = useBottomTabBarHeight();
-  const [data, setData] = useState<PlacesResponse['places']>([]);
-  const [location] = useState<Location.LocationObject | null>({
-    coords: {
-      heading: 0,
-      speed: 0,
-      latitude: 52.520008,
-      longitude: 13.404954,
-      altitude: 10,
-      accuracy: 10,
-      altitudeAccuracy: 0,
-    },
-    timestamp: 1717564800000,
-  });
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const { data: location, isPending: isLocationPending } = useQuery(currentLocation);
+
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
   >(null);
 
   const action = useAction(api.placesActions.getNearbyPlaces);
 
-  useEffect(() => {
-    async function test() {
-      if (!location?.coords.latitude || !location.coords.longitude) {
-        return;
-      }
+  const placesQuery = useQuery({
+    queryKey: ['places'],
+    queryFn: location
+      ? () => {
+          return action({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+        }
+      : skipToken,
+  });
+  const data = placesQuery.data?.places;
 
-      try {
-        const val = await action({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          radius: 50,
-        });
-        setData(val.places);
-        console.log(val, 'val');
-      } catch (error) {
-        console.error('Error in useEffect:', error);
-      }
-    }
-
-    void test();
-  }, [action, location, location?.coords.latitude, location?.coords.longitude]);
-
-  // const places = useQuery(api.places.getPlaces, {
-  //   latitude: location?.coords.latitude ?? 0,
-  //   longitude: location?.coords.longitude ?? 0,
-  //   radius: 50,
-  // });
-
-  // console.log('places', places);
-
-  // const places = useQuery(api.places.fetchAndCachePlaces, {
-  //   latitude: location?.coords.latitude ?? 0,
-  //   longitude: location?.coords.longitude ?? 0,
-  //   radius: 1000,
-  //   maxResults: 10,
-  // });
-
-  const [retryCount, setRetryCount] = useState(0);
   const mapRef = useRef<MapView>(null);
   const sheetRef = useSheetRef();
 
-  const initializeLocationAndAttractions = async () => {
-    try {
-      // Reset permission denied state on retry
-      setPermissionDenied(false);
-
-      // First check current permission status
-      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
-      console.log('Current permission status:', currentStatus);
-
-      // If not granted, request permissions
-      if (currentStatus !== 'granted') {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        console.log('Permission request result:', status);
-
-        if (status !== 'granted') {
-          let errorMessage = 'Permission to access location was denied';
-          setPermissionDenied(true);
-
-          // Provide more specific error messages based on status
-          switch (status) {
-            case 'denied':
-              errorMessage =
-                'Location permission was denied. You can enable it in your device settings.';
-              break;
-            case 'undetermined':
-              errorMessage = 'Location permission was not determined. Please try again.';
-              break;
-            default:
-              errorMessage = `Location permission status: ${status}. Please enable location access in device settings.`;
-          }
-
-          setErrorMsg(errorMessage);
-          return;
-        }
-      }
-
-      console.log('Getting current location...');
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-        timeInterval: 10000,
-      });
-      console.log('Current location obtained:', currentLocation.coords);
-      // setLocation(currentLocation);
-
-      // Fetch nearby attractions
-      console.log('Fetching nearby attractions...');
-    } catch (error) {
-      console.error('Error in initializeLocationAndAttractions:', error);
-      const errorMessage = `Error fetching location or attractions: ${error}`;
-      setErrorMsg(errorMessage);
-    }
-  };
-
-  useEffect(() => {
-    void initializeLocationAndAttractions();
-  }, []);
+  const { data: locationData, mutate: requestUserLocation } = useLocation();
+  const errorMsg = locationData?.error;
+  const permissionDenied = locationData?.status === Location.PermissionStatus.DENIED;
 
   const handleAttractionPress = (attraction: PlacesResponse['places'][number]) => {
-    setSelectedAttraction(attraction);
-    sheetRef.current?.present();
-
-    // Animate to the selected attraction
-    if (mapRef.current) {
-      mapRef.current?.animateToRegion(
-        {
-          latitude: attraction.location.latitude,
-          longitude: attraction.location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        1000
-      );
-    }
-  };
-
-  const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
     setSelectedAttraction(attraction);
     sheetRef.current?.present();
 
@@ -171,16 +65,28 @@ export default function MapScreen() {
     }
   };
 
+  const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
+    setSelectedAttraction(attraction);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: attraction.location.latitude,
+          longitude: attraction.location.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
+    }
+  };
+
   const closeBottomSheet = () => {
     setSelectedAttraction(null);
-    sheetRef.current?.dismiss();
+    // sheetRef.current?.dismiss();
   };
-  // For now, use mock data until Convex functions are generated
-  // TODO: Replace with Convex query once functions are deployed
-  // const data = location ? (mockData.places as PlacesResponse['places']) : undefined;
-  const isPending = !location || data === undefined;
 
-  if (isPending) {
+  if (isLocationPending) {
     return <LoadingOverlay message="🗺️ Discovering amazing places nearby..." />;
   }
 
@@ -224,9 +130,7 @@ export default function MapScreen() {
                 elevation: 6,
               }}
               onPress={() => {
-                setErrorMsg(null);
-                setPermissionDenied(false);
-                setRetryCount((prev) => prev + 1);
+                requestUserLocation();
               }}
               activeOpacity={0.9}>
               <Text
@@ -312,10 +216,7 @@ export default function MapScreen() {
           position: 'absolute',
           inset: 0,
         }}
-        showsUserLocation
-        onMapReady={() => {
-          console.log('Map is ready!');
-        }}>
+        showsUserLocation>
         <MapMarker
           coordinate={{
             latitude: location.coords.latitude,
@@ -335,8 +236,8 @@ export default function MapScreen() {
             className="bg-background"
             key={attraction.id}
             coordinate={{
-              latitude: attraction.location.latitude,
-              longitude: attraction.location.longitude,
+              latitude: attraction.location?.latitude ?? 0,
+              longitude: attraction.location?.longitude ?? 0,
             }}
             title={attraction.name}
             description={attraction.editorialSummary?.text}
@@ -359,7 +260,7 @@ export default function MapScreen() {
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={(attraction) => {
             if (mapRef.current) {
-              mapRef.current?.animateToRegion(
+              mapRef.current.animateToRegion(
                 {
                   latitude: attraction.location.latitude,
                   longitude: attraction.location.longitude,

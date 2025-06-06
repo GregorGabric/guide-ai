@@ -26,8 +26,6 @@ export const getNearbyPlaces = action({
       forceRefresh = false,
     } = args;
 
-    console.log(latitude, longitude, radius, 'args');
-
     const API_KEY = process.env.PLACES_API_KEY;
     const searchParams = { latitude, longitude, radius };
 
