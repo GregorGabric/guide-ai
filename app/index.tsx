@@ -167,21 +167,11 @@ export default function MapScreen() {
         },
         { duration: 1000 }
       );
-      // mapRef.current.animateToRegion(
-      //   {
-      //     latitude: attraction.location.latitude,
-      //     longitude: attraction.location.longitude,
-      //     latitudeDelta: 0.01,
-      //     longitudeDelta: 0.01,
-      //   },
-      //   1000
-      // );
     }
   };
 
   const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
     setSelectedAttraction(attraction);
-    console.log('here');
 
     if (mapRef.current) {
       mapRef.current.animateCamera(

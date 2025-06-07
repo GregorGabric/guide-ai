@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as places from "../places.js";
 import type * as placesActions from "../placesActions.js";
+import type * as textToSpeech from "../textToSpeech.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -27,6 +28,7 @@ import type * as placesActions from "../placesActions.js";
 declare const fullApi: ApiFromModules<{
   places: typeof places;
   placesActions: typeof placesActions;
+  textToSpeech: typeof textToSpeech;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

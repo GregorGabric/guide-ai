@@ -1,78 +1,81 @@
-'use dom';
+'use client';
 
-import { useConversation } from '@elevenlabs/react';
-import { Volume2 } from 'lucide-react-native';
-import { useCallback } from 'react';
+import { useAction } from 'convex/react';
+import { useAudioPlayer } from 'expo-audio';
+import { MessageSquare, Volume2 } from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
+import { api } from '~/convex/_generated/api';
 
-async function requestMicrophonePermission() {
-  try {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-    return true;
-  } catch (error) {
-    console.log(error);
-    console.error('Microphone permission denied');
-    return false;
-  }
-}
-
+const welcomeMessage =
+  'The Berlin Wall was a concrete barrier built in 1961 by East Germany to separate East and West Berlin, symbolizing the Cold War division until its fall in 1989.';
 export default function AiChat() {
-  const conversation = useConversation({
-    agentId: process.env.EXPO_PUBLIC_AGENT_ID!,
-    preferHeadphonesForIosDevices: true,
-    agent: {
-      prompt: {
-        prompt: 'You are a helpful assistant that can answer questions about the Berlin Wall.',
-      },
-      firstMessage: 'The Berlin Wall was a concrete barrier built in 1961 by East Germany',
-      language: 'en',
-    },
-    onConnect: () => {
-      console.log('Connected');
-    },
-    onDisconnect: () => {
-      console.log('Disconnected');
-    },
-    onMessage: (message) => {
-      console.log('Message:', message);
-    },
-    onError: (error) => {
-      console.error('Error:', error);
-    },
-  });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioBase64, setAudioBase64] = useState<string | null>(null);
+  const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
 
-  const startConversation = useCallback(async () => {
+  // Create audio player with data URI from base64
+  const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
+  const player = useAudioPlayer(audioSource);
+
+  const handlePlayWelcomeMessage = useCallback(async () => {
     try {
-      // Request microphone permission
-      const hasPermission = await requestMicrophonePermission();
-      if (!hasPermission) {
-        alert('No permission');
-        return;
-      }
-      // Start the conversation with your agent
-      await conversation.startSession({
-        agentId: process.env.EXPO_PUBLIC_AGENT_ID!,
-        authorization: process.env.ELEVEN_LABS_API_KEY!,
+      setIsPlaying(true);
+      const audioData = await convertTextToSpeech({
+        text: welcomeMessage,
       });
+      console.log({ audioData }, 'hello');
+      setAudioBase64(audioData);
     } catch (error) {
-      console.error('Failed to start conversation:', error);
+      console.error('Failed to generate audio:', error);
+      Alert.alert('Error', 'Failed to generate audio. Please check your internet connection.');
+      setIsPlaying(false);
     }
-  }, [conversation]);
+  }, [convertTextToSpeech]);
 
-  const stopConversation = useCallback(async () => {
-    await conversation.endSession();
-  }, [conversation]);
+  // Play audio when base64 is set
+  useEffect(() => {
+    if (audioBase64) {
+      player.play();
+    }
+  }, [audioBase64, player]);
+
+  // Listen to player events
+  useEffect(() => {
+    const handlePlaybackStatusUpdate = () => {
+      setIsPlaying(player.playing);
+    };
+
+    handlePlaybackStatusUpdate();
+
+    const interval = setInterval(handlePlaybackStatusUpdate, 100);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [player]);
+
+  const stopAudio = useCallback(() => {
+    player.pause();
+    setIsPlaying(false);
+  }, [player]);
 
   return (
     <Button
-      variant="primary"
+      variant="tonal"
       size="lg"
+      className="rounded-2xl border border-slate-200"
       onPress={() => {
-        void (conversation.isSpeaking ? stopConversation() : startConversation());
+        if (isPlaying) {
+          stopAudio();
+        } else {
+          handlePlayWelcomeMessage().catch(console.error);
+        }
       }}>
-      <Volume2 size={22} />
-      <P>Listen to Audio Guide</P>
+      {isPlaying ? <MessageSquare size={22} /> : <Volume2 size={22} />}
+      <P>{isPlaying ? 'Stop Audio Guide' : 'Listen to Audio Guide'}</P>
     </Button>
   );
 }

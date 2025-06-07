@@ -5,14 +5,15 @@
   "scripts": {
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "start": "expo start",
-    "start:tunnel": "expo start --tunnel",
+    "start": "expo start -c",
+    "start:tunnel": "expo start --tunnel --clear",
     "prebuild": "expo prebuild",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.2.0",
     "@elevenlabs/react": "^0.1.6",
     "@expo-google-fonts/sora": "^0.4.1",
     "@expo/vector-icons": "^14.0.0",

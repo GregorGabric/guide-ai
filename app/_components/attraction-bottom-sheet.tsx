@@ -1,9 +1,9 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ArrowUpRight, Clock3, MapPin, Navigation, Phone } from 'lucide-react-native';
 import type React from 'react';
 import { useCallback } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { TAB_BAR_HEIGHT } from '~/app/(tabs)/_layout';
 import AiChat from '~/app/_components/ai-chat';
 import { Badge } from '~/components/ui/badge';
@@ -107,7 +107,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
       }}>
       <BottomSheetScrollView className="flex-  1 rounded-t-3xl">
         {attraction && (
-          <BottomSheetView className="flex-1 font-mono">
+          <View className="flex-1 font-mono">
             <View className="mb-6 px-6">
               <H3 className="mb-3 font-thin leading-tight text-slate-900">
                 {attraction.displayName.text || attraction.name}
@@ -124,7 +124,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
             </View>
 
             <View className="mb-6 px-6">
-              <BottomSheetScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View className="flex-row space-x-3">
                   {distance && (
                     <Badge
@@ -160,7 +160,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
                     </Badge>
                   )}
                 </View>
-              </BottomSheetScrollView>
+              </ScrollView>
             </View>
 
             {/* Enhanced Description */}
@@ -228,7 +228,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
                 </Button>
               </View>
             </View>
-          </BottomSheetView>
+          </View>
         )}
       </BottomSheetScrollView>
     </BottomSheet>
