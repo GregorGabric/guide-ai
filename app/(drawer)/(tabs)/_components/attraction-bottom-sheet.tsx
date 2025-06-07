@@ -2,14 +2,15 @@ import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import * as Haptics from 'expo-haptics';
 import { ArrowUpRight, Clock3, MapPin, Navigation, Phone, Volume2 } from 'lucide-react-native';
-import React, { useCallback } from 'react';
+import type React from 'react';
+import { useCallback } from 'react';
 import { View } from 'react-native';
+import AiChat from '~/app/(drawer)/(tabs)/_components/ai-chat';
 import { TAB_BAR_HEIGHT } from '~/app/(drawer)/(tabs)/_layout';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';
 import { H3, H4, P } from '~/components/ui/typography';
-
 import type { PlacesResponse } from '~/services/places/types';
 import { colors } from '~/utils/theme';
 
@@ -99,12 +100,21 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
       bottomInset={TAB_BAR_HEIGHT}
       ref={sheetRef}
       snapPoints={snapPoints}
-      onChange={handleSheetChanges}
+      onChange={(index) => {
+        handleSheetChanges(index);
+        // if (index === -1) {
+        //   void stopConversation();
+        // }
+        // if (index === 0) {
+        //   void startConversation();
+        // }
+      }}
       enablePanDownToClose
       backgroundStyle={{
         backgroundColor: colors.background,
       }}>
       <BottomSheetScrollView className="flex-  1 rounded-t-3xl">
+        <AiChat />
         {attraction && (
           <BottomSheetView className="flex-1 font-mono">
             <View className="mb-6 px-6">
