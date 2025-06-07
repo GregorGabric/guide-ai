@@ -1,13 +1,19 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as Location from 'expo-location';
 import { Navigation, Settings, SparklesIcon, Zap } from 'lucide-react-native';
-import { useRef, useState } from 'react';
-import { Animated, Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
-import AttractionBottomSheet from '~/app/(tabs)/_components/attraction-bottom-sheet';
-import { AttractionCarousel } from '~/app/(tabs)/_components/attraction-carousel/attraction-carousel';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import AttractionBottomSheet from '~/app/_components/attraction-bottom-sheet';
+import { AttractionCarousel } from '~/app/_components/attraction-carousel/attraction-carousel';
 import Header from '~/components/header';
 import LoadingOverlay from '~/components/loading-overlay';
 import { useSheetRef } from '~/components/ui/sheet';
@@ -15,11 +21,106 @@ import { api } from '~/convex/_generated/api';
 import { useLocation } from '~/lib/hooks';
 import { COLORS } from '~/lib/theme/colors';
 import type { PlacesResponse } from '~/services/places/types';
-import { currentLocation } from '~/services/queries';
+import { currentLocation as getCurrentLocation } from '~/services/queries';
+
+const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
+
+// Custom animated marker component with staggered entrance animation
+function StaggeredMarker({
+  attraction,
+  index,
+  selectedAttractionId,
+  onPress,
+}: {
+  attraction: PlacesResponse['places'][number];
+  index: number;
+  selectedAttractionId: string | undefined;
+  onPress: () => void;
+}) {
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    // Reset animations
+    scale.set(0);
+    opacity.set(0);
+    translateY.set(20);
+
+    // Staggered entrance animation
+    const delay = index * 100; // 100ms delay between each marker
+
+    scale.set(
+      withDelay(
+        delay,
+        withSpring(1, {
+          damping: 15,
+          stiffness: 200,
+          mass: 1,
+        })
+      )
+    );
+
+    opacity.set(withDelay(delay, withTiming(1, { duration: 400 })));
+
+    translateY.set(
+      withDelay(
+        delay,
+        withSpring(0, {
+          damping: 15,
+          stiffness: 200,
+          mass: 1,
+        })
+      )
+    );
+  }, [index, scale, opacity, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.get() }, { translateY: translateY.get() }],
+      opacity: opacity.get(),
+    };
+  });
+
+  const isSelected = selectedAttractionId === attraction.id;
+
+  return (
+    <AnimatedMapMarker
+      coordinate={{
+        latitude: attraction.location.latitude,
+        longitude: attraction.location.longitude,
+      }}
+      title={attraction.name}
+      description={attraction.editorialSummary?.text}
+      onPress={onPress}>
+      <Animated.View style={[animatedStyle, { alignItems: 'center' }]}>
+        {isSelected && (
+          <Animated.View
+            className="bg-secondary/30 absolute inset-0 h-10 w-10 rounded-full"
+            style={{
+              transform: [{ scale: 1.2 }],
+            }}
+          />
+        )}
+        <Animated.View
+          className="rounded-full bg-white p-2 shadow-lg"
+          style={{
+            shadowColor: '#6366F1',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 8,
+            elevation: 5,
+          }}>
+          <SparklesIcon size={16} color={COLORS.light.primary} />
+        </Animated.View>
+      </Animated.View>
+    </AnimatedMapMarker>
+  );
+}
 
 export default function MapScreen() {
-  const tabBarHeight = useBottomTabBarHeight();
-  const { data: location, isPending: isLocationPending } = useQuery(currentLocation);
+  // const tabBarHeight = useBottomTabBarHeight();
+  const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
 
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
@@ -53,30 +154,48 @@ export default function MapScreen() {
 
     // Animate to the selected attraction
     if (mapRef.current) {
-      mapRef.current.animateToRegion(
+      mapRef.current.animateCamera(
         {
-          latitude: attraction.location.latitude,
-          longitude: attraction.location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          altitude: 1000,
+          pitch: 45,
+          heading: 0,
+          center: {
+            latitude: attraction.location.latitude,
+            longitude: attraction.location.longitude,
+          },
+          zoom: 15,
         },
-        1000
+        { duration: 1000 }
       );
+      // mapRef.current.animateToRegion(
+      //   {
+      //     latitude: attraction.location.latitude,
+      //     longitude: attraction.location.longitude,
+      //     latitudeDelta: 0.01,
+      //     longitudeDelta: 0.01,
+      //   },
+      //   1000
+      // );
     }
   };
 
   const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
     setSelectedAttraction(attraction);
+    console.log('here');
 
     if (mapRef.current) {
-      mapRef.current.animateToRegion(
+      mapRef.current.animateCamera(
         {
-          latitude: attraction.location.latitude,
-          longitude: attraction.location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          altitude: 1000,
+          pitch: 45,
+          heading: 0,
+          center: {
+            latitude: attraction.location.latitude,
+            longitude: attraction.location.longitude,
+          },
+          zoom: 15,
         },
-        1000
+        { duration: 1000 }
       );
     }
   };
@@ -201,7 +320,7 @@ export default function MapScreen() {
   }
 
   return (
-    <View className="flex-1" style={{ paddingBottom: tabBarHeight }}>
+    <View className="flex-1">
       <MapView
         ref={mapRef}
         provider={Platform.OS === 'ios' ? undefined : 'google'}
@@ -216,8 +335,9 @@ export default function MapScreen() {
           position: 'absolute',
           inset: 0,
         }}
+        showsBuildings
         showsUserLocation>
-        <MapMarker
+        <AnimatedMapMarker
           coordinate={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -229,29 +349,18 @@ export default function MapScreen() {
               <Navigation size={18} color="#fff" />
             </View>
           </Animated.View>
-        </MapMarker>
+        </AnimatedMapMarker>
 
-        {data?.map((attraction) => (
-          <MapMarker
-            className="bg-background"
+        {data?.map((attraction, index) => (
+          <StaggeredMarker
             key={attraction.id}
-            coordinate={{
-              latitude: attraction.location?.latitude ?? 0,
-              longitude: attraction.location?.longitude ?? 0,
-            }}
-            title={attraction.name}
-            description={attraction.editorialSummary?.text}
+            attraction={attraction}
+            index={index}
+            selectedAttractionId={selectedAttraction?.id}
             onPress={() => {
               handleAttractionPress(attraction);
-            }}>
-            <View className="items-center">
-              {selectedAttraction?.id === attraction.id && (
-                <View className="bg-secondary/30 absolute inset-0 h-10 w-10 rounded-full" />
-              )}
-
-              <SparklesIcon size={14} color={COLORS.light.primary} />
-            </View>
-          </MapMarker>
+            }}
+          />
         ))}
       </MapView>
       {data && (
@@ -260,14 +369,18 @@ export default function MapScreen() {
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={(attraction) => {
             if (mapRef.current) {
-              mapRef.current.animateToRegion(
+              mapRef.current.animateCamera(
                 {
-                  latitude: attraction.location.latitude,
-                  longitude: attraction.location.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
+                  altitude: 1000,
+                  pitch: 45,
+                  heading: 0,
+                  center: {
+                    latitude: attraction.location.latitude,
+                    longitude: attraction.location.longitude,
+                  },
+                  zoom: 15,
                 },
-                1000
+                { duration: 1000 }
               );
             }
           }}

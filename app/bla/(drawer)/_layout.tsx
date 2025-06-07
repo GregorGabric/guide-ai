@@ -2,7 +2,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 
-import { HeaderButton } from '../../components/HeaderButton';
+import { HeaderButton } from '../../../components/HeaderButton';
 
 const DrawerLayout = () => {
   return (

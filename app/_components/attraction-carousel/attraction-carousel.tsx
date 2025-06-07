@@ -1,4 +1,3 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -6,6 +5,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { PlacesResponse } from '~/services/places/types';
 import { InfoItem } from './info-card';
 import { PaginationDots } from './pagination-dots';
@@ -33,7 +33,9 @@ export const AttractionCarousel = ({
     scrollOffsetX.set(event.contentOffset.x);
   });
 
-  const paddingBottom = useBottomTabBarHeight();
+  const { bottom: tabBarPaddingBottom } = useSafeAreaInsets();
+
+  const paddingBottom = tabBarPaddingBottom + 12;
 
   return (
     <View
@@ -41,7 +43,9 @@ export const AttractionCarousel = ({
         setWidth(event.nativeEvent.layout.width);
       }}
       className="absolute bottom-0 mt-4 w-full gap-3"
-      style={{ paddingBottom: paddingBottom + 12 }}>
+      style={{ paddingBottom: paddingBottom }}>
+      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
+
       <Animated.ScrollView
         className="flex-1"
         horizontal
@@ -69,7 +73,6 @@ export const AttractionCarousel = ({
           />
         ))}
       </Animated.ScrollView>
-      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
     </View>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useConversation } from '@elevenlabs/react';
 import { Volume2 } from 'lucide-react-native';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
 
@@ -64,12 +64,13 @@ export default function AiChat() {
     await conversation.endSession();
   }, [conversation]);
 
-  useEffect(() => {
-    void startConversation();
-  }, [startConversation]);
-
   return (
-    <Button variant="primary" size="lg" onPress={startConversation}>
+    <Button
+      variant="primary"
+      size="lg"
+      onPress={() => {
+        void (conversation.isSpeaking ? stopConversation() : startConversation());
+      }}>
       <Volume2 size={22} />
       <P>Listen to Audio Guide</P>
     </Button>
