@@ -12,7 +12,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import AttractionBottomSheet from '~/app/_components/attraction-bottom-sheet';
+import { AttractionBottomSheet } from '~/app/_components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/app/_components/attraction-carousel/attraction-carousel';
 import Header from '~/components/header';
 import LoadingOverlay from '~/components/loading-overlay';
@@ -172,6 +172,7 @@ export default function MapScreen() {
 
   const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
     setSelectedAttraction(attraction);
+    sheetRef.current?.present();
 
     if (mapRef.current) {
       mapRef.current.animateCamera(
@@ -192,7 +193,7 @@ export default function MapScreen() {
 
   const closeBottomSheet = () => {
     setSelectedAttraction(null);
-    // sheetRef.current?.dismiss();
+    sheetRef.current?.dismiss();
   };
 
   if (isLocationPending) {

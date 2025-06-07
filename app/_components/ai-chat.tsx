@@ -12,17 +12,15 @@ import { api } from '~/convex/_generated/api';
 const welcomeMessage =
   'The Berlin Wall was a concrete barrier built in 1961 by East Germany to separate East and West Berlin, symbolizing the Cold War division until its fall in 1989.';
 export default function AiChat() {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
-
-  // Create audio player with data URI from base64
   const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
   const player = useAudioPlayer(audioSource);
 
+  const isPlaying = player.playing;
+
   const handlePlayWelcomeMessage = useCallback(async () => {
     try {
-      setIsPlaying(true);
       const audioData = await convertTextToSpeech({
         text: welcomeMessage,
       });
@@ -31,7 +29,6 @@ export default function AiChat() {
     } catch (error) {
       console.error('Failed to generate audio:', error);
       Alert.alert('Error', 'Failed to generate audio. Please check your internet connection.');
-      setIsPlaying(false);
     }
   }, [convertTextToSpeech]);
 
@@ -42,26 +39,6 @@ export default function AiChat() {
     }
   }, [audioBase64, player]);
 
-  // Listen to player events
-  useEffect(() => {
-    const handlePlaybackStatusUpdate = () => {
-      setIsPlaying(player.playing);
-    };
-
-    handlePlaybackStatusUpdate();
-
-    const interval = setInterval(handlePlaybackStatusUpdate, 100);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [player]);
-
-  const stopAudio = useCallback(() => {
-    player.pause();
-    setIsPlaying(false);
-  }, [player]);
-
   return (
     <Button
       variant="tonal"
@@ -69,7 +46,7 @@ export default function AiChat() {
       className="rounded-2xl border border-slate-200"
       onPress={() => {
         if (isPlaying) {
-          stopAudio();
+          player.pause();
         } else {
           handlePlayWelcomeMessage().catch(console.error);
         }

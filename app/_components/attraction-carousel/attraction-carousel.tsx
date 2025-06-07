@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { startTransition, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
   runOnJS,
@@ -54,7 +54,7 @@ export const AttractionCarousel = ({
         onMomentumScrollEnd={(event) => {
           const index = Math.round(event.nativeEvent.contentOffset.x / width);
           const nextLocation = data[index];
-          // setSelectedAttraction(nextLocation);
+          setSelectedAttraction(nextLocation);
           runOnJS(onPressOut)(nextLocation);
         }}
         onScroll={scrollHandler}
@@ -64,8 +64,10 @@ export const AttractionCarousel = ({
             width={width}
             place={place}
             onOpenAttraction={(attraction) => {
-              onAttractionPress?.(attraction);
-              setSelectedAttraction(attraction);
+              startTransition(() => {
+                setSelectedAttraction(attraction);
+                onAttractionPress?.(attraction);
+              });
             }}
             key={place.id}
             index={index}

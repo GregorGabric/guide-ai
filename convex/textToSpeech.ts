@@ -4,7 +4,7 @@ import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { v } from 'convex/values';
 import { action } from './_generated/server';
 
-const apiKey = 'sk_4e7746803163652148f7cbc8792087d1e6538edf1b51297f';
+const apiKey = process.env.ELEVENLABS_API_KEY;
 
 const client = new ElevenLabsClient({
   apiKey,
@@ -21,7 +21,7 @@ export const convertTextToSpeech = action({
       // Use provided voiceId or default voice
       const voiceId = 'EkK5I93UQWFDigLMpZcX';
 
-      const audioStream = await client.textToSpeech.convert(voiceId, {
+      const audioStream = await client.textToSpeech.stream(voiceId, {
         text: args.text,
         modelId: 'eleven_flash_v2_5',
         outputFormat: 'mp3_44100_128',
@@ -33,9 +33,6 @@ export const convertTextToSpeech = action({
         },
       });
 
-      console.log('audioStream', audioStream);
-
-      // Convert stream to buffer
       const chunks: Array<Buffer> = [];
       for await (const chunk of audioStream) {
         chunks.push(Buffer.from(chunk));
