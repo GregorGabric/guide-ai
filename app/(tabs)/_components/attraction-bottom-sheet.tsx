@@ -4,8 +4,8 @@ import { ArrowUpRight, Clock3, MapPin, Navigation, Phone } from 'lucide-react-na
 import type React from 'react';
 import { useCallback } from 'react';
 import { View } from 'react-native';
-import AiChat from '~/app/(drawer)/(tabs)/_components/ai-chat';
-import { TAB_BAR_HEIGHT } from '~/app/(drawer)/(tabs)/_layout';
+import AiChat from '~/app/(tabs)/_components/ai-chat';
+import { TAB_BAR_HEIGHT } from '~/app/(tabs)/_layout';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';

@@ -6,7 +6,7 @@ import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ConvexClientProvider } from '~/context/convex-provider';
@@ -73,7 +73,7 @@ export default function RootLayout() {
             <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
               <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
               <Stack>
-                <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="modal" options={{ title: 'Modal', presentation: 'modal' }} />
               </Stack>
             </ThemeProvider>
@@ -83,6 +83,3 @@ export default function RootLayout() {
     </ConvexClientProvider>
   );
 }
-
-const useIsomorphicLayoutEffect =
-  Platform.OS === 'web' && typeof window === 'undefined' ? useEffect : useLayoutEffect;
