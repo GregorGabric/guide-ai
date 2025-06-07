@@ -1,7 +1,6 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
-import * as Haptics from 'expo-haptics';
-import { ArrowUpRight, Clock3, MapPin, Navigation, Phone, Volume2 } from 'lucide-react-native';
+import { ArrowUpRight, Clock3, MapPin, Navigation, Phone } from 'lucide-react-native';
 import type React from 'react';
 import { useCallback } from 'react';
 import { View } from 'react-native';
@@ -31,13 +30,6 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
     },
     [onClose]
   );
-
-  const handlePlayAudio = async () => {
-    if (!attraction) {
-      return;
-    }
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
 
   const getDistance = () => {
     const landmark = attraction?.addressDescriptor?.landmarks?.[0];
@@ -114,7 +106,6 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
         backgroundColor: colors.background,
       }}>
       <BottomSheetScrollView className="flex-  1 rounded-t-3xl">
-        <AiChat />
         {attraction && (
           <BottomSheetView className="flex-1 font-mono">
             <View className="mb-6 px-6">
@@ -216,10 +207,7 @@ function AttractionBottomSheet({ attraction, onClose, sheetRef }: AttractionBott
               )}
 
             <View className="gap-2 space-y-4 px-6 pb-6">
-              <Button variant="primary" size="lg" onPress={handlePlayAudio}>
-                <Volume2 size={22} />
-                <P>Listen to Audio Guide</P>
-              </Button>
+              <AiChat />
 
               {/* Secondary Actions */}
               <View className="w-full flex-row gap-2 space-x-3">

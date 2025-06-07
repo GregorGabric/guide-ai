@@ -1,9 +1,10 @@
 'use dom';
 
 import { useConversation } from '@elevenlabs/react';
-import { Mic } from 'lucide-react-native';
+import { Volume2 } from 'lucide-react-native';
 import { useCallback, useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Button } from '~/components/ui/button';
+import { P } from '~/components/ui/typography';
 
 async function requestMicrophonePermission() {
   try {
@@ -68,54 +69,9 @@ export default function AiChat() {
   }, [startConversation]);
 
   return (
-    <Pressable
-      style={[styles.callButton, conversation.status === 'connected' && styles.callButtonActive]}
-      onPress={conversation.status === 'disconnected' ? startConversation : stopConversation}>
-      <View
-        style={[
-          styles.buttonInner,
-          conversation.status === 'connected' && styles.buttonInnerActive,
-        ]}>
-        <Mic size={32} color="#E2E8F0" strokeWidth={1.5} style={styles.buttonIcon} />
-      </View>
-    </Pressable>
+    <Button variant="primary" size="lg" onPress={startConversation}>
+      <Volume2 size={22} />
+      <P>Listen to Audio Guide</P>
+    </Button>
   );
 }
-
-const styles = StyleSheet.create({
-  callButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  callButtonActive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-  },
-  buttonInner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#3B82F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 5,
-  },
-  buttonInnerActive: {
-    backgroundColor: '#EF4444',
-    shadowColor: '#EF4444',
-  },
-  buttonIcon: {
-    transform: [{ translateY: 2 }],
-  },
-});
