@@ -4,7 +4,7 @@ import { useAction } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
 import { fetch as expoFetch } from 'expo/fetch';
 import { Volume2, VolumeX } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ScrollView, TextInput, View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
@@ -22,7 +22,6 @@ const convexSiteUrl = process.env.EXPO_PUBLIC_CONVEX_URL?.replace(/\.cloud$/, '.
 
 export default function AiChatInterface({ attraction: _attraction }: AiChatInterfaceProps) {
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
   const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
   const player = useAudioPlayer(audioSource);
@@ -50,35 +49,19 @@ export default function AiChatInterface({ attraction: _attraction }: AiChatInter
 
   const isLoading = status === 'streaming';
 
+  const isPlayingAudio = player.playing;
+
   const handleTextToSpeech = useCallback(
     async (text: string) => {
       try {
-        setIsPlayingAudio(true);
         const audioData = await convertTextToSpeech({ text });
         setAudioBase64(audioData);
       } catch (error) {
         console.error('Failed to generate audio:', error);
-        setIsPlayingAudio(false);
       }
     },
     [convertTextToSpeech]
   );
-
-  // Handle audio playback
-  useEffect(() => {
-    if (audioBase64) {
-      player.play();
-    }
-  }, [audioBase64, player]);
-
-  // Monitor audio playback state
-  useEffect(() => {
-    if (player.playing) {
-      setIsPlayingAudio(true);
-    } else {
-      setIsPlayingAudio(false);
-    }
-  }, [player.playing]);
 
   const toggleAudio = () => {
     if (player.playing) {
