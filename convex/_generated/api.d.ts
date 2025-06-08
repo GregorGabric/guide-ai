@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as http from "../http.js";
 import type * as places from "../places.js";
 import type * as placesActions from "../placesActions.js";
 import type * as textToSpeech from "../textToSpeech.js";
@@ -26,6 +27,7 @@ import type * as textToSpeech from "../textToSpeech.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  http: typeof http;
   places: typeof places;
   placesActions: typeof placesActions;
   textToSpeech: typeof textToSpeech;

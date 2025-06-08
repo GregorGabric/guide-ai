@@ -1,58 +1,43 @@
 'use client';
 
-import { useAction } from 'convex/react';
-import { useAudioPlayer } from 'expo-audio';
-import { MessageSquare, Volume2 } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { MessageSquare } from 'lucide-react-native';
+import { useState } from 'react';
+import { View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
-import { api } from '~/convex/_generated/api';
+import AiChatInterface from './ai-chat-interface';
 
-const welcomeMessage =
-  'The Berlin Wall was a concrete barrier built in 1961 by East Germany to separate East and West Berlin, symbolizing the Cold War division until its fall in 1989.';
-export default function AiChat() {
-  const [audioBase64, setAudioBase64] = useState<string | null>(null);
-  const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
-  const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
-  const player = useAudioPlayer(audioSource);
+interface AiChatProps {
+  attraction?: {
+    name?: string;
+    displayName?: { text?: string };
+    formattedAddress?: string;
+  } | null;
+  onStartChat?: () => void;
+}
 
-  const isPlaying = player.playing;
+export default function AiChat({ attraction, onStartChat }: AiChatProps) {
+  const [showChat, setShowChat] = useState(false);
 
-  const handlePlayWelcomeMessage = useCallback(async () => {
-    try {
-      const audioData = await convertTextToSpeech({
-        text: welcomeMessage,
-      });
-      console.log({ audioData }, 'hello');
-      setAudioBase64(audioData);
-    } catch (error) {
-      console.error('Failed to generate audio:', error);
-      Alert.alert('Error', 'Failed to generate audio. Please check your internet connection.');
-    }
-  }, [convertTextToSpeech]);
+  const handleStartChat = () => {
+    setShowChat(true);
+    onStartChat?.();
+  };
 
-  // Play audio when base64 is set
-  useEffect(() => {
-    if (audioBase64) {
-      player.play();
-    }
-  }, [audioBase64, player]);
+  if (showChat) {
+    return <AiChatInterface attraction={attraction} />;
+  }
 
   return (
-    <Button
-      variant="tonal"
-      size="lg"
-      className="rounded-2xl border border-slate-200"
-      onPress={() => {
-        if (isPlaying) {
-          player.pause();
-        } else {
-          handlePlayWelcomeMessage().catch(console.error);
-        }
-      }}>
-      {isPlaying ? <MessageSquare size={22} /> : <Volume2 size={22} />}
-      <P>{isPlaying ? 'Stop Audio Guide' : 'Listen to Audio Guide'}</P>
-    </Button>
+    <View className="flex-1 items-center justify-center px-6">
+      <Button
+        variant="tonal"
+        size="lg"
+        className="rounded-2xl border border-slate-200"
+        onPress={handleStartChat}>
+        <MessageSquare size={22} />
+        <P>Start AI Guide</P>
+      </Button>
+    </View>
   );
 }

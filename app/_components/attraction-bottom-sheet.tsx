@@ -331,8 +331,17 @@ export function AttractionBottomSheet({
 
               <TabsContent value="chat" className="flex-1">
                 <GestureDetector gesture={panGesture}>
-                  <View className="px-6 pb-6">
-                    <AiChat />
+                  <View className="flex-1 px-6 pb-6">
+                    <AiChat
+                      attraction={attraction}
+                      onStartChat={() => {
+                        // Optional: Add any additional logic when chat starts
+                        console.log(
+                          'AI chat started for:',
+                          attraction.displayName.text || attraction.name
+                        );
+                      }}
+                    />
                   </View>
                 </GestureDetector>
               </TabsContent>

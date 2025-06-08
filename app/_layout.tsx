@@ -1,6 +1,4 @@
 import { Sora_400Regular, useFonts } from '@expo-google-fonts/sora';
-import '~/global.css';
-
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -11,8 +9,10 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ConvexClientProvider } from '~/context/convex-provider';
 import { QueryProvider } from '~/context/query-context';
+import '~/global.css';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
+import '~/polyfills';
 
 void SplashScreen.preventAutoHideAsync();
 
