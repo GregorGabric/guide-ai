@@ -148,11 +148,8 @@ export default function MapScreen() {
   const errorMsg = locationData?.error;
   const permissionDenied = locationData?.status === Location.PermissionStatus.DENIED;
 
-  const handleAttractionPress = (attraction: PlacesResponse['places'][number]) => {
-    setSelectedAttraction(attraction);
-    sheetRef.current?.present();
-
-    // Animate to the selected attraction
+  // Centralized camera animation function with consistent parameters
+  const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
     if (mapRef.current) {
       mapRef.current.animateCamera(
         {
@@ -170,25 +167,27 @@ export default function MapScreen() {
     }
   };
 
-  const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
-    setSelectedAttraction(attraction);
-    sheetRef.current?.present();
-
-    if (mapRef.current) {
-      mapRef.current.animateCamera(
-        {
-          altitude: 1000,
-          pitch: 45,
-          heading: 0,
-          center: {
-            latitude: attraction.location.latitude,
-            longitude: attraction.location.longitude,
-          },
-          zoom: 15,
-        },
-        { duration: 1000 }
-      );
+  // Unified attraction selection handler with smart behavior
+  const handleAttractionSelection = (attraction: PlacesResponse['places'][number]) => {
+    // Check if the same attraction is already selected
+    if (selectedAttraction?.id === attraction.id) {
+      // Same attraction - just open/focus the sheet without animating camera
+      sheetRef.current?.present();
+      return;
     }
+
+    // Different attraction - set new selection, animate camera, and open sheet
+    setSelectedAttraction(attraction);
+    animateCameraToAttraction(attraction);
+    sheetRef.current?.present();
+  };
+
+  const handleAttractionPress = (attraction: PlacesResponse['places'][number]) => {
+    handleAttractionSelection(attraction);
+  };
+
+  const handleAttractionPressOnMap = (attraction: PlacesResponse['places'][number]) => {
+    handleAttractionSelection(attraction);
   };
 
   const closeBottomSheet = () => {
@@ -358,23 +357,7 @@ export default function MapScreen() {
         <AttractionCarousel
           data={data}
           setSelectedAttraction={setSelectedAttraction}
-          onPressOut={(attraction) => {
-            if (mapRef.current) {
-              mapRef.current.animateCamera(
-                {
-                  altitude: 1000,
-                  pitch: 45,
-                  heading: 0,
-                  center: {
-                    latitude: attraction.location.latitude,
-                    longitude: attraction.location.longitude,
-                  },
-                  zoom: 15,
-                },
-                { duration: 1000 }
-              );
-            }
-          }}
+          onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
         />
       )}

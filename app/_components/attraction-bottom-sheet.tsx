@@ -3,9 +3,15 @@ import * as Haptics from 'expo-haptics';
 import { ArrowUpRight, NavigationIcon } from 'lucide-react-native';
 import type React from 'react';
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Dimensions, ScrollView, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AiChat from '~/app/_components/ai-chat';
 import { Badge } from '~/components/ui/badge';
@@ -24,6 +30,8 @@ interface AttractionBottomSheetProps {
 
 const snapPoints = ['85%', '95%'];
 
+const { width: screenWidth } = Dimensions.get('window');
+
 export function AttractionBottomSheet({
   attraction,
   onClose,
@@ -31,6 +39,11 @@ export function AttractionBottomSheet({
 }: AttractionBottomSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
+
+  // Animation values
+  const translateX = useSharedValue(0);
+  const gestureProgress = useSharedValue(0);
+  const tabTransition = useSharedValue(0); // 0 = overview, 1 = chat
 
   const handleSheetChanges = useCallback(
     (index: number) => {
@@ -41,28 +54,68 @@ export function AttractionBottomSheet({
     [onClose]
   );
 
-  const panGesture = Gesture.Pan().onEnd((event) => {
-    'worklet';
-    const { velocityX, translationX } = event;
-    const swipeThreshold = 50;
-    const velocityThreshold = 500;
+  const updateTabTransition = useCallback(
+    (newActiveTab: string) => {
+      setActiveTab(newActiveTab);
+      const targetValue = newActiveTab === 'chat' ? 1 : 0;
+      tabTransition.set(withTiming(targetValue, { duration: 300 }));
+    },
+    [tabTransition]
+  );
 
-    // Determine if it's a significant horizontal swipe
-    if (Math.abs(translationX) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
-      if (translationX > 0 || velocityX > 0) {
-        // Swipe right - go to previous tab (overview)
-        if (activeTab === 'chat') {
-          runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-          runOnJS(setActiveTab)('overview');
-        }
-      } else {
-        // Swipe left - go to next tab (chat)
-        if (activeTab === 'overview') {
-          runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-          runOnJS(setActiveTab)('chat');
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      translateX.set(0);
+      gestureProgress.set(0);
+    })
+    .onUpdate((event) => {
+      const { translationX } = event;
+      const maxTranslation = screenWidth * 0.3; // Maximum translation for visual feedback
+
+      // Update translation with bounds
+      translateX.set(Math.max(-maxTranslation, Math.min(maxTranslation, translationX)));
+
+      // Update gesture progress (-1 to 1, where -1 is left swipe, 1 is right swipe)
+      gestureProgress.set(translateX.value / maxTranslation);
+    })
+    .onEnd((event) => {
+      'worklet';
+      const { velocityX, translationX } = event;
+      const swipeThreshold = 50;
+      const velocityThreshold = 500;
+
+      // Reset animations
+      translateX.set(withTiming(0));
+      gestureProgress.set(withTiming(0));
+
+      // Determine if it's a significant horizontal swipe
+      if (Math.abs(translationX) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
+        if (translationX > 0 || velocityX > 0) {
+          // Swipe right - go to previous tab (overview)
+          if (activeTab === 'chat') {
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            runOnJS(updateTabTransition)('overview');
+          }
+        } else {
+          // Swipe left - go to next tab (chat)
+          if (activeTab === 'overview') {
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            runOnJS(updateTabTransition)('chat');
+          }
         }
       }
-    }
+    });
+
+  const tabIndicatorStyle = useAnimatedStyle(() => {
+    const baseProgress = tabTransition.get();
+    // Invert the gesture - left swipe moves indicator right, right swipe moves indicator left
+    const gestureOffset = -gestureProgress.get() * (screenWidth * 0.25); // Gesture influence (inverted)
+    const finalProgress = baseProgress + gestureOffset / (screenWidth * 0.5);
+    const translateXValue = interpolate(finalProgress, [0, 1], [0, screenWidth * 0.5]);
+
+    return {
+      transform: [{ translateX: Math.max(0, Math.min(screenWidth * 0.5, translateXValue)) }],
+    };
   });
 
   const getDistance = () => {
@@ -138,11 +191,9 @@ export function AttractionBottomSheet({
       }}>
       <ScrollView className="flex-1">
         {attraction && (
-          <View className="flex-1 font-mono">
+          <View className="flex-1">
             <View className="mb-6 px-6">
-              <H3 className="mb-3 font-thin leading-tight">
-                {attraction.displayName.text || attraction.name}
-              </H3>
+              <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
 
               {attraction.formattedAddress && (
                 <View className="flex flex-row items-center gap-2 rounded-2xl px-4">
@@ -151,13 +202,51 @@ export function AttractionBottomSheet({
               )}
             </View>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-              <TabsList className="mb-6 w-full flex-row">
-                <TabsTrigger value="overview" className="flex-1">
-                  <Text>Overview</Text>
+            <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1">
+              <TabsList className="relative mb-6 h-12 w-full flex-row rounded-2xl bg-slate-100 p-1">
+                <Animated.View
+                  style={[
+                    tabIndicatorStyle,
+                    {
+                      position: 'absolute',
+                      top: 4,
+                      left: 4,
+                      width: (screenWidth - 48) * 0.5 - 8, // Account for container padding
+                      height: 40,
+                      backgroundColor: '#1f2937', // Dark background for the indicator
+                      borderRadius: 16,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.15,
+                      shadowRadius: 4,
+                      elevation: 2,
+                      zIndex: 10,
+                    },
+                  ]}
+                />
+                <TabsTrigger
+                  value="overview"
+                  className="flex-1 rounded-2xl bg-transparent shadow-none"
+                  style={{ zIndex: 20 }}>
+                  <Text
+                    className="font-semibold"
+                    style={{
+                      color: activeTab === 'overview' ? 'white' : '#64748b',
+                    }}>
+                    Overview
+                  </Text>
                 </TabsTrigger>
-                <TabsTrigger value="chat" className="flex-1">
-                  <Text>AI Chat</Text>
+                <TabsTrigger
+                  value="chat"
+                  className="flex-1 rounded-2xl bg-transparent shadow-none"
+                  style={{ zIndex: 20 }}>
+                  <Text
+                    className="font-semibold"
+                    style={{
+                      color: activeTab === 'chat' ? 'white' : '#64748b',
+                    }}>
+                    AI Chat
+                  </Text>
                 </TabsTrigger>
               </TabsList>
 
