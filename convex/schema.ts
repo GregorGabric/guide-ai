@@ -99,6 +99,11 @@ export const placesSchema = v.object({
 });
 
 export default defineSchema({
+  chats: defineTable({
+    title: v.string(),
+    prompt: v.string(),
+    stream: v.string(),
+  }),
   place: defineTable({
     name: v.string(),
     places: v.optional(placesSchema),

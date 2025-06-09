@@ -15,6 +15,7 @@
   "dependencies": {
     "@ai-sdk/google": "^1.2.19",
     "@ai-sdk/react": "^1.2.12",
+    "@convex-dev/persistent-text-streaming": "^0.2.3",
     "@elevenlabs/elevenlabs-js": "^2.2.0",
     "@elevenlabs/react": "^0.1.6",
     "@expo-google-fonts/sora": "^0.4.1",
