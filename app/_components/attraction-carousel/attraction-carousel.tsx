@@ -59,7 +59,7 @@ export const AttractionCarousel = ({
         }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}>
-        {data.map((place, index) => (
+        {data.map((place) => (
           <InfoItem
             width={width}
             place={place}
@@ -70,8 +70,6 @@ export const AttractionCarousel = ({
               });
             }}
             key={place.id}
-            index={index}
-            scrollOffsetX={scrollOffsetX}
           />
         ))}
       </Animated.ScrollView>

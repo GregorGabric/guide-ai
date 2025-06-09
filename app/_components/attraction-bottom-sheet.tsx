@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AiChatInterface from '~/app/_components/ai-chat-interface';
+import { AiChat } from '~/app/_components/ai-chat-interface';
 import { Badge } from '~/components/ui/badge';
 import { Sheet } from '~/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
@@ -37,7 +37,6 @@ export function AttractionBottomSheet({
 }: AttractionBottomSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
-  const { height: screenHeight } = Dimensions.get('screen');
 
   // Calculate safe snap points to prevent top overflow
   // const maxSheetHeight = screenHeight - insets.top; // 20px buffer from top
@@ -191,7 +190,7 @@ export function AttractionBottomSheet({
       topInset={insets.top}
       style={{
         marginInline: insets.left + 12,
-        marginBottom: insets.bottom + 12,
+        // marginBottom: insets.bottom + 12,
       }}
       ref={sheetRef}
       snapPoints={snapPoints}
@@ -200,7 +199,7 @@ export function AttractionBottomSheet({
       enableBlurKeyboardOnGesture
       enableOverDrag={false}
       backgroundStyle={{
-        borderRadius: 47,
+        borderRadius: 47 - (insets.left + 12),
         backgroundColor: colors.background,
       }}
       keyboardBehavior="interactive"
@@ -348,7 +347,7 @@ export function AttractionBottomSheet({
 
             <TabsContent value="chat" className="flex-1">
               <GestureDetector gesture={panGesture}>
-                <AiChatInterface attraction={attraction} />
+                <AiChat attraction={attraction} />
               </GestureDetector>
             </TabsContent>
           </Tabs>

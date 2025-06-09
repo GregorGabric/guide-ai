@@ -1,6 +1,7 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import type { UIMessage } from 'ai';
 import { useAction } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
 import { fetch as expoFetch } from 'expo/fetch';
@@ -11,7 +12,7 @@ import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
 import { api } from '~/convex/_generated/api';
 
-interface AiChatInterfaceProps {
+interface AiChatProps {
   attraction?: {
     name?: string;
     displayName?: { text?: string };
@@ -21,7 +22,7 @@ interface AiChatInterfaceProps {
 
 const convexSiteUrl = process.env.EXPO_PUBLIC_CONVEX_URL?.replace(/\.cloud$/, '.site');
 
-export default function AiChatInterface({ attraction: _attraction }: AiChatInterfaceProps) {
+export function AiChat({ attraction: _attraction }: AiChatProps) {
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
   const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
@@ -152,28 +153,12 @@ export default function AiChatInterface({ attraction: _attraction }: AiChatInter
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 16 }}>
         {messages.map((message) => (
-          <View
+          <Message
             key={message.id}
-            className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-            <View
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                message.role === 'user' ? 'bg-blue-500' : 'border border-slate-200 bg-slate-100'
-              }`}>
-              <P className={message.role === 'user' ? 'text-white' : 'text-slate-800'}>
-                {message.content}
-              </P>
-              {message.role === 'assistant' && (
-                <Button variant="plain" size="sm" className="mt-2 self-start" onPress={toggleAudio}>
-                  {isPlayingAudio ? (
-                    <VolumeX size={16} color="#6B7280" />
-                  ) : (
-                    <Volume2 size={16} color="#6B7280" />
-                  )}
-                  <P className="text-xs text-slate-600">{isPlayingAudio ? 'Stop' : 'Listen'}</P>
-                </Button>
-              )}
-            </View>
-          </View>
+            message={message}
+            isPlayingAudio={isPlayingAudio}
+            toggleAudio={toggleAudio}
+          />
         ))}
 
         {isLoading && (
@@ -186,20 +171,65 @@ export default function AiChatInterface({ attraction: _attraction }: AiChatInter
       </ScrollView>
 
       {/* Input area - fixed at bottom */}
-      <View className="mb-4 border-t border-slate-200 px-6 py-3">
-        <BottomSheetTextInput
-          className="rounded-2xl border border-slate-300 bg-white px-4 py-3"
-          placeholder="Ask about this location..."
-          maxLength={500}
-          editable={!isLoading}
-          onSubmitEditing={(event) => {
-            const text = event.nativeEvent.text;
-            if (text.trim()) {
-              void append({ role: 'user', content: text });
-            }
-          }}
-        />
+      <AiChatInput isLoading={isLoading} append={append} />
+    </View>
+  );
+}
+
+interface MessageProps {
+  message: UIMessage;
+  isPlayingAudio: boolean;
+  toggleAudio: () => void;
+}
+
+function Message(props: MessageProps) {
+  return (
+    <View className={`mb-4 ${props.message.role === 'user' ? 'items-end' : 'items-start'}`}>
+      <View
+        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+          props.message.role === 'user' ? 'bg-blue-500' : 'border border-slate-200 bg-slate-100'
+        }`}>
+        <P className={props.message.role === 'user' ? 'text-white' : 'text-slate-800'}>
+          {props.message.content}
+        </P>
+        {props.message.role === 'assistant' && (
+          <Button variant="plain" size="sm" className="mt-2 self-start" onPress={props.toggleAudio}>
+            {props.isPlayingAudio ? (
+              <VolumeX size={16} color="#6B7280" />
+            ) : (
+              <Volume2 size={16} color="#6B7280" />
+            )}
+            <P className="text-xs text-slate-600">{props.isPlayingAudio ? 'Stop' : 'Listen'}</P>
+          </Button>
+        )}
       </View>
+    </View>
+  );
+}
+
+interface AiChatInputProps {
+  isLoading: boolean;
+  append: ReturnType<typeof useChat>['append'];
+}
+
+function AiChatInput({ isLoading, append }: AiChatInputProps) {
+  const [text, setText] = useState('');
+  return (
+    <View className="mb-4 border-t border-slate-200 px-6 py-3">
+      <BottomSheetTextInput
+        className="rounded-2xl border border-slate-300 bg-white px-4 py-3"
+        placeholder="Ask about this location..."
+        editable={!isLoading}
+        value={text}
+        onChangeText={setText}
+        onSubmitEditing={(event) => {
+          const text = event.nativeEvent.text;
+          if (text.trim()) {
+            void append({ role: 'user', content: text });
+          }
+          setText('');
+        }}
+      />
     </View>
   );
 }
