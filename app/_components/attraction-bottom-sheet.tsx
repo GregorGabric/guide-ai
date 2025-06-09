@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AiChat from '~/app/_components/ai-chat';
+import AiChatInterface from '~/app/_components/ai-chat-interface';
 import { Badge } from '~/components/ui/badge';
 import { Sheet } from '~/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
@@ -28,8 +28,6 @@ interface AttractionBottomSheetProps {
   sheetRef: React.RefObject<BottomSheetModal | null>;
 }
 
-const snapPoints = ['85%', '95%'];
-
 const { width: screenWidth } = Dimensions.get('window');
 
 export function AttractionBottomSheet({
@@ -39,6 +37,16 @@ export function AttractionBottomSheet({
 }: AttractionBottomSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
+  const { height: screenHeight } = Dimensions.get('screen');
+
+  // Calculate safe snap points to prevent top overflow
+  // const maxSheetHeight = screenHeight - insets.top; // 20px buffer from top
+  // const snapPoints = [
+  //   Math.min(screenHeight * 0.85, maxSheetHeight),
+  //   Math.min(screenHeight * 0.95, maxSheetHeight),
+  // ];
+
+  const snapPoints = ['85%', '95%'];
 
   // Animation values
   const translateX = useSharedValue(0);
@@ -56,11 +64,14 @@ export function AttractionBottomSheet({
 
   const updateTabTransition = useCallback(
     (newActiveTab: string) => {
+      if (newActiveTab === 'chat') {
+        sheetRef.current?.expand();
+      }
       setActiveTab(newActiveTab);
       const targetValue = newActiveTab === 'chat' ? 1 : 0;
       tabTransition.set(withTiming(targetValue, { duration: 300 }));
     },
-    [tabTransition]
+    [sheetRef, tabTransition]
   );
 
   const panGesture = Gesture.Pan()
@@ -177,80 +188,85 @@ export function AttractionBottomSheet({
       enableDynamicSizing={false}
       detached
       bottomInset={insets.bottom}
+      topInset={insets.top}
       style={{
         marginInline: insets.left + 12,
-        marginBlock: insets.right + 12,
+        marginBottom: insets.bottom + 12,
       }}
       ref={sheetRef}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
+      enableBlurKeyboardOnGesture
+      enableOverDrag={false}
       backgroundStyle={{
         borderRadius: 47,
         backgroundColor: colors.background,
-      }}>
-      <ScrollView className="flex-1">
-        {attraction && (
-          <View className="flex-1">
-            <View className="mb-6 px-6">
-              <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
+      }}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore">
+      {attraction && (
+        <View className="flex-1 overflow-hidden">
+          <View className="mb-6 px-6">
+            <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
 
-              {attraction.formattedAddress && (
-                <View className="flex flex-row items-center gap-2 rounded-2xl px-4">
-                  <P className="flex-1 text-base font-medium">{attraction.formattedAddress}</P>
-                </View>
-              )}
-            </View>
+            {attraction.formattedAddress && (
+              <View className="flex flex-row items-center gap-2 rounded-2xl px-4">
+                <P className="flex-1 text-base font-medium">{attraction.formattedAddress}</P>
+              </View>
+            )}
+          </View>
 
-            <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1">
-              <TabsList className="relative mb-6 h-12 w-full flex-row rounded-2xl bg-slate-100 p-1">
-                <Animated.View
-                  style={[
-                    tabIndicatorStyle,
-                    {
-                      position: 'absolute',
-                      top: 4,
-                      left: 4,
-                      width: (screenWidth - 48) * 0.5 - 8, // Account for container padding
-                      height: 40,
-                      backgroundColor: '#1f2937', // Dark background for the indicator
-                      borderRadius: 16,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.15,
-                      shadowRadius: 4,
-                      elevation: 2,
-                      zIndex: 10,
-                    },
-                  ]}
-                />
-                <TabsTrigger
-                  value="overview"
-                  className="flex-1 rounded-2xl bg-transparent shadow-none"
-                  style={{ zIndex: 20 }}>
-                  <Text
-                    className="font-semibold"
-                    style={{
-                      color: activeTab === 'overview' ? 'white' : '#64748b',
-                    }}>
-                    Overview
-                  </Text>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="chat"
-                  className="flex-1 rounded-2xl bg-transparent shadow-none"
-                  style={{ zIndex: 20 }}>
-                  <Text
-                    className="font-semibold"
-                    style={{
-                      color: activeTab === 'chat' ? 'white' : '#64748b',
-                    }}>
-                    AI Chat
-                  </Text>
-                </TabsTrigger>
-              </TabsList>
+          <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1">
+            <TabsList className="relative mb-6 h-12 w-full flex-row rounded-2xl bg-slate-100 p-1">
+              <Animated.View
+                style={[
+                  tabIndicatorStyle,
+                  {
+                    position: 'absolute',
+                    top: 4,
+                    left: 4,
+                    width: (screenWidth - 48) * 0.5 - 8, // Account for container padding
+                    height: 40,
+                    backgroundColor: '#1f2937', // Dark background for the indicator
+                    borderRadius: 16,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 4,
+                    elevation: 2,
+                    zIndex: 10,
+                  },
+                ]}
+              />
+              <TabsTrigger
+                value="overview"
+                className="flex-1 rounded-2xl bg-transparent shadow-none"
+                style={{ zIndex: 20 }}>
+                <Text
+                  className="font-semibold"
+                  style={{
+                    color: activeTab === 'overview' ? 'white' : '#64748b',
+                  }}>
+                  Overview
+                </Text>
+              </TabsTrigger>
+              <TabsTrigger
+                value="chat"
+                className="flex-1 rounded-2xl bg-transparent shadow-none"
+                style={{ zIndex: 20 }}>
+                <Text
+                  className="font-semibold"
+                  style={{
+                    color: activeTab === 'chat' ? 'white' : '#64748b',
+                  }}>
+                  AI Chat
+                </Text>
+              </TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="overview" className="flex-1">
+            <TabsContent value="overview" className="flex-1">
+              <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <GestureDetector gesture={panGesture}>
                   <View className="flex-1">
                     <View className="mb-6 px-6">
@@ -327,28 +343,17 @@ export function AttractionBottomSheet({
                       )}
                   </View>
                 </GestureDetector>
-              </TabsContent>
+              </ScrollView>
+            </TabsContent>
 
-              <TabsContent value="chat" className="flex-1">
-                <GestureDetector gesture={panGesture}>
-                  <View className="flex-1 px-6 pb-6">
-                    <AiChat
-                      attraction={attraction}
-                      onStartChat={() => {
-                        // Optional: Add any additional logic when chat starts
-                        console.log(
-                          'AI chat started for:',
-                          attraction.displayName.text || attraction.name
-                        );
-                      }}
-                    />
-                  </View>
-                </GestureDetector>
-              </TabsContent>
-            </Tabs>
-          </View>
-        )}
-      </ScrollView>
+            <TabsContent value="chat" className="flex-1">
+              <GestureDetector gesture={panGesture}>
+                <AiChatInterface attraction={attraction} />
+              </GestureDetector>
+            </TabsContent>
+          </Tabs>
+        </View>
+      )}
     </Sheet>
   );
 }

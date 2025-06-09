@@ -1,11 +1,12 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useAction } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
 import { fetch as expoFetch } from 'expo/fetch';
 import { Volume2, VolumeX } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { ScrollView, TextInput, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
 import { api } from '~/convex/_generated/api';
@@ -71,10 +72,85 @@ export default function AiChatInterface({ attraction: _attraction }: AiChatInter
     }
   };
 
+  const mockMessages = [
+    {
+      id: 'initial',
+      role: 'assistant',
+      content: "Hello! I'm your AI tour guide. What would you like to know about this location?",
+      parts: [
+        {
+          type: 'text',
+          text: "Hello! I'm your AI tour guide. What would you like to know about this location?",
+        },
+      ],
+    },
+    {
+      role: 'user',
+      content: 'Help',
+      id: 'G5bDBftXq9WH0piz',
+      createdAt: '2025-06-08T20:12:26.777Z',
+      parts: [
+        {
+          type: 'text',
+          text: 'Help',
+        },
+      ],
+    },
+    {
+      id: 'msg-P4WMG0m8Ck0w9jUE71q9TYQI',
+      createdAt: '2025-06-08T20:12:27.266Z',
+      role: 'assistant',
+      content:
+        "No problem! I'm here to help. What are you looking for? Are you planning a trip? Do you need information about a specific place? Just let me know how I can assist you!\n",
+      parts: [
+        {
+          type: 'step-start',
+        },
+        {
+          type: 'text',
+          text: "No problem! I'm here to help. What are you looking for? Are you planning a trip? Do you need information about a specific place? Just let me know how I can assist you!\n",
+        },
+      ],
+      revisionId: 'm1Qu4HH3Vh2tN7qm',
+    },
+    {
+      role: 'user',
+      content: 'Help',
+      id: 'XvhdXeJWy3WYoj4e',
+      createdAt: '2025-06-08T20:12:29.117Z',
+      parts: [
+        {
+          type: 'text',
+          text: 'Help',
+        },
+      ],
+    },
+    {
+      id: 'msg-gH6dZ17YBRTUc4I4l7VGL5VW',
+      createdAt: '2025-06-08T20:12:29.619Z',
+      role: 'assistant',
+      content:
+        "Okay! I'm ready to help. To give you the best assistance, could you tell me what you need help with? Are you looking for:\n\n*   **Travel advice?** (e.g., planning a trip, finding flights, booking hotels)\n*   **Information about a specific location?** (e.g., attractions, history, things to do)\n*   **General travel tips?** (e.g., packing, safety, etiquette)\n\nThe more information you give me, the better I can assist you!\n",
+      parts: [
+        {
+          type: 'step-start',
+        },
+        {
+          type: 'text',
+          text: "Okay! I'm ready to help. To give you the best assistance, could you tell me what you need help with? Are you looking for:\n\n*   **Travel advice?** (e.g., planning a trip, finding flights, booking hotels)\n*   **Information about a specific location?** (e.g., attractions, history, things to do)\n*   **General travel tips?** (e.g., packing, safety, etiquette)\n\nThe more information you give me, the better I can assist you!\n",
+        },
+      ],
+      revisionId: 'r6ceD1zprSXcXrJd',
+    },
+  ];
+
   return (
-    <View className="flex-1">
-      {/* Chat Messages */}
-      <ScrollView className="flex-1 px-4 py-2" showsVerticalScrollIndicator={false}>
+    <View className="flex-1" collapsable={false}>
+      {/* Messages area - scrollable */}
+      <ScrollView
+        className="flex-1 px-4 py-2"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 16 }}>
         {messages.map((message) => (
           <View
             key={message.id}
@@ -109,22 +185,20 @@ export default function AiChatInterface({ attraction: _attraction }: AiChatInter
         )}
       </ScrollView>
 
-      {/* Input Area */}
-      <View className="border-t border-slate-200 bg-white px-4 py-3">
-        <View className="flex-row items-center space-x-2">
-          <TextInput
-            className="flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-3"
-            placeholder="Ask about this location..."
-            maxLength={500}
-            editable={!isLoading}
-            onSubmitEditing={(event) => {
-              const text = event.nativeEvent.text;
-              if (text.trim()) {
-                void append({ role: 'user', content: text });
-              }
-            }}
-          />
-        </View>
+      {/* Input area - fixed at bottom */}
+      <View className="mb-4 border-t border-slate-200 px-6 py-3">
+        <BottomSheetTextInput
+          className="rounded-2xl border border-slate-300 bg-white px-4 py-3"
+          placeholder="Ask about this location..."
+          maxLength={500}
+          editable={!isLoading}
+          onSubmitEditing={(event) => {
+            const text = event.nativeEvent.text;
+            if (text.trim()) {
+              void append({ role: 'user', content: text });
+            }
+          }}
+        />
       </View>
     </View>
   );

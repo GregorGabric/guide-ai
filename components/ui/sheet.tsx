@@ -54,4 +54,4 @@ function useSheetRef() {
 
 type SheetRef = React.RefObject<BottomSheetModal>;
 
-export { Sheet, SheetRef, useSheetRef };
+export { Sheet, useSheetRef, type SheetRef };

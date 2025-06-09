@@ -12,6 +12,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AttractionBottomSheet } from '~/app/_components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/app/_components/attraction-carousel/attraction-carousel';
 import Header from '~/components/header';
@@ -363,11 +364,13 @@ export default function MapScreen() {
       )}
 
       {selectedAttraction && (
-        <AttractionBottomSheet
-          sheetRef={sheetRef}
-          attraction={selectedAttraction}
-          onClose={closeBottomSheet}
-        />
+        <SafeAreaView edges={['bottom']}>
+          <AttractionBottomSheet
+            sheetRef={sheetRef}
+            attraction={selectedAttraction}
+            onClose={closeBottomSheet}
+          />
+        </SafeAreaView>
       )}
     </View>
   );

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Keyboard, type KeyboardEvent } from 'react-native';
 
 const EVENT_TYPE = {
@@ -11,30 +11,24 @@ export function useKeyboard(
     eventType: 'didShow',
   }
 ) {
-  const [isKeyboardVisible, setKeyboardVisible] = React.useState(false);
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  React.useEffect(() => {
-    const showListener = Keyboard.addListener(
-      EVENT_TYPE[eventType].show,
-      (e: KeyboardEvent) => {
-        setKeyboardVisible(true);
-        setKeyboardHeight(e.endCoordinates.height);
-      }
-    );
-    const hideListener = Keyboard.addListener(
-      EVENT_TYPE[eventType].hide,
-      () => {
-        setKeyboardVisible(false);
-        setKeyboardHeight(0);
-      }
-    );
+  useEffect(() => {
+    const showListener = Keyboard.addListener(EVENT_TYPE[eventType].show, (e: KeyboardEvent) => {
+      setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideListener = Keyboard.addListener(EVENT_TYPE[eventType].hide, () => {
+      setKeyboardVisible(false);
+      setKeyboardHeight(0);
+    });
 
     return () => {
       showListener.remove();
       hideListener.remove();
     };
-  }, []);
+  }, [eventType]);
 
   function dismissKeyboard() {
     Keyboard.dismiss();
