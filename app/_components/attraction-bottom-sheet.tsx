@@ -1,4 +1,5 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useQuery } from 'convex/react';
 
 import * as Haptics from 'expo-haptics';
 import { ArrowUpRight, NavigationIcon } from 'lucide-react-native';
@@ -20,6 +21,7 @@ import { Sheet } from '~/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Text } from '~/components/ui/text';
 import { H3, H4, P } from '~/components/ui/typography';
+import { api } from '~/convex/_generated/api';
 import type { PlacesResponse } from '~/services/places/types';
 import { colors } from '~/utils/theme';
 
@@ -52,6 +54,11 @@ export function AttractionBottomSheet({
     },
     [onClose]
   );
+
+  const userMessages =
+    useQuery(api.messages.listMessagesByLocationId, {
+      locationId: attraction?.id ?? '',
+    }) ?? [];
 
   // const sendMessage = useMutation(api.messages.sendMessage);
 
@@ -349,7 +356,7 @@ export function AttractionBottomSheet({
 
             <TabsContent value="chat" className="flex-1">
               <GestureDetector gesture={panGesture}>
-                <AiChat attraction={attraction} />
+                <AiChat attraction={attraction} userMessages={userMessages} />
               </GestureDetector>
             </TabsContent>
           </Tabs>

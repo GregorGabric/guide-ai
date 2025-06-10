@@ -1,7 +1,6 @@
 import type { StreamId } from '@convex-dev/persistent-text-streaming';
 import { v } from 'convex/values';
 import { internalQuery, mutation, query } from './_generated/server';
-import { attractionSchema } from './schema';
 import { streamingComponent } from './streaming';
 
 export const listMessages = query({
@@ -11,15 +10,29 @@ export const listMessages = query({
   },
 });
 
-export const listMessagesByStreamId = query({
+export const listMessagesByLocationId = query({
   args: {
-    streamId: v.string(),
+    locationId: v.string(),
+  },
+  handler: async (ctx, args) =>
+    await ctx.db
+      .query('messages')
+      .filter((q) => q.eq(q.field('locationId'), args.locationId))
+      .collect(),
+});
+
+export const sendMessage = mutation({
+  args: {
+    role: v.union(v.literal('user'), v.literal('assistant')),
+    content: v.string(),
+    locationId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query('userMessages')
-      .filter((q) => q.eq('responseStreamId', args.streamId))
-      .collect();
+    await ctx.db.insert('messages', {
+      role: args.role,
+      content: args.content,
+      locationId: args.locationId,
+    });
   },
 });
 
@@ -31,22 +44,22 @@ export const clearMessages = mutation({
   },
 });
 
-export const sendMessage = mutation({
-  args: {
-    prompt: v.string(),
-    attraction: v.optional(attractionSchema),
-  },
-  handler: async (ctx, args) => {
-    const responseStreamId = await streamingComponent.createStream(ctx);
-    console.log({ responseStreamId });
-    const chatId = await ctx.db.insert('userMessages', {
-      attraction: args.attraction,
-      prompt: args.prompt,
-      responseStreamId,
-    });
-    return chatId;
-  },
-});
+// export const sendMessage = mutation({
+//   args: {
+//     prompt: v.string(),
+//     attraction: v.optional(attractionSchema),
+//   },
+//   handler: async (ctx, args) => {
+//     const responseStreamId = await streamingComponent.createStream(ctx);
+//     console.log({ responseStreamId });
+//     const chatId = await ctx.db.insert('userMessages', {
+//       attraction: args.attraction,
+//       prompt: args.prompt,
+//       responseStreamId,
+//     });
+//     return chatId;
+//   },
+// });
 
 export const getHistory = internalQuery({
   args: {},

@@ -1,5 +1,7 @@
-import { useMutation, useQuery } from 'convex/react';
+import { useChat } from '@ai-sdk/react';
+import { useMutation } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
+import { fetch as expoFetch } from 'expo/fetch';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { AiChatInput } from '~/app/_components/ai-chat/ai-chat-input';
@@ -7,8 +9,11 @@ import { AIMessage, UserMessage } from '~/app/_components/ai-chat/ai-chat-messag
 import { Button } from '~/components/ui/button';
 import { P } from '~/components/ui/typography';
 import { api } from '~/convex/_generated/api';
+import type { Doc } from '~/convex/_generated/dataModel';
+import { getConvexSiteUrl } from '~/lib/utils';
 
 export type Attraction = {
+  id: string;
   name?: string;
   displayName?: { text?: string };
   formattedAddress?: string;
@@ -20,21 +25,54 @@ export type Attraction = {
 
 interface AiChatProps {
   attraction: Attraction | null;
+  userMessages: Array<Doc<'messages'>>;
 }
 
-export function AiChat({ attraction }: AiChatProps) {
+export function AiChat({ attraction, userMessages }: AiChatProps) {
   const [audioBase64, _setAudioBase64] = useState<string | null>(null);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const [drivenIds, setDrivenIds] = useState<Set<string>>(() => new Set());
   const audioSource = audioBase64 ? `data:audio/mp3;base64,${audioBase64}` : null;
   const player = useAudioPlayer(audioSource);
-
-  const userMessages = useQuery(api.messages.listMessages) ?? [];
-
-  const isLoading = false;
-
   const isPlayingAudio = player.playing;
+
+  const attractionId = attraction?.id ?? '';
+
+  const { messages, error, append, status } = useChat({
+    api: `${getConvexSiteUrl()}/chat`,
+    fetch: expoFetch as unknown as typeof globalThis.fetch,
+    body: {
+      attraction,
+    },
+    initialMessages: userMessages.map((message) => ({
+      role: message.role,
+      content: message.content,
+      id: message._id.toString(),
+    })),
+    onFinish(message) {
+      void sendMessage({
+        role: message.role as 'user' | 'assistant',
+        content: message.content,
+        locationId: attractionId,
+      });
+    },
+  });
+
+  const sendMessage = useMutation(api.messages.sendMessage);
+
+  const isLoading = status === 'streaming';
+
+  // Auto-generate initial AI response when component loads with no messages
+  useEffect(() => {
+    if (userMessages.length === 0 && attraction && messages.length === 0) {
+      // This will trigger the AI to generate a response automatically
+      void append({
+        role: 'user',
+        content: `Tell me about ${attraction.displayName?.text || attraction.name || 'this place'}`,
+      });
+    }
+  }, [attraction, userMessages.length, messages.length, append]);
 
   const toggleAudio = () => {
     if (player.playing) {
@@ -62,6 +100,10 @@ export function AiChat({ attraction }: AiChatProps) {
 
   const clearMessages = useMutation(api.messages.clearMessages);
 
+  if (error) {
+    return <P className="text-red-500">{error.message}</P>;
+  }
+
   return (
     <View className="flex-1" collapsable={false}>
       <ScrollView
@@ -71,30 +113,33 @@ export function AiChat({ attraction }: AiChatProps) {
         contentContainerStyle={{ paddingBottom: 16 }}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}>
-        {userMessages.length === 0 && (
+        {userMessages.length === 0 && !attraction && (
           <View className="mb-4 items-start">
             <View className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
-              <P className="text-slate-600">No messages yet. Start the conversation!</P>
+              <P className="text-slate-600">
+                No location selected. Please select a location to start the conversation!
+              </P>
             </View>
           </View>
         )}
 
-        {userMessages.map((message) => (
-          <View key={message._id}>
-            <UserMessage message={message} />
+        {messages.map((message) => (
+          <View key={message.id}>
+            {message.role === 'user' && <UserMessage message={message} />}
 
-            <AIMessage
-              scrollViewRef={scrollViewRef}
-              isUserScrolling={isUserScrolling}
-              userMessages={userMessages}
-              message={message}
-              isPlayingAudio={isPlayingAudio}
-              toggleAudio={toggleAudio}
-              isDriven={drivenIds.has(message._id)}
-              stopStreaming={() => {
-                // Could implement stop streaming logic here
-              }}
-            />
+            {message.role === 'assistant' && (
+              <AIMessage
+                scrollViewRef={scrollViewRef}
+                isUserScrolling={isUserScrolling}
+                message={message}
+                isPlayingAudio={isPlayingAudio}
+                toggleAudio={toggleAudio}
+                isDriven={drivenIds.has(message.id)}
+                stopStreaming={() => {
+                  // Could implement stop streaming logic here
+                }}
+              />
+            )}
           </View>
         ))}
         <Button
@@ -107,7 +152,22 @@ export function AiChat({ attraction }: AiChatProps) {
         </Button>
       </ScrollView>
 
-      <AiChatInput isLoading={isLoading} setDrivenIds={setDrivenIds} attraction={attraction} />
+      <AiChatInput
+        isLoading={isLoading}
+        setDrivenIds={setDrivenIds}
+        attraction={attraction}
+        onSend={(message) => {
+          void sendMessage({
+            role: message.role as 'user' | 'assistant',
+            content: message.content,
+            locationId: attractionId,
+          });
+          void append({
+            role: message.role,
+            content: message.content,
+          });
+        }}
+      />
     </View>
   );
 }

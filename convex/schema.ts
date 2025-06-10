@@ -106,6 +106,11 @@ export const attractionSchema = v.object({
 });
 
 export default defineSchema({
+  messages: defineTable({
+    role: v.union(v.literal('user'), v.literal('assistant')),
+    content: v.string(),
+    locationId: v.string(),
+  }),
   userMessages: defineTable({
     prompt: v.string(),
     responseStreamId: StreamIdValidator,
