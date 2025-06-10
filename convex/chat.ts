@@ -1,44 +1,31 @@
 import { google } from '@ai-sdk/google';
-import {
-  PersistentTextStreaming,
-  type StreamId,
-  StreamIdValidator,
-} from '@convex-dev/persistent-text-streaming';
-import { type CoreMessage, streamText } from 'ai';
+import { type StreamId } from '@convex-dev/persistent-text-streaming';
+import { streamText } from 'ai';
 import { v } from 'convex/values';
-import { components } from './_generated/api';
-import { httpAction, mutation, query } from './_generated/server';
-
-const persistentTextStreaming = new PersistentTextStreaming(components.persistentTextStreaming);
+import { internal } from './_generated/api';
+import { httpAction, mutation } from './_generated/server';
+import { streamingComponent } from './streaming';
 
 export const createChat = mutation({
   args: {
     prompt: v.string(),
   },
   handler: async (ctx, args) => {
-    const streamId = await persistentTextStreaming.createStream(ctx);
-    const chatId = await ctx.db.insert('chats', {
-      title: '...',
+    const streamId = await streamingComponent.createStream(ctx);
+    const chatId = await ctx.db.insert('userMessages', {
       prompt: args.prompt,
-      stream: streamId,
+      responseStreamId: streamId,
     });
     return chatId;
   },
 });
 
-export const getChatBody = query({
-  args: {
-    streamId: StreamIdValidator,
-  },
-  handler: async (ctx, args) => {
-    return await persistentTextStreaming.getStreamBody(ctx, args.streamId as StreamId);
-  },
-});
-
-export const chatHandler = httpAction(async (ctx, request) => {
+export const chatStreamHandler = httpAction(async (ctx, request) => {
   try {
-    const body = (await request.json()) as { messages: Array<CoreMessage> };
-    const { messages } = body;
+    const body = (await request.json()) as {
+      streamId: string;
+    };
+    const { streamId } = body;
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'placeholder_key') {
@@ -48,39 +35,121 @@ export const chatHandler = httpAction(async (ctx, request) => {
       });
     }
 
-    const result = streamText({
-      model: google('gemini-2.0-flash-lite'),
-      messages,
-      system:
-        'You are a knowledgeable and friendly tour guide AI assistant. You provide informative, engaging, and helpful information about locations, attractions, and travel-related topics. Keep your responses concise but informative, and always maintain an enthusiastic and welcoming tone.',
-      maxTokens: 1000,
-    });
-
-    const streamId = await persistentTextStreaming.createStream(ctx);
-
-    // const stream = result.toDataStreamResponse({
-    //   headers: {
-    //     'Content-Type': 'application/octet-stream',
-    //     'Content-Encoding': 'none',
-    //   },
-    // });
-
-    const response = await persistentTextStreaming.stream(
+    const response = await streamingComponent.stream(
       ctx,
       request,
-      streamId,
-      async (_ctx, _request, _streamId, chunkAppender) => {
+      streamId as StreamId,
+      async (_ctx, _request, _streamId, append) => {
+        const history = await ctx.runQuery(internal.messages.getHistory);
+
+        let locationContext: string | null = null;
+        const location = history[0].attraction;
+
+        if (location) {
+          locationContext = `
+Current Location Context:
+- Name: ${location.displayName || 'Unknown'}
+- Address: ${location.formattedAddress || 'Address not available'}
+- Description: ${location.summary || 'No description available'}
+
+Please provide information specifically about this location and answer questions in the context of this place.
+            `;
+        }
+
+        const systemPrompt = locationContext
+          ? `You are a knowledgeable and friendly tour guide AI assistant focused on helping visitors understand and explore specific locations. ${locationContext} You provide informative, engaging, and helpful information about this location, nearby attractions, and travel-related topics. Keep your responses concise but informative, and always maintain an enthusiastic and welcoming tone. Focus your responses on the current location context provided above.`
+          : 'You are a knowledgeable and friendly tour guide AI assistant. You provide informative, engaging, and helpful information about locations, attractions, and travel-related topics. Keep your responses concise but informative, and always maintain an enthusiastic and welcoming tone.';
+
+        const result = streamText({
+          model: google('gemini-2.0-flash-lite'),
+          messages: history,
+          system: systemPrompt,
+          maxTokens: 1000,
+          onError: ({ error }) => {
+            console.error('Streaming error:', error);
+          },
+        });
         for await (const chunk of result.textStream) {
-          await chunkAppender(chunk);
+          await append(chunk);
         }
       }
     );
 
-    // Set CORS headers appropriately.
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Vary', 'Origin');
-    response.headers.set('Content-Type', 'application/octet-stream');
-    response.headers.set('Content-Encoding', 'none');
+    return response;
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to generate AI response',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+});
+
+export const chatHandler = httpAction(async (ctx, request) => {
+  try {
+    const body = (await request.json()) as {
+      streamId: string;
+    };
+    const { streamId } = body;
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'placeholder_key') {
+      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const response = await streamingComponent.stream(
+      ctx,
+      request,
+      streamId as StreamId,
+      async (_ctx, _request, _streamId, append) => {
+        const history = await ctx.runQuery(internal.messages.getHistory);
+
+        let locationContext: string | null = null;
+        const location = history[0].attraction;
+
+        if (location) {
+          locationContext = `
+Current Location Context:
+- Name: ${location.displayName || 'Unknown'}
+- Address: ${location.formattedAddress || 'Address not available'}
+- Description: ${location.summary || 'No description available'}
+
+Please provide information specifically about this location and answer questions in the context of this place.
+            `;
+        }
+
+        const systemPrompt = locationContext
+          ? `You are a knowledgeable and friendly tour guide AI assistant focused on helping visitors understand and explore specific locations. ${locationContext} You provide informative, engaging, and helpful information about this location, nearby attractions, and travel-related topics. Keep your responses concise but informative, and always maintain an enthusiastic and welcoming tone. Focus your responses on the current location context provided above.`
+          : 'You are a knowledgeable and friendly tour guide AI assistant. You provide informative, engaging, and helpful information about locations, attractions, and travel-related topics. Keep your responses concise but informative, and always maintain an enthusiastic and welcoming tone.';
+
+        const result = streamText({
+          model: google('gemini-2.0-flash-lite'),
+          messages: history,
+          system: systemPrompt,
+          maxTokens: 1000,
+          onError: ({ error }) => {
+            console.error('Streaming error:', error);
+          },
+        });
+        for await (const chunk of result.textStream) {
+          await append(chunk);
+        }
+      }
+    );
+
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Vary', 'Origin');
     return response;
   } catch (error) {
     console.error('Gemini API error:', error);

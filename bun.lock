@@ -47,6 +47,7 @@
         "react-dom": "19.0.0",
         "react-native": "0.79.2",
         "react-native-gesture-handler": "~2.24.0",
+        "react-native-keyboard-controller": "^1.17.4",
         "react-native-maps": "1.23.8",
         "react-native-reanimated": "~3.17.4",
         "react-native-safe-area-context": "5.4.0",
@@ -1644,6 +1645,8 @@
     "react-native-gesture-handler": ["react-native-gesture-handler@2.24.0", "", { "dependencies": { "@egjs/hammerjs": "^2.0.17", "hoist-non-react-statics": "^3.3.0", "invariant": "^2.2.4" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-ZdWyOd1C8axKJHIfYxjJKCcxjWEpUtUWgTOVY2wynbiveSQDm8X/PDyAKXSer/GOtIpjudUbACOndZXCN3vHsw=="],
 
     "react-native-is-edge-to-edge": ["react-native-is-edge-to-edge@1.1.7", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-EH6i7E8epJGIcu7KpfXYXiV2JFIYITtq+rVS8uEb+92naMRBdxhTuS8Wn2Q7j9sqyO0B+Xbaaf9VdipIAmGW4w=="],
+
+    "react-native-keyboard-controller": ["react-native-keyboard-controller@1.17.4", "", { "dependencies": { "react-native-is-edge-to-edge": "^1.1.6" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-reanimated": ">=3.0.0" } }, "sha512-aoXPy1LA4xPqBBv4gGZvGfMCIYbcWVWqDza0xEIC9TYla2Jj2H25ADnfcOk/5exrwUKsWiLFRywykSAR5RurFQ=="],
 
     "react-native-maps": ["react-native-maps@1.23.8", "", { "dependencies": { "@types/geojson": "^7946.0.13" }, "peerDependencies": { "react": ">= 18.3.1", "react-native": ">= 0.76.0", "react-native-web": ">= 0.11" }, "optionalPeers": ["react-native-web"] }, "sha512-oYuJFZ/MV5URkJRloDlZM3+tb4PkT93Qg19b9c03txCPUpUj70HKXjDTrr7RTRGY1Nu66NTlLoKeV635WI8wQQ=="],
 

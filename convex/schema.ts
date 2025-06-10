@@ -1,3 +1,4 @@
+import { StreamIdValidator } from '@convex-dev/persistent-text-streaming';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 export const placesSchema = v.object({
@@ -98,11 +99,17 @@ export const placesSchema = v.object({
   ),
 });
 
+export const attractionSchema = v.object({
+  displayName: v.optional(v.string()),
+  formattedAddress: v.optional(v.string()),
+  summary: v.optional(v.string()),
+});
+
 export default defineSchema({
-  chats: defineTable({
-    title: v.string(),
+  userMessages: defineTable({
     prompt: v.string(),
-    stream: v.string(),
+    responseStreamId: StreamIdValidator,
+    attraction: v.optional(attractionSchema),
   }),
   place: defineTable({
     name: v.string(),

@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { ConvexClientProvider } from '~/context/convex-provider';
 import { QueryProvider } from '~/context/query-context';
 import '~/global.css';
@@ -70,13 +71,15 @@ export default function RootLayout() {
       <QueryProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-              <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="modal" options={{ title: 'Modal', presentation: 'modal' }} />
-              </Stack>
-            </ThemeProvider>
+            <KeyboardProvider>
+              <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+                <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="modal" options={{ title: 'Modal', presentation: 'modal' }} />
+                </Stack>
+              </ThemeProvider>
+            </KeyboardProvider>
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </QueryProvider>

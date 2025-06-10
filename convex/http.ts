@@ -1,12 +1,12 @@
 import { httpRouter } from 'convex/server';
-import { chatHandler } from './chat';
+import { chatStreamHandler } from './chat';
 
 const http = httpRouter();
 
 http.route({
-  path: '/api/chat',
+  path: '/chat-stream',
   method: 'POST',
-  handler: chatHandler,
+  handler: chatStreamHandler,
 });
 
 export default http;

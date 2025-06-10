@@ -1,4 +1,5 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+
 import * as Haptics from 'expo-haptics';
 import { ArrowUpRight, NavigationIcon } from 'lucide-react-native';
 import type React from 'react';
@@ -13,7 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AiChat } from '~/app/_components/ai-chat-interface';
+import { AiChat } from '~/app/_components/ai-chat/ai-chat';
 import { Badge } from '~/components/ui/badge';
 import { Sheet } from '~/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
@@ -27,6 +28,7 @@ interface AttractionBottomSheetProps {
   onClose: () => void;
   sheetRef: React.RefObject<BottomSheetModal | null>;
 }
+const snapPoints = ['85%', '95%'];
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -38,16 +40,6 @@ export function AttractionBottomSheet({
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
 
-  // Calculate safe snap points to prevent top overflow
-  // const maxSheetHeight = screenHeight - insets.top; // 20px buffer from top
-  // const snapPoints = [
-  //   Math.min(screenHeight * 0.85, maxSheetHeight),
-  //   Math.min(screenHeight * 0.95, maxSheetHeight),
-  // ];
-
-  const snapPoints = ['85%', '95%'];
-
-  // Animation values
   const translateX = useSharedValue(0);
   const gestureProgress = useSharedValue(0);
   const tabTransition = useSharedValue(0); // 0 = overview, 1 = chat
@@ -61,10 +53,21 @@ export function AttractionBottomSheet({
     [onClose]
   );
 
+  // const sendMessage = useMutation(api.messages.sendMessage);
+
   const updateTabTransition = useCallback(
     (newActiveTab: string) => {
       if (newActiveTab === 'chat') {
         sheetRef.current?.expand();
+
+        // void sendMessage({
+        //   prompt: 'Can you provide a brief history and cultural significance of this place?',
+        //   attraction: {
+        //     displayName: attraction?.displayName.text,
+        //     formattedAddress: attraction?.formattedAddress,
+        //     summary: attraction?.editorialSummary?.text,
+        //   },
+        // });
       }
       setActiveTab(newActiveTab);
       const targetValue = newActiveTab === 'chat' ? 1 : 0;
@@ -190,7 +193,6 @@ export function AttractionBottomSheet({
       topInset={insets.top}
       style={{
         marginInline: insets.left + 12,
-        // marginBottom: insets.bottom + 12,
       }}
       ref={sheetRef}
       snapPoints={snapPoints}
