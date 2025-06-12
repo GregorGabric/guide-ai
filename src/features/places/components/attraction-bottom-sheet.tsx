@@ -210,12 +210,12 @@ export function AttractionBottomSheet({
       enableOverDrag={false}
       backgroundStyle={{
         borderRadius: 47 - (insets.left + 12),
-        backgroundColor: colors.background,
+        backgroundColor: colors['card-background'],
       }}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore">
       {attraction && (
-        <View className="flex-1 overflow-hidden">
+        <View className="flex-1 overflow-hidden ">
           <View className="mb-6 px-6">
             <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
 

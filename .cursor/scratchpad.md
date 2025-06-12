@@ -234,3 +234,68 @@ guide-ai/
 - Import paths must be updated systematically after moving files to avoid broken references
 - Linter can effectively identify remaining import issues that need resolution
 - Feature extraction works well when done incrementally with immediate import updates
+
+# Legend List Integration
+
+## Background and Motivation
+
+Integrating Legend List to replace the current ScrollView in the AI chat component for better performance and chat-specific features. Legend List provides:
+
+- Better performance for dynamic message heights
+- Built-in `maintainScrollAtEnd` for chat UIs
+- `alignItemsAtEnd` for proper content alignment
+- Superior scroll management without manual position tracking
+
+## Key Challenges and Analysis
+
+- Converting from ScrollView-based message rendering to LegendList's renderItem pattern
+- Adapting message components to work with list items
+- Handling different item types (messages, placeholder, clear button)
+- Maintaining existing functionality like audio controls and scroll behavior
+
+## High-level Task Breakdown
+
+- [x] Install @legendapp/list package
+- [x] Update imports to include LegendList components
+- [x] Replace ScrollView with LegendList in AI chat component
+- [x] Transform message data into LegendList-compatible format
+- [x] Implement renderItem function for different message types
+- [x] Configure Legend List with chat-appropriate props (maintainScrollAtEnd, alignItemsAtEnd)
+- [x] Update AIMessage component to make scrollViewRef optional
+- [ ] Test the implementation with different scenarios
+- [ ] Verify all existing functionality works correctly
+
+## Project Status Board
+
+- ✅ Package installation completed
+- ✅ Component refactoring completed
+- ✅ Type compatibility issues resolved
+- 🔄 Testing phase - ready for manual testing
+
+## Current Status / Progress Tracking
+
+Successfully integrated Legend List into the AI chat component. The implementation includes:
+
+- LegendList with proper chat configuration (maintainScrollAtEnd, alignItemsAtEnd)
+- Transformed message rendering to use renderItem pattern
+- Support for placeholder messages and clear button
+- Maintained existing audio controls and scroll behavior
+- Fixed TypeScript compatibility issues
+
+## Executor's Feedback or Assistance Requests
+
+Integration complete! The AI chat component now uses Legend List with the following benefits:
+
+- `maintainScrollAtEnd={true}` - automatically keeps scroll at bottom when new messages arrive
+- `alignItemsAtEnd={true}` - aligns content to bottom for proper chat UX
+- `maintainScrollAtEndThreshold={0.1}` - maintains scroll position when user is near bottom
+- Better performance for dynamic message heights
+- Simplified scroll management (no need for manual scrollToEnd calls)
+
+Ready for user testing to verify all functionality works as expected.
+
+## Lessons
+
+- Legend List provides excellent chat-specific features out of the box
+- The renderItem pattern requires transforming data but provides better performance
+- Making component props optional helps with API flexibility during refactoring

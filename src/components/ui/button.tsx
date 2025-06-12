@@ -129,7 +129,7 @@ type ButtonProps = PressableProps & ButtonVariantProps & AndroidOnlyButtonProps;
 
 const Root = Platform.OS === 'android' ? View : Slot.Pressable;
 
-const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
+const Button = React.forwardRef<React.ComponentRef<typeof Pressable>, ButtonProps>(
   (
     { className, variant = 'primary', size, style = BORDER_CURVE, androidRootClassName, ...props },
     ref
@@ -137,7 +137,7 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
     const { colorScheme } = useColorScheme();
 
     return (
-      <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
+      <TextClassContext value={buttonTextVariants({ variant, size })}>
         <Root
           className={Platform.select({
             ios: undefined,
@@ -157,7 +157,7 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
             {...props}
           />
         </Root>
-      </TextClassContext.Provider>
+      </TextClassContext>
     );
   }
 );
