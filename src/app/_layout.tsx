@@ -8,12 +8,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { ConvexClientProvider } from '~/context/convex-provider';
-import { QueryProvider } from '~/context/query-context';
 import '~/global.css';
-import { NAV_THEME } from '~/lib/constants';
-import { useColorScheme } from '~/lib/useColorScheme';
 import '~/polyfills';
+import { ConvexClientProvider } from '~/src/context/convex-provider';
+import { QueryProvider } from '~/src/context/query-context';
+import { NAV_THEME } from '~/src/lib/constants';
+import { useColorScheme } from '~/src/lib/useColorScheme';
 
 void SplashScreen.preventAutoHideAsync();
 

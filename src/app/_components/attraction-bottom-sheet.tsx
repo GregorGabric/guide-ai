@@ -15,15 +15,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AiChat } from '~/app/_components/ai-chat/ai-chat';
-import { Badge } from '~/components/ui/badge';
-import { Sheet } from '~/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Text } from '~/components/ui/text';
-import { H3, H4, P } from '~/components/ui/typography';
-import { api } from '~/convex/_generated/api';
+
 import type { PlacesResponse } from '~/services/places/types';
-import { colors } from '~/utils/theme';
+import { AiChat } from '~/src/app/_components/ai-chat/ai-chat';
+import { Badge } from '~/src/components/ui/badge';
+import { Sheet } from '~/src/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
+import { Text } from '~/src/components/ui/text';
+import { H3, H4, P } from '~/src/components/ui/typography';
+import { api } from '~/src/convex/_generated/api';
+import { colors } from '~/src/utils/theme';
 
 interface AttractionBottomSheetProps {
   attraction: PlacesResponse['places'][number] | null;

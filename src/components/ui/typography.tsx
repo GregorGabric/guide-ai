@@ -1,7 +1,7 @@
 import * as Slot from '@rn-primitives/slot';
 import type React from 'react';
 import { Platform, Text as RNText } from 'react-native';
-import { cn } from '~/lib/utils';
+import { cn } from '~/src/lib/utils';
 
 type TypographyProps = React.ComponentProps<typeof RNText> & {
   ref?: React.RefObject<RNText>;

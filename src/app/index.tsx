@@ -13,16 +13,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AttractionBottomSheet } from '~/app/_components/attraction-bottom-sheet';
-import { AttractionCarousel } from '~/app/_components/attraction-carousel/attraction-carousel';
-import Header from '~/components/header';
-import LoadingOverlay from '~/components/loading-overlay';
-import { useSheetRef } from '~/components/ui/sheet';
-import { api } from '~/convex/_generated/api';
-import { useLocation } from '~/lib/hooks';
-import { COLORS } from '~/lib/theme/colors';
-import type { PlacesResponse } from '~/services/places/types';
-import { currentLocation as getCurrentLocation } from '~/services/queries';
+import { AttractionBottomSheet } from '~/src/app/_components/attraction-bottom-sheet';
+import { AttractionCarousel } from '~/src/app/_components/attraction-carousel/attraction-carousel';
+import Header from '~/src/components/header';
+import LoadingOverlay from '~/src/components/loading-overlay';
+import { useSheetRef } from '~/src/components/ui/sheet';
+import { api } from '~/src/convex/_generated/api';
+import { useLocation } from '~/src/lib/hooks';
+import { COLORS } from '~/src/lib/theme/colors';
+import type { PlacesResponse } from '~/src/services/places/types';
+import { currentLocation as getCurrentLocation } from '~/src/services/queries';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
 

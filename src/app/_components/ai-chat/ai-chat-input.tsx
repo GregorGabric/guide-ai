@@ -2,7 +2,7 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import type { CreateMessage } from 'ai';
 import { useState } from 'react';
 import { View } from 'react-native';
-import type { Attraction } from '~/app/_components/ai-chat/ai-chat';
+import type { Attraction } from '~/src/app/_components/ai-chat/ai-chat';
 
 interface AiChatInputProps {
   isLoading: boolean;

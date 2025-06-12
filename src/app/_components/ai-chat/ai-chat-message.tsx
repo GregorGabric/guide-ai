@@ -2,9 +2,9 @@ import type { Message } from 'ai';
 import { Volume2, VolumeX } from 'lucide-react-native';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
-import { Button } from '~/components/ui/button';
-import { P } from '~/components/ui/typography';
-import { useSmoothText } from '~/lib/hooks';
+import { Button } from '~/src/components/ui/button';
+import { P } from '~/src/components/ui/typography';
+import { useSmoothText } from '~/src/lib/hooks';
 
 export function UserMessage({ message }: { message: Message }) {
   return (

@@ -2,7 +2,7 @@ import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 
-import { useColorScheme } from '~/lib/useColorScheme';
+import { useColorScheme } from '~/src/lib/useColorScheme';
 
 const Sheet = ({
   ref,

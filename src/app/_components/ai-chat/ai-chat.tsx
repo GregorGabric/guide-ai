@@ -4,13 +4,13 @@ import { useAudioPlayer } from 'expo-audio';
 import { fetch as expoFetch } from 'expo/fetch';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { AiChatInput } from '~/app/_components/ai-chat/ai-chat-input';
-import { AIMessage, UserMessage } from '~/app/_components/ai-chat/ai-chat-message';
-import { Button } from '~/components/ui/button';
-import { P } from '~/components/ui/typography';
-import { api } from '~/convex/_generated/api';
-import type { Doc } from '~/convex/_generated/dataModel';
-import { getConvexSiteUrl } from '~/lib/utils';
+import { AiChatInput } from '~/src/app/_components/ai-chat/ai-chat-input';
+import { AIMessage, UserMessage } from '~/src/app/_components/ai-chat/ai-chat-message';
+import { Button } from '~/src/components/ui/button';
+import { P } from '~/src/components/ui/typography';
+import { api } from '~/src/convex/_generated/api';
+import type { Doc } from '~/src/convex/_generated/dataModel';
+import { getConvexSiteUrl } from '~/src/lib/utils';
 
 export type Attraction = {
   id: string;

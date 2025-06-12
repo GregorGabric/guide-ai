@@ -2,7 +2,7 @@ import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
 import { Animated, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TabBarIcon } from '~/components/TabBarIcon';
+import { TabBarIcon } from '~/src/components/TabBarIcon';
 
 export const TAB_BAR_HEIGHT = 75;
 export default function TabLayout() {

@@ -1,25 +1,18 @@
 import * as Slot from '@rn-primitives/slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-import {
-  Platform,
-  Pressable,
-  PressableProps,
-  View,
-  ViewStyle,
-} from 'react-native';
-
-import { TextClassContext } from '~/components/ui/text';
-import { COLORS } from '~/lib/theme/colors';
-import { useColorScheme } from '~/lib/useColorScheme';
-import { cn } from '~/lib/utils';
+import type { PressableProps, ViewStyle } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { TextClassContext } from '~/src/components/ui/text';
+import { COLORS } from '~/src/lib/theme/colors';
+import { useColorScheme } from '~/src/lib/useColorScheme';
+import { cn } from '~/src/lib/utils';
 
 const buttonVariants = cva('flex-row items-center justify-center gap-2', {
   variants: {
     variant: {
       primary: 'ios:active:opacity-80 bg-primary',
-      secondary:
-        'ios:border-primary ios:active:bg-primary/5 border border-foreground/40',
+      secondary: 'ios:border-primary ios:active:bg-primary/5 border border-foreground/40',
       tonal:
         'ios:bg-primary/10 dark:ios:bg-primary/10 ios:active:bg-primary/15 bg-primary/15 dark:bg-primary/30',
       plain: 'ios:active:opacity-70',
@@ -121,10 +114,7 @@ const BORDER_CURVE: ViewStyle = {
   borderCurve: 'continuous',
 };
 
-type ButtonVariantProps = Omit<
-  VariantProps<typeof buttonVariants>,
-  'variant'
-> & {
+type ButtonVariantProps = Omit<VariantProps<typeof buttonVariants>, 'variant'> & {
   variant?: Exclude<VariantProps<typeof buttonVariants>['variant'], null>;
 };
 
@@ -139,19 +129,9 @@ type ButtonProps = PressableProps & ButtonVariantProps & AndroidOnlyButtonProps;
 
 const Root = Platform.OS === 'android' ? View : Slot.Pressable;
 
-const Button = React.forwardRef<
-  React.ElementRef<typeof Pressable>,
-  ButtonProps
->(
+const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
   (
-    {
-      className,
-      variant = 'primary',
-      size,
-      style = BORDER_CURVE,
-      androidRootClassName,
-      ...props
-    },
+    { className, variant = 'primary', size, style = BORDER_CURVE, androidRootClassName, ...props },
     ref
   ) => {
     const { colorScheme } = useColorScheme();
@@ -165,8 +145,7 @@ const Button = React.forwardRef<
               size,
               className: androidRootClassName,
             }),
-          })}
-        >
+          })}>
           <Pressable
             className={cn(
               props.disabled && 'opacity-50',
