@@ -1,4 +1,4 @@
-import { searchNearbyPlaces } from '~/services/places/placesService';
+import { searchNearbyPlaces } from '~/src/features/places/services/placesService';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

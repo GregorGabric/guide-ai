@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { PlacesResponse } from '~/services/places/types';
+import type { PlacesResponse } from '~/src/features/places/services/types';
 import { InfoItem } from './info-card';
 import { PaginationDots } from './pagination-dots';
 

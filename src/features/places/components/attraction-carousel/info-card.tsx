@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
-import type { PlacesResponse } from '~/services/places/types';
+import type { PlacesResponse } from '~/src/features/places/services/types';
 
 // On card change, this is a distance the card passes from it comes fully visible to final position
 const _translateXGap = 25;
