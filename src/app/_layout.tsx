@@ -3,6 +3,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { SplashScreen, Stack } from 'expo-router';
+import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
@@ -67,22 +68,55 @@ export default function RootLayout() {
   }
 
   return (
-    <ConvexClientProvider>
-      <QueryProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <BottomSheetModalProvider>
-            <KeyboardProvider>
-              <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-                <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-                <Stack>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen name="modal" options={{ title: 'Modal', presentation: 'modal' }} />
-                </Stack>
-              </ThemeProvider>
-            </KeyboardProvider>
-          </BottomSheetModalProvider>
-        </GestureHandlerRootView>
-      </QueryProvider>
-    </ConvexClientProvider>
+    <SQLiteProvider databaseName="audio-cache.db" onInit={initDb}>
+      <ConvexClientProvider>
+        <QueryProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+              <KeyboardProvider>
+                <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+                  <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+                  <Stack>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="modal"
+                      options={{ title: 'Modal', presentation: 'modal' }}
+                    />
+                  </Stack>
+                </ThemeProvider>
+              </KeyboardProvider>
+            </BottomSheetModalProvider>
+          </GestureHandlerRootView>
+        </QueryProvider>
+      </ConvexClientProvider>
+    </SQLiteProvider>
   );
+}
+
+async function initDb(db: SQLiteDatabase) {
+  const DATABASE_VERSION = 1;
+  const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  let currentDbVersion = result?.user_version ?? 0;
+
+  if (currentDbVersion >= DATABASE_VERSION) {
+    return;
+  }
+
+  if (currentDbVersion === 0) {
+    await db.execAsync(`
+PRAGMA journal_mode = 'wal';
+CREATE TABLE IF NOT EXISTS audio_cache (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cache_key TEXT NOT NULL UNIQUE,
+  audio TEXT NOT NULL,
+  created_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+CREATE INDEX IF NOT EXISTS idx_audio_cache_key ON audio_cache(cache_key);
+`);
+    currentDbVersion = 1;
+  }
+  // if (currentDbVersion === 1) {
+  //   Add more migrations
+  // }
+  await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }

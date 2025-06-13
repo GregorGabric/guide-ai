@@ -4,6 +4,7 @@ import { LegendList } from '@legendapp/list';
 import { useMutation as useTanstackMutation } from '@tanstack/react-query';
 import { useAction, useMutation } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
+import { useSQLiteContext } from 'expo-sqlite';
 import { fetch as expoFetch } from 'expo/fetch';
 import { LoaderIcon } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -114,6 +115,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     }
   }, [player]);
 
+  const db = useSQLiteContext();
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
 
   const { mutateAsync, isPending: isGeneratingAudio } = useTanstackMutation({
@@ -123,10 +125,14 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
       // Check if we already have this audio cached
       const cacheKey = `tts_${textHash}`;
-      const cachedAudio = localStorage.getItem(cacheKey);
+      const result = await db.getFirstAsync<{ text: string; audio: string }>(
+        'SELECT * FROM audio_cache WHERE cache_key = ?',
+        [cacheKey]
+      );
 
-      if (cachedAudio) {
+      if (result) {
         console.log(`Using cached audio for text (${text.length} chars)`);
+        const cachedAudio = result.audio;
         return cachedAudio;
       }
 
@@ -134,7 +140,10 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       const audioBase64 = await convertTextToSpeech({ text });
 
       try {
-        localStorage.setItem(cacheKey, audioBase64);
+        await db.runAsync('INSERT INTO audio_cache (cache_key, audio) VALUES (?, ?)', [
+          cacheKey,
+          audioBase64,
+        ]);
         console.log(`Cached audio for future use`);
       } catch (error) {
         console.warn('Failed to cache audio - localStorage full?', error);
