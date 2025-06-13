@@ -6,7 +6,6 @@ import { useAction, useMutation } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
 import { useSQLiteContext } from 'expo-sqlite';
 import { fetch as expoFetch } from 'expo/fetch';
-import { LoaderIcon } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
@@ -17,6 +16,7 @@ import type { Doc } from '~/src/convex/_generated/dataModel';
 import { AiChatInput } from '~/src/features/chat/components/ai-chat/ai-chat-input';
 import { AIMessage, UserMessage } from '~/src/features/chat/components/ai-chat/ai-chat-message';
 import { AudioLinesIcon } from '~/src/lib/icons/audio-lines';
+import { LoaderIcon } from '~/src/lib/icons/loader-icon';
 import { getConvexSiteUrl } from '~/src/lib/utils';
 
 export type Attraction = {
@@ -280,15 +280,15 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         className="flex-1"
         contentContainerStyle={{ paddingTop: 8, paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}
-        maintainScrollAtEnd={true}
-        alignItemsAtEnd={true}
+        maintainScrollAtEnd
+        alignItemsAtEnd
         maintainScrollAtEndThreshold={0.1}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}
       />
 
       <View className="mb-4 gap-2 border-t border-slate-200 px-6 py-3">
-        <ScrollView horizontal className="flex-row gap-4">
+        <ScrollView horizontal contentContainerClassName="flex-row gap-2">
           <Button
             onPress={() => {
               void clearMessages();

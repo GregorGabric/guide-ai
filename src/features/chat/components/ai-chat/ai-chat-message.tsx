@@ -1,11 +1,12 @@
 import type { Message } from 'ai';
-import { AudioPlayer } from 'expo-audio';
-import { LoaderIcon, Volume2, VolumeX } from 'lucide-react-native';
+import type { AudioPlayer } from 'expo-audio';
+import { Volume2, VolumeX } from 'lucide-react-native';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
 import { P } from '~/src/components/ui/typography';
 import { useSmoothText } from '~/src/lib/hooks';
+import { LoaderIcon } from '~/src/lib/icons/loader-icon';
 
 export function UserMessage({ message }: { message: Message }) {
   return (
