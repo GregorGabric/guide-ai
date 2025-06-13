@@ -28,13 +28,11 @@ export const convertTextToSpeech = action({
 
       const chunks: Array<Buffer> = [];
       for await (const chunk of audioStream) {
-        chunks.push(Buffer.from(chunk));
+        chunks.push(chunk as Buffer);
       }
+      const content = Buffer.concat(chunks);
 
-      const audioBuffer = Buffer.concat(chunks);
-
-      // Convert to base64 for transmission
-      return audioBuffer.toString('base64');
+      return content.toString('base64');
     } catch (error) {
       console.error('Failed to convert text to speech:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

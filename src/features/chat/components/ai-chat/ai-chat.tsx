@@ -120,10 +120,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
   const { mutateAsync, isPending: isGeneratingAudio } = useTanstackMutation({
     mutationFn: async (text: string) => {
-      // Create a hash of the text for caching
-      const textHash = btoa(text).slice(0, 16); // Simple hash for demo
+      const textHash = btoa(text).slice(0, 16);
 
-      // Check if we already have this audio cached
       const cacheKey = `tts_${textHash}`;
       const result = await db.getFirstAsync<{ text: string; audio: string }>(
         'SELECT * FROM audio_cache WHERE cache_key = ?',
@@ -136,7 +134,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         return cachedAudio;
       }
 
-      // Generate new audio
       const audioBase64 = await convertTextToSpeech({ text });
 
       try {
@@ -195,16 +192,13 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
   const clearMessages = useMutation(api.messages.clearMessages);
 
-  // Get the last AI message for the "Read it" button
   const lastAiMessage = useMemo(() => {
     return messages.filter((msg) => msg.role === 'assistant').pop();
   }, [messages]);
 
-  // Transform messages into data format for LegendList
   const listData = useMemo((): Array<MessageItem> => {
     const items: Array<MessageItem> = [];
 
-    // Add placeholder message if no location selected
     if (userMessages.length === 0 && !attraction) {
       items.push({
         id: 'placeholder',
@@ -214,7 +208,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       });
     }
 
-    // Add all messages
     messages.forEach((message) => {
       items.push({
         id: message.id,
@@ -224,7 +217,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       });
     });
 
-    // Add clear button as last item
     items.push({
       id: 'clear-button',
       role: 'assistant',
