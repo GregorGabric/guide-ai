@@ -5,6 +5,7 @@ import { useMutation as useTanstackMutation } from '@tanstack/react-query';
 import { useAction, useMutation } from 'convex/react';
 import { useAudioPlayer } from 'expo-audio';
 import { fetch as expoFetch } from 'expo/fetch';
+import { LoaderIcon } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
@@ -85,18 +86,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     }
   }, [attraction, userMessages.length, messages.length, append]);
 
-  useEffect(() => {
-    return () => {
-      try {
-        if (player.isLoaded) {
-          player.remove();
-        }
-      } catch (error) {
-        console.warn('Failed to remove audio during cleanup:', error);
-      }
-    };
-  }, [player]);
-
   const stopAudio = useCallback(() => {
     // Stop audio playback if playing - with safety checks
     try {
@@ -108,7 +97,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     }
   }, [player]);
 
-  const toggleAudio = () => {
+  const toggleAudio = useCallback(() => {
     try {
       if (!player.isLoaded) {
         console.warn('Cannot toggle audio: player not loaded');
@@ -123,13 +112,34 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     } catch (error) {
       console.warn('Failed to toggle audio:', error);
     }
-  };
+  }, [player]);
 
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
 
-  const { mutateAsync, isPending } = useTanstackMutation({
+  const { mutateAsync, isPending: isGeneratingAudio } = useTanstackMutation({
     mutationFn: async (text: string) => {
+      // Create a hash of the text for caching
+      const textHash = btoa(text).slice(0, 16); // Simple hash for demo
+
+      // Check if we already have this audio cached
+      const cacheKey = `tts_${textHash}`;
+      const cachedAudio = localStorage.getItem(cacheKey);
+
+      if (cachedAudio) {
+        console.log(`Using cached audio for text (${text.length} chars)`);
+        return cachedAudio;
+      }
+
+      // Generate new audio
       const audioBase64 = await convertTextToSpeech({ text });
+
+      try {
+        localStorage.setItem(cacheKey, audioBase64);
+        console.log(`Cached audio for future use`);
+      } catch (error) {
+        console.warn('Failed to cache audio - localStorage full?', error);
+      }
+
       return audioBase64;
     },
   });
@@ -216,41 +226,44 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     return items;
   }, [messages, userMessages.length, attraction]);
 
-  const renderItem = ({ item }: LegendListRenderItemProps<MessageItem>) => {
-    if (item.type === 'placeholder') {
-      return (
-        <View className="mb-4 items-start px-4">
-          <View className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
-            <P className="text-slate-600">{item.content}</P>
+  const renderItem = useCallback(
+    ({ item }: LegendListRenderItemProps<MessageItem>) => {
+      if (item.type === 'placeholder') {
+        return (
+          <View className="mb-4 items-start px-4">
+            <View className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
+              <P className="text-slate-600">{item.content}</P>
+            </View>
           </View>
+        );
+      }
+
+      const message = { id: item.id, role: item.role, content: item.content };
+
+      return (
+        <View className="px-4">
+          {item.role === 'user' && <UserMessage message={message} />}
+          {item.role === 'assistant' && (
+            <AIMessage
+              scrollViewRef={scrollViewRef}
+              playAudio={playAudio}
+              stopAudio={stopAudio}
+              isUserScrolling={isUserScrolling}
+              message={message}
+              player={player}
+              isGeneratingAudio={isGeneratingAudio}
+              toggleAudio={toggleAudio}
+              isDriven={drivenIds.has(item.id)}
+              stopStreaming={() => {
+                // Could implement stop streaming logic here
+              }}
+            />
+          )}
         </View>
       );
-    }
-
-    const message = { id: item.id, role: item.role, content: item.content };
-
-    return (
-      <View className="px-4">
-        {item.role === 'user' && <UserMessage message={message} />}
-        {item.role === 'assistant' && (
-          <AIMessage
-            scrollViewRef={scrollViewRef}
-            playAudio={playAudio}
-            stopAudio={stopAudio}
-            isUserScrolling={isUserScrolling}
-            message={message}
-            player={player}
-            isGeneratingAudio={isPending}
-            toggleAudio={toggleAudio}
-            isDriven={drivenIds.has(item.id)}
-            stopStreaming={() => {
-              // Could implement stop streaming logic here
-            }}
-          />
-        )}
-      </View>
-    );
-  };
+    },
+    [drivenIds, isGeneratingAudio, isUserScrolling, playAudio, player, stopAudio, toggleAudio]
+  );
 
   if (error) {
     return <P className="text-red-500">{error.message}</P>;
@@ -284,7 +297,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
           <Button
             onPress={() => {
               try {
-                if (isPending || player.playing) {
+                if (isGeneratingAudio || player.playing) {
                   stopAudio();
                 } else if (lastAiMessage) {
                   void playAudio(lastAiMessage.content);
@@ -295,7 +308,13 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             }}
             disabled={!lastAiMessage}>
             <AudioLinesIcon size={16} />
-            <Text>{isPending ? 'Stop' : player.playing ? 'Stop' : 'Read it'}</Text>
+            {isGeneratingAudio ? (
+              <LoaderIcon className="animate-spin" />
+            ) : player.playing ? (
+              <Text>Stop</Text>
+            ) : (
+              <Text>Read it</Text>
+            )}
           </Button>
         </ScrollView>
         <AiChatInput

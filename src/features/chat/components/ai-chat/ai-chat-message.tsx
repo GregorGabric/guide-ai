@@ -1,6 +1,6 @@
 import type { Message } from 'ai';
 import { AudioPlayer } from 'expo-audio';
-import { Volume2, VolumeX } from 'lucide-react-native';
+import { LoaderIcon, Volume2, VolumeX } from 'lucide-react-native';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
@@ -31,31 +31,7 @@ interface MessageProps {
 }
 
 export function AIMessage(props: MessageProps) {
-  // const { text, status } = useStream(
-  //   api.streaming.getStreamBody,
-  //   new URL(`${getConvexSiteUrl()}/chat-stream`),
-  //   props.isDriven,
-  //   props.message.id as StreamId
-  // );
-
   const [visibleText] = useSmoothText(props.message.content);
-
-  // const isCurrentlyStreaming = useMemo(() => {
-  //   if (!props.isDriven) {
-  //     return false;
-  //   }
-  //   return status === 'pending' || status === 'streaming';
-  // }, [props.isDriven, status]);
-
-  // useEffect(() => {
-  //   if (!props.isDriven) {
-  //     return;
-  //   }
-  //   if (isCurrentlyStreaming) {
-  //     return;
-  //   }
-  //   props.stopStreaming();
-  // }, [props.isDriven, isCurrentlyStreaming, props.stopStreaming, props]);
 
   if (!visibleText) {
     return null;
@@ -76,13 +52,16 @@ export function AIMessage(props: MessageProps) {
               props.playAudio(props.message.content);
             }
           }}>
-          {props.player.playing || props.isGeneratingAudio ? (
-            <VolumeX size={16} color="#6B7280" />
+          {props.isGeneratingAudio ? (
+            <LoaderIcon className="animate-spin" />
+          ) : props.player.playing ? (
+            <VolumeX size={16} />
           ) : (
-            <Volume2 size={16} color="#6B7280" />
+            <Volume2 size={16} />
           )}
+
           <P className="text-xs text-slate-600">
-            {props.isGeneratingAudio ? 'Stop' : props.player.playing ? 'Stop' : 'Listen'}
+            {props.isGeneratingAudio ? 'Loading...' : props.player.playing ? 'Stop' : 'Listen'}
           </P>
         </Button>
       </View>

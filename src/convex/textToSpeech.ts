@@ -15,22 +15,15 @@ export const convertTextToSpeech = action({
     text: v.string(),
     voiceId: v.optional(v.string()),
   },
-  returns: v.string(), // Returns base64 encoded audio
-  handler: async (ctx, args) => {
+  returns: v.string(),
+  handler: async (_ctx, args) => {
     try {
-      // Use provided voiceId or default voice
       const voiceId = 'EkK5I93UQWFDigLMpZcX';
 
       const audioStream = await client.textToSpeech.stream(voiceId, {
         text: args.text,
         modelId: 'eleven_flash_v2_5',
         outputFormat: 'mp3_44100_128',
-        voiceSettings: {
-          stability: 0.5,
-          similarityBoost: 0.8,
-          useSpeakerBoost: true,
-          speed: 1.0,
-        },
       });
 
       const chunks: Array<Buffer> = [];
