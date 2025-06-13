@@ -1,5 +1,5 @@
 import type { Message } from 'ai';
-import type { AudioPlayer } from 'expo-audio';
+import { AudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Volume2, VolumeX } from 'lucide-react-native';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
@@ -33,7 +33,8 @@ interface MessageProps {
 
 export function AIMessage(props: MessageProps) {
   const [visibleText] = useSmoothText(props.message.content);
-
+  const playerStatus = useAudioPlayerStatus(props.player);
+  const isPlaying = playerStatus.playing;
   if (!visibleText) {
     return null;
   }
@@ -47,22 +48,22 @@ export function AIMessage(props: MessageProps) {
           size="sm"
           className="mt-2 self-start"
           onPress={() => {
-            if (props.isGeneratingAudio || props.player.playing) {
-              props.stopAudio();
+            if (isPlaying) {
+              props.player.pause();
             } else {
               props.playAudio(props.message.content);
             }
           }}>
           {props.isGeneratingAudio ? (
             <LoaderIcon className="animate-spin" />
-          ) : props.player.playing ? (
+          ) : isPlaying ? (
             <VolumeX size={16} />
           ) : (
             <Volume2 size={16} />
           )}
 
           <P className="text-xs text-slate-600">
-            {props.isGeneratingAudio ? 'Loading...' : props.player.playing ? 'Stop' : 'Listen'}
+            {props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}
           </P>
         </Button>
       </View>

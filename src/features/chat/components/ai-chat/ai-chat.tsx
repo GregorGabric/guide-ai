@@ -3,7 +3,7 @@ import type { LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { LegendList } from '@legendapp/list';
 import { useMutation as useTanstackMutation } from '@tanstack/react-query';
 import { useAction, useMutation } from 'convex/react';
-import { useAudioPlayer } from 'expo-audio';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useSQLiteContext } from 'expo-sqlite';
 import { fetch as expoFetch } from 'expo/fetch';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -50,6 +50,9 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const player = useAudioPlayer();
 
+  const playerStatus = useAudioPlayerStatus(player);
+  const isPlaying = playerStatus.playing;
+
   const attractionId = attraction?.id ?? '';
 
   const { messages, error, append, status } = useChat({
@@ -79,7 +82,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   // Auto-generate initial AI response when component loads with no messages
   useEffect(() => {
     if (userMessages.length === 0 && attraction && messages.length === 0) {
-      // This will trigger the AI to generate a response automatically
       void append({
         role: 'user',
         content: `Tell me about ${attraction.displayName?.text || attraction.name || 'this place'}`,
@@ -88,15 +90,14 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   }, [attraction, userMessages.length, messages.length, append]);
 
   const stopAudio = useCallback(() => {
-    // Stop audio playback if playing - with safety checks
     try {
-      if (player.playing) {
+      if (isPlaying) {
         player.pause();
       }
     } catch (error) {
       console.warn('Failed to pause audio:', error);
     }
-  }, [player]);
+  }, [player, isPlaying]);
 
   const toggleAudio = useCallback(() => {
     try {
@@ -105,7 +106,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         return;
       }
 
-      if (player.playing) {
+      if (isPlaying) {
         player.pause();
       } else {
         player.play();
@@ -113,7 +114,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     } catch (error) {
       console.warn('Failed to toggle audio:', error);
     }
-  }, [player]);
+  }, [player, isPlaying]);
 
   const db = useSQLiteContext();
   const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
@@ -174,14 +175,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
   const handleScrollBeginDrag = () => {
     setIsUserScrolling(true);
-    // Stop audio when user starts scrolling (event-driven)
-    try {
-      if (player.playing) {
-        stopAudio();
-      }
-    } catch (error) {
-      console.warn('Failed to stop audio on scroll:', error);
-    }
   };
 
   const handleScrollEndDrag = () => {
@@ -298,7 +291,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
           <Button
             onPress={() => {
               try {
-                if (isGeneratingAudio || player.playing) {
+                if (isGeneratingAudio || isPlaying) {
                   stopAudio();
                 } else if (lastAiMessage) {
                   void playAudio(lastAiMessage.content);
@@ -311,7 +304,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             <AudioLinesIcon size={16} />
             {isGeneratingAudio ? (
               <LoaderIcon className="animate-spin" />
-            ) : player.playing ? (
+            ) : isPlaying ? (
               <Text>Stop</Text>
             ) : (
               <Text>Read it</Text>
