@@ -261,7 +261,16 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         </View>
       );
     },
-    [drivenIds, isGeneratingAudio, isUserScrolling, playAudio, player, stopAudio, toggleAudio]
+    [
+      drivenIds,
+      isGeneratingAudio,
+      isUserScrolling,
+      listData,
+      playAudio,
+      player,
+      stopAudio,
+      toggleAudio,
+    ]
   );
 
   if (error) {
@@ -273,6 +282,9 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       <LegendList
         ref={listRef}
         data={listData}
+        onLoad={() => {
+          listRef.current?.scrollToEnd();
+        }}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         className="flex-1"
