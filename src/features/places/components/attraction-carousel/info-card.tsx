@@ -27,7 +27,8 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) =
       }}
       onPressOut={() => {
         scale.set(withTiming(1));
-      }}>
+      }}
+    >
       <BlurView
         experimentalBlurMethod="dimezisBlurView"
         tint="extraLight"
@@ -41,10 +42,12 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) =
             justifyContent: 'center',
           },
         ]}
-        className="h-20 flex-row items-center gap-5 overflow-hidden rounded-2xl border border-neutral-200 px-5 py-3">
+        className="h-20 flex-row items-center gap-5 overflow-hidden rounded-2xl border border-neutral-200 px-5 py-3"
+      >
         <View
           className="aspect-square h-full items-center justify-center rounded-xl bg-neutral-800"
-          style={styles.borderCurve}>
+          style={styles.borderCurve}
+        >
           <Text className="font-semibold text-stone-300">{place.id}</Text>
         </View>
         <View className="flex-1 gap-2">

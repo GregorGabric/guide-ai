@@ -75,6 +75,7 @@ export default function MapScreen() {
     if (selectedAttraction?.id === attraction.id) {
       // Same attraction - just open/focus the sheet without animating camera
       sheetRef.current?.present();
+
       return;
     }
 
@@ -115,17 +116,20 @@ export default function MapScreen() {
                 shadowOpacity: 0.1,
                 shadowRadius: 16,
                 elevation: 4,
-              }}>
+              }}
+            >
               <Zap size={28} color="#EF4444" strokeWidth={2.5} />
             </View>
             <Text
               className="font-quicksand-bold text-text mb-3 text-center text-xl"
-              style={{ letterSpacing: -0.3 }}>
+              style={{ letterSpacing: -0.3 }}
+            >
               {permissionDenied ? 'Location Permission Required' : 'Something went wrong'}
             </Text>
             <Text
               className="text-text-tertiary font-quicksand max-w-sm text-center text-sm"
-              style={{ letterSpacing: 0.1 }}>
+              style={{ letterSpacing: 0.1 }}
+            >
               {errorMsg}
             </Text>
           </View>
@@ -143,10 +147,12 @@ export default function MapScreen() {
               onPress={() => {
                 requestUserLocation();
               }}
-              activeOpacity={0.9}>
+              activeOpacity={0.9}
+            >
               <Text
                 className="font-quicksand-medium text-center text-white"
-                style={{ letterSpacing: 0.2 }}>
+                style={{ letterSpacing: 0.2 }}
+              >
                 Try Again
               </Text>
             </TouchableOpacity>
@@ -164,10 +170,12 @@ export default function MapScreen() {
                 onPress={() => {
                   void Linking.openSettings();
                 }}
-                activeOpacity={0.9}>
+                activeOpacity={0.9}
+              >
                 <Text
                   className="text-text font-quicksand-medium text-center"
-                  style={{ letterSpacing: 0.2 }}>
+                  style={{ letterSpacing: 0.2 }}
+                >
                   <Settings size={16} color="#6366F1" /> Settings
                 </Text>
               </TouchableOpacity>
@@ -192,17 +200,20 @@ export default function MapScreen() {
                 shadowOpacity: 0.1,
                 shadowRadius: 16,
                 elevation: 4,
-              }}>
+              }}
+            >
               <Navigation size={28} color="#F59E0B" strokeWidth={2.5} />
             </View>
             <Text
               className="font-quicksand-bold text-text mb-3 text-center text-xl"
-              style={{ letterSpacing: -0.3 }}>
+              style={{ letterSpacing: -0.3 }}
+            >
               Location Required
             </Text>
             <Text
               className="text-text-tertiary font-quicksand max-w-sm text-center text-sm"
-              style={{ letterSpacing: 0.1 }}>
+              style={{ letterSpacing: 0.1 }}
+            >
               Please enable location services to discover amazing places around you.
             </Text>
           </View>
@@ -228,13 +239,15 @@ export default function MapScreen() {
           inset: 0,
         }}
         showsBuildings
-        showsUserLocation>
+        showsUserLocation
+      >
         <AnimatedMapMarker
           coordinate={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           }}
-          title="Your Location">
+          title="Your Location"
+        >
           <Animated.View className="relative">
             <View className="bg-primary/20 absolute inset-0 h-12 w-12 rounded-full" />
             <View className="border-3 h-10 w-10 items-center justify-center rounded-full border-white bg-primary">

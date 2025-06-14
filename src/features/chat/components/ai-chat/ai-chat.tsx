@@ -221,7 +221,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   }, [messages, userMessages.length, attraction]);
 
   const renderItem = useCallback(
-    ({ item }: LegendListRenderItemProps<MessageItem>) => {
+    ({ item, index }: LegendListRenderItemProps<MessageItem>) => {
       if (item.type === 'placeholder') {
         return (
           <View className="mb-4 items-start px-4">
@@ -234,9 +234,14 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
       const message = { id: item.id, role: item.role, content: item.content };
 
+      const nextItem = listData.at(index + 1);
+      const isNextUserMessage = nextItem?.role === 'user' && nextItem.type === 'message';
+
       return (
         <View className="px-4">
-          {item.role === 'user' && <UserMessage message={message} />}
+          {item.role === 'user' && (
+            <UserMessage message={message} isNextUserMessage={isNextUserMessage} />
+          )}
           {item.role === 'assistant' && (
             <AIMessage
               scrollViewRef={scrollViewRef}
@@ -285,7 +290,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
           <Button
             onPress={() => {
               void clearMessages();
-            }}>
+            }}
+          >
             <Text>Clear</Text>
           </Button>
           <Button
@@ -300,7 +306,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
                 console.warn('Failed to handle audio button press:', error);
               }
             }}
-            disabled={!lastAiMessage}>
+            disabled={!lastAiMessage}
+          >
             <AudioLinesIcon size={16} />
             {isGeneratingAudio ? (
               <LoaderIcon className="animate-spin" />
