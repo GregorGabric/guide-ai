@@ -1,7 +1,8 @@
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
+import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
-import { Navigation, Settings, Zap } from 'lucide-react-native';
+import { CameraIcon, LocateIcon, MapIcon, Navigation, Settings, Zap } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
@@ -9,6 +10,7 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/src/components/header';
 import LoadingOverlay from '~/src/components/loading-overlay';
+import { Button } from '~/src/components/ui/button';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
 import { Camera } from '~/src/features/camera/camera';
@@ -276,7 +278,23 @@ export default function MapScreen() {
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
-        />
+        >
+          <BlurView
+            experimentalBlurMethod="dimezisBlurView"
+            tint="prominent"
+            className="mx-auto w-min flex-row items-center justify-center gap-4 overflow-hidden rounded-full border bg-background px-4 py-2"
+          >
+            <View>
+              <MapIcon />
+            </View>
+            <Button variant="primary" className="native:rounded-full" size="icon">
+              <LocateIcon color="#fff" />
+            </Button>
+            <View>
+              <CameraIcon />
+            </View>
+          </BlurView>
+        </AttractionCarousel>
       )}
 
       {selectedAttraction && (

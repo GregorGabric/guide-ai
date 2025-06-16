@@ -47,7 +47,7 @@ export const AttractionCarousel = ({
       className="absolute bottom-0 mt-4 w-full gap-3"
       style={{ paddingBottom: paddingBottom }}
     >
-      {children}
+      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
       <Animated.ScrollView
         className="flex-1"
         horizontal
@@ -76,7 +76,8 @@ export const AttractionCarousel = ({
           />
         ))}
       </Animated.ScrollView>
-      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
+
+      {children}
     </View>
   );
 };
