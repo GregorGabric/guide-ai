@@ -8,12 +8,14 @@ import { Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import Header from '~/src/components/header';
 import LoadingOverlay from '~/src/components/loading-overlay';
 import { Button } from '~/src/components/ui/button';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import { Camera } from '~/src/features/camera/camera';
+import { CameraView } from '~/src/features/camera/camera';
+// import { Camera } from '~/src/features/camera/camera';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
 import { useLocation } from '~/src/features/maps/hooks/useLocation';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
@@ -24,7 +26,6 @@ import { currentLocation as getCurrentLocation } from '~/src/services/queries';
 const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
 
 export default function MapScreen() {
-  // const tabBarHeight = useBottomTabBarHeight();
   const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
 
   const [selectedAttraction, setSelectedAttraction] = useState<
@@ -53,6 +54,9 @@ export default function MapScreen() {
   const errorMsg = locationData?.error;
   const permissionDenied = locationData?.status === Location.PermissionStatus.DENIED;
 
+  const device = useCameraDevice('back');
+  const { requestPermission, hasPermission } = useCameraPermission();
+  const [open, setOpen] = useState(false);
   // Centralized camera animation function with consistent parameters
   const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
     if (mapRef.current) {
@@ -271,7 +275,8 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
-      <Camera />
+      <CameraView isOpen={open} setIsOpen={setOpen} onPhotoTaken={() => {}} />
+
       {data && (
         <AttractionCarousel
           data={data}
@@ -290,9 +295,25 @@ export default function MapScreen() {
             <Button variant="primary" className="native:rounded-full" size="icon">
               <LocateIcon color="#fff" />
             </Button>
-            <View>
+            <Button
+              className="native:rounded-full"
+              size={'icon'}
+              variant={'plain'}
+              onPress={async () => {
+                if (!hasPermission) {
+                  const result = await requestPermission();
+                  if (result) {
+                    setOpen(true);
+                  } else {
+                    console.log('Permission denied');
+                  }
+                  return;
+                }
+                setOpen(true);
+              }}
+            >
               <CameraIcon />
-            </View>
+            </Button>
           </BlurView>
         </AttractionCarousel>
       )}
