@@ -1,14 +1,6 @@
 import { v } from 'convex/values';
-import { internalMutation, internalQuery, query } from './_generated/server';
+import { internalMutation } from './_generated/server';
 import { placesSchema } from './schema';
-
-// const args = {
-//   latitude: v.number(),
-//   longitude: v.number(),
-//   radius: v.optional(v.number()),
-//   maxResults: v.optional(v.number()),
-//   includedTypes: v.optional(v.array(v.string())),
-// };
 
 export const savePlacesData = internalMutation({
   args: placesSchema,
@@ -50,46 +42,3 @@ export const savePlacesData = internalMutation({
     return id;
   },
 });
-
-export const getPlaces = query({
-  args: {
-    latitude: v.number(),
-    longitude: v.number(),
-    radius: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const { latitude, longitude, radius } = args;
-    const location = `place-${latitude},${longitude},${radius}`;
-
-    const result = await ctx.db
-      .query('place')
-      .filter((q) => q.eq('name', location))
-      .first();
-
-    return result?.places?.places ?? [];
-  },
-});
-
-export const getCachedPlaces = internalQuery({
-  args: {
-    latitude: v.number(),
-    longitude: v.number(),
-    radius: v.number(),
-  },
-  returns: v.union(placesSchema, v.null()),
-  handler: async (ctx, args) => {
-    const locationKey = `${args.latitude},${args.longitude},${args.radius}`;
-    const result = await ctx.db
-      .query('place')
-      .filter((q) => q.eq('name', locationKey))
-      .first();
-
-    if (result) {
-      return result.places;
-    }
-
-    return null;
-  },
-});
-
-export type GetCachedPlacesReturn = (typeof placesSchema)['type'];

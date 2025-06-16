@@ -11,6 +11,7 @@ import Header from '~/src/components/header';
 import LoadingOverlay from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
+import { Camera } from '~/src/features/camera/camera';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
 import { useLocation } from '~/src/features/maps/hooks/useLocation';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
@@ -268,6 +269,7 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
+      <Camera />
       {data && (
         <AttractionCarousel
           data={data}

@@ -1,11 +1,10 @@
 'use node';
 
 import { v } from 'convex/values';
-import { internal } from './_generated/api';
 import { action } from './_generated/server';
-import type { GetCachedPlacesReturn } from './places';
 import { placesSchema } from './schema';
 
+const API_KEY = process.env.PLACES_API_KEY;
 export const getNearbyPlaces = action({
   args: {
     latitude: v.number(),
@@ -23,30 +22,9 @@ export const getNearbyPlaces = action({
       radius = 5000,
       maxResults = 20,
       // includedTypes = ['tourist_attraction'],
-      forceRefresh = false,
     } = args;
 
-    const API_KEY = process.env.PLACES_API_KEY;
     const searchParams = { latitude, longitude, radius };
-
-    // Check if we have cached data (unless forcing refresh)
-    if (!forceRefresh) {
-      try {
-        const cached = await ctx.runQuery(internal.places.getCachedPlaces, searchParams);
-
-        const typeCached = cached as GetCachedPlacesReturn | null;
-
-        if (typeCached) {
-          return {
-            places: typeCached.places,
-            searchParams,
-          };
-        }
-      } catch (error) {
-        // Continue to fetch fresh data if cache fails
-        console.warn('Failed to get cached places:', error);
-      }
-    }
 
     if (!API_KEY) {
       throw new Error('Google Places API key not configured');
@@ -95,11 +73,28 @@ export const getNearbyPlaces = action({
 
     const apiResponse = (await response.json()) as (typeof placesSchema)['type'];
 
-    // await ctx.runMutation(internal.places.savePlacesData, {
-    //   places: apiResponse.places,
-    //   searchParams,
-    // });
-
     return { places: apiResponse.places ?? [], searchParams };
+  },
+});
+
+export const getPlacesPhotoUrl = action({
+  args: {
+    photoName: v.string(),
+  },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    if (!API_KEY) {
+      throw new Error('Google Places API key not configured');
+    }
+
+    const url = `https://places.googleapis.com/v1/${args.photoName}/media?key=${API_KEY}&maxWidthPx=200`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.url;
   },
 });

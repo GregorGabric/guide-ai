@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from 'react';
 import { startTransition, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -25,7 +26,8 @@ export const AttractionCarousel = ({
   onPressOut,
   onAttractionPress,
   setSelectedAttraction,
-}: AttractionCarouselProps) => {
+  children,
+}: PropsWithChildren<AttractionCarouselProps>) => {
   const scrollOffsetX = useSharedValue(0);
   const [width, setWidth] = useState(0);
 
@@ -43,9 +45,9 @@ export const AttractionCarousel = ({
         setWidth(event.nativeEvent.layout.width);
       }}
       className="absolute bottom-0 mt-4 w-full gap-3"
-      style={{ paddingBottom: paddingBottom }}>
-      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
-
+      style={{ paddingBottom: paddingBottom }}
+    >
+      {children}
       <Animated.ScrollView
         className="flex-1"
         horizontal
@@ -58,7 +60,8 @@ export const AttractionCarousel = ({
           runOnJS(onPressOut)(nextLocation);
         }}
         onScroll={scrollHandler}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+      >
         {data.map((place) => (
           <InfoItem
             width={width}
@@ -73,6 +76,7 @@ export const AttractionCarousel = ({
           />
         ))}
       </Animated.ScrollView>
+      <PaginationDots numberOfItems={data.length} scrollOffsetX={scrollOffsetX} />
     </View>
   );
 };
