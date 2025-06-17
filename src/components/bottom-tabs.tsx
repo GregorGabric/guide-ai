@@ -16,7 +16,7 @@ export function BottomTabs({ setOpen }: BottomTabsProps) {
     <BlurView
       experimentalBlurMethod="dimezisBlurView"
       tint="prominent"
-      className="mx-auto w-min flex-row items-center justify-center gap-4 overflow-hidden rounded-full border bg-background px-4 py-2"
+      className="mx-auto w-min flex-row items-center justify-center gap-4 overflow-hidden rounded-full border border-background bg-background px-4 py-2"
     >
       <View>
         <MapIcon />

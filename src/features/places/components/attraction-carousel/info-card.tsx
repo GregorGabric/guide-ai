@@ -53,7 +53,7 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) =
             justifyContent: 'center',
           },
         ]}
-        className="h-32 flex-row items-center gap-5 overflow-hidden rounded-2xl border border-neutral-200 px-5 py-3"
+        className="h-32 flex-row items-center gap-5 overflow-hidden rounded-2xl border border-background px-5 py-3"
       >
         <View
           className="aspect-square h-full items-center justify-center rounded-xl "

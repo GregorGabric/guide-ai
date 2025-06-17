@@ -4,8 +4,8 @@ import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
 import { XIcon } from 'lucide-react-native';
-import type { PropsWithChildren } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PropsWithChildren, RefObject } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Camera } from 'react-native-vision-camera';
@@ -32,20 +32,15 @@ function AnalysisResultSheet({
   sheetRef,
 }: {
   analysisText: string;
-  sheetRef: React.RefObject<BottomSheetModal | null>;
+  sheetRef: RefObject<BottomSheetModal | null>;
 }) {
   const insets = useSafeAreaInsets();
   const snapPoints = ['50%', '80%'];
-
-  const handleSheetChanges = useCallback((index: number) => {
-    // Sheet handles its own closing
-  }, []);
 
   return (
     <Sheet
       ref={sheetRef}
       snapPoints={snapPoints}
-      onChange={handleSheetChanges}
       enablePanDownToClose
       enableBlurKeyboardOnGesture
       enableOverDrag={false}
