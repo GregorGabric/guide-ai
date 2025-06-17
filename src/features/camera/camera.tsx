@@ -1,11 +1,13 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
 import { XIcon } from 'lucide-react-native';
 import type { PropsWithChildren } from 'react';
-import { useEffect, useRef } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Camera } from 'react-native-vision-camera';
 import {
   useCameraDevice,
@@ -13,16 +15,79 @@ import {
   Camera as VisionCamera,
 } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
+import { Sheet } from '~/src/components/ui/sheet';
+import { H4, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { cn } from '~/src/lib/utils';
+import { colors } from '~/src/utils/theme';
+
 interface CameraViewProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
+// Analysis Result Sheet Component
+function AnalysisResultSheet({
+  analysisText,
+  sheetRef,
+}: {
+  analysisText: string;
+  sheetRef: React.RefObject<BottomSheetModal | null>;
+}) {
+  const insets = useSafeAreaInsets();
+  const snapPoints = ['50%', '80%'];
+
+  const handleSheetChanges = useCallback((index: number) => {
+    // Sheet handles its own closing
+  }, []);
+
+  return (
+    <Sheet
+      ref={sheetRef}
+      snapPoints={snapPoints}
+      onChange={handleSheetChanges}
+      enablePanDownToClose
+      enableBlurKeyboardOnGesture
+      enableOverDrag={false}
+      enableDynamicSizing={false}
+      detached
+      bottomInset={insets.bottom}
+      topInset={insets.top}
+      style={{
+        borderCurve: 'continuous',
+        marginInline: insets.left + 8,
+      }}
+      backgroundStyle={{
+        borderRadius: 47 - (insets.left + 12),
+        backgroundColor: colors['card-background'],
+      }}
+    >
+      <View className="flex-1 px-4">
+        <View className="mb-6">
+          <H4 className="mb-4">Analysis Result</H4>
+        </View>
+
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+        >
+          <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
+            <P className="font-medium leading-7 text-slate-700">{analysisText}</P>
+          </View>
+        </ScrollView>
+      </View>
+    </Sheet>
+  );
+}
+
 export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewProps>) {
   const device = useCameraDevice('back');
   const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
+
+  // State for analysis sheet
+  const [analysisResult, setAnalysisResult] = useState('');
+  const analysisSheetRef = useRef<BottomSheetModal>(null);
 
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -64,16 +129,9 @@ export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewPr
 
         console.log('Analysis result:', analysis);
 
-        // Method 2: Alternative - Upload to Convex storage (commented out)
-        // const response = await fetch(photo.path);
-        // const blob = await response.blob();
-        // const storageId = await generateUploadUrl.mutateAsync();
-        // await fetch(storageId.uploadUrl, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': blob.type },
-        //   body: blob,
-        // });
-        // Then pass storageId to your action instead of base64
+        // Show the analysis result sheet
+        setAnalysisResult(analysis || 'No analysis available');
+        analysisSheetRef.current?.present();
       }
     } catch (error) {
       console.error('Error taking photo:', error);
@@ -117,43 +175,48 @@ export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewPr
   }
 
   return (
-    <View
-      className={cn('absolute inset-0 z-20', {
-        'opacity-100': isOpen,
-        'opacity-0': !isOpen,
-        hidden: !isOpen,
-      })}
-    >
-      <VisionCamera
-        video
-        ref={camera}
-        style={{
-          flex: 1,
-        }}
-        device={device}
-        isActive={isOpen}
-        photo
-        enableLocation={locationPermissionStatus.granted}
-      />
+    <>
+      <View
+        className={cn('absolute inset-0 z-20', {
+          'opacity-100': isOpen,
+          'opacity-0': !isOpen,
+          hidden: !isOpen,
+        })}
+      >
+        <VisionCamera
+          video
+          ref={camera}
+          style={{
+            flex: 1,
+          }}
+          device={device}
+          isActive={isOpen}
+          photo
+          enableLocation={locationPermissionStatus.granted}
+        />
 
-      <View className="absolute inset-0 flex-row items-center justify-between bg-transparent p-4">
-        <View className="flex-row items-center justify-start">
-          <Button onPress={handleCloseCamera} variant="secondary" size="icon">
-            <XIcon color="#fff" />
-          </Button>
-        </View>
+        <View className="absolute inset-0 flex-row items-center justify-between bg-transparent p-4">
+          <View className="flex-row items-center justify-start">
+            <Button onPress={handleCloseCamera} variant="secondary" size="icon">
+              <XIcon color="#fff" />
+            </Button>
+          </View>
 
-        <View className="flex-row items-center justify-center">
-          <Button
-            onPress={handleCapturePhoto}
-            variant="primary"
-            size="lg"
-            className="rounded-full bg-white p-4"
-          >
-            <Text className="text-2xl">📷</Text>
-          </Button>
+          <View className="flex-row items-center justify-center">
+            <Button
+              onPress={handleCapturePhoto}
+              variant="primary"
+              size="lg"
+              className="rounded-full bg-white p-4"
+            >
+              <Text className="text-2xl">📷</Text>
+            </Button>
+          </View>
         </View>
       </View>
-    </View>
+
+      {/* Analysis Result Sheet */}
+      <AnalysisResultSheet analysisText={analysisResult} sheetRef={analysisSheetRef} />
+    </>
   );
 }
