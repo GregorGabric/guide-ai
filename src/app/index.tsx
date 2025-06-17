@@ -1,23 +1,19 @@
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
-import { BlurView } from 'expo-blur';
-import * as Location from 'expo-location';
-import { CameraIcon, LocateIcon, MapIcon, Navigation, Settings, Zap } from 'lucide-react-native';
+import { Navigation } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
+import { BottomTabs } from '~/src/components/bottom-tabs';
 import Header from '~/src/components/header';
 import LoadingOverlay from '~/src/components/loading-overlay';
-import { Button } from '~/src/components/ui/button';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
 import { CameraView } from '~/src/features/camera/camera';
 // import { Camera } from '~/src/features/camera/camera';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
-import { useLocation } from '~/src/features/maps/hooks/useLocation';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
@@ -50,14 +46,8 @@ export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
   const sheetRef = useSheetRef();
 
-  const { data: locationData, mutate: requestUserLocation } = useLocation();
-  const errorMsg = locationData?.error;
-  const permissionDenied = locationData?.status === Location.PermissionStatus.DENIED;
-
-  const device = useCameraDevice('back');
-  const { requestPermission, hasPermission } = useCameraPermission();
   const [open, setOpen] = useState(false);
-  // Centralized camera animation function with consistent parameters
+
   const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
     if (mapRef.current) {
       mapRef.current.animateCamera(
@@ -106,91 +96,7 @@ export default function MapScreen() {
   };
 
   if (isLocationPending) {
-    return <LoadingOverlay message="🗺️ Discovering amazing places nearby..." />;
-  }
-
-  if (errorMsg) {
-    return (
-      <View className="flex-1 bg-background">
-        <Header title="Discover" showBackButton={false} />
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="mb-10 items-center">
-            <View
-              className="bg-error/8 mb-6 h-20 w-20 items-center justify-center rounded-3xl"
-              style={{
-                shadowColor: '#EF4444',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 16,
-                elevation: 4,
-              }}
-            >
-              <Zap size={28} color="#EF4444" strokeWidth={2.5} />
-            </View>
-            <Text
-              className="font-quicksand-bold text-text mb-3 text-center text-xl"
-              style={{ letterSpacing: -0.3 }}
-            >
-              {permissionDenied ? 'Location Permission Required' : 'Something went wrong'}
-            </Text>
-            <Text
-              className="text-text-tertiary font-quicksand max-w-sm text-center text-sm"
-              style={{ letterSpacing: 0.1 }}
-            >
-              {errorMsg}
-            </Text>
-          </View>
-
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="border-primary/20 flex-1 rounded-2xl border bg-primary px-6 py-4"
-              style={{
-                shadowColor: '#6366F1',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
-                shadowRadius: 16,
-                elevation: 6,
-              }}
-              onPress={() => {
-                requestUserLocation();
-              }}
-              activeOpacity={0.9}
-            >
-              <Text
-                className="font-quicksand-medium text-center text-white"
-                style={{ letterSpacing: 0.2 }}
-              >
-                Try Again
-              </Text>
-            </TouchableOpacity>
-
-            {permissionDenied && (
-              <TouchableOpacity
-                className="flex-1 rounded-2xl border border-gray-200 bg-white px-6 py-4"
-                style={{
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 8,
-                  elevation: 3,
-                }}
-                onPress={() => {
-                  void Linking.openSettings();
-                }}
-                activeOpacity={0.9}
-              >
-                <Text
-                  className="text-text font-quicksand-medium text-center"
-                  style={{ letterSpacing: 0.2 }}
-                >
-                  <Settings size={16} color="#6366F1" /> Settings
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
-    );
+    return <LoadingOverlay message="Discovering amazing places nearby..." />;
   }
 
   if (!location) {
@@ -275,7 +181,8 @@ export default function MapScreen() {
           />
         ))}
       </MapView>
-      <CameraView isOpen={open} setIsOpen={setOpen} onPhotoTaken={() => {}} />
+
+      <CameraView isOpen={open} setIsOpen={setOpen} />
 
       {data && (
         <AttractionCarousel
@@ -284,37 +191,7 @@ export default function MapScreen() {
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
         >
-          <BlurView
-            experimentalBlurMethod="dimezisBlurView"
-            tint="prominent"
-            className="mx-auto w-min flex-row items-center justify-center gap-4 overflow-hidden rounded-full border bg-background px-4 py-2"
-          >
-            <View>
-              <MapIcon />
-            </View>
-            <Button variant="primary" className="native:rounded-full" size="icon">
-              <LocateIcon color="#fff" />
-            </Button>
-            <Button
-              className="native:rounded-full"
-              size={'icon'}
-              variant={'plain'}
-              onPress={async () => {
-                if (!hasPermission) {
-                  const result = await requestPermission();
-                  if (result) {
-                    setOpen(true);
-                  } else {
-                    console.log('Permission denied');
-                  }
-                  return;
-                }
-                setOpen(true);
-              }}
-            >
-              <CameraIcon />
-            </Button>
-          </BlurView>
+          <BottomTabs isOpen={open} setOpen={setOpen} />
         </AttractionCarousel>
       )}
 

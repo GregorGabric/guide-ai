@@ -1,34 +1,41 @@
-import { PropsWithChildren, useEffect, useRef } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useMutation } from '@tanstack/react-query';
+import { useAction } from 'convex/react';
+import * as FileSystem from 'expo-file-system';
+import { useForegroundPermissions } from 'expo-location';
+import { XIcon } from 'lucide-react-native';
+import type { PropsWithChildren } from 'react';
+import { useEffect, useRef } from 'react';
+import { Alert, Text, View } from 'react-native';
+import type { Camera } from 'react-native-vision-camera';
 import {
-  Camera,
   useCameraDevice,
   useCameraPermission,
   Camera as VisionCamera,
 } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
-import { useLocation } from '~/src/features/maps/hooks/useLocation';
-
+import { api } from '~/src/convex/_generated/api';
+import { cn } from '~/src/lib/utils';
 interface CameraViewProps {
-  onPhotoTaken: (photo: string) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export function CameraView({
-  children,
-  onPhotoTaken,
-  isOpen,
-  setIsOpen,
-}: PropsWithChildren<CameraViewProps>) {
+export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewProps>) {
   const device = useCameraDevice('back');
-  const { status } = useLocation();
+  const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
+
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
 
+  const analyzeImageAction = useAction(api.image.analyzeImage);
+
+  const analyzeImage = useMutation({
+    mutationFn: analyzeImageAction,
+  });
+
   useEffect(() => {
     if (!hasPermission) {
-      requestPermission().then((granted) => {
+      void requestPermission().then((granted) => {
         if (!granted) {
           Alert.alert('Camera Permission', 'Camera permission is required to use this feature.');
         }
@@ -39,11 +46,34 @@ export function CameraView({
   const handleCapturePhoto = async () => {
     try {
       if (camera.current) {
-        const photo = await camera.current.takePhoto({
-          flash: 'off',
-          enableShutterSound: false,
+        const photo = await camera.current.takeSnapshot({
+          quality: 90,
         });
-        onPhotoTaken(photo.path);
+
+        const base64 = await FileSystem.readAsStringAsync(photo.path, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const analysis = await analyzeImage.mutateAsync({
+          imageBase64: base64,
+          location: {
+            latitude: 0,
+            longitude: 0,
+          },
+        });
+
+        console.log('Analysis result:', analysis);
+
+        // Method 2: Alternative - Upload to Convex storage (commented out)
+        // const response = await fetch(photo.path);
+        // const blob = await response.blob();
+        // const storageId = await generateUploadUrl.mutateAsync();
+        // await fetch(storageId.uploadUrl, {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': blob.type },
+        //   body: blob,
+        // });
+        // Then pass storageId to your action instead of base64
       }
     } catch (error) {
       console.error('Error taking photo:', error);
@@ -55,10 +85,22 @@ export function CameraView({
     setIsOpen(false);
   };
 
+  // TODO: this sucks
+  if (!locationPermissionStatus?.granted) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Location permission is required</Text>
+        <Button onPress={() => requestLocationPermission()} variant="primary">
+          <Text>Grant Permission</Text>
+        </Button>
+      </View>
+    );
+  }
+
   if (!hasPermission) {
     return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>Camera permission is required</Text>
+      <View className="flex-1 items-center justify-center">
+        <Text>Camera permission is required</Text>
         <Button onPress={() => requestPermission()} variant="primary">
           <Text>Grant Permission</Text>
         </Button>
@@ -68,98 +110,50 @@ export function CameraView({
 
   if (!device) {
     return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>No camera device found</Text>
+      <View className="flex-1 items-center justify-center">
+        <Text>No camera device found</Text>
       </View>
     );
   }
 
   return (
-    <>
-      {isOpen && (
-        <View style={styles.cameraContainer}>
-          <VisionCamera
-            ref={camera}
-            style={styles.camera}
-            device={device}
-            isActive={isOpen}
-            photo={true}
-            enableLocation={status === 'success'}
-          />
+    <View
+      className={cn('absolute inset-0 z-20', {
+        'opacity-100': isOpen,
+        'opacity-0': !isOpen,
+        hidden: !isOpen,
+      })}
+    >
+      <VisionCamera
+        video
+        ref={camera}
+        style={{
+          flex: 1,
+        }}
+        device={device}
+        isActive={isOpen}
+        photo
+        enableLocation={locationPermissionStatus.granted}
+      />
 
-          <View style={styles.controlsContainer}>
-            <View style={styles.topControls}>
-              <Button onPress={handleCloseCamera} variant="secondary" size="sm">
-                <Text style={styles.buttonText}>✕</Text>
-              </Button>
-            </View>
-
-            <View style={styles.bottomControls}>
-              <Button
-                onPress={handleCapturePhoto}
-                variant="primary"
-                size="lg"
-                style={styles.captureButton}
-              >
-                <Text style={styles.captureButtonText}>📷</Text>
-              </Button>
-            </View>
-          </View>
+      <View className="absolute inset-0 flex-row items-center justify-between bg-transparent p-4">
+        <View className="flex-row items-center justify-start">
+          <Button onPress={handleCloseCamera} variant="secondary" size="icon">
+            <XIcon color="#fff" />
+          </Button>
         </View>
-      )}
-    </>
+
+        <View className="flex-row items-center justify-center">
+          <Button
+            onPress={handleCapturePhoto}
+            variant="primary"
+            size="lg"
+            className="rounded-full bg-white p-4"
+          >
+            <Text className="text-2xl">📷</Text>
+          </Button>
+        </View>
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  cameraContainer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1000,
-  },
-  camera: {
-    flex: 1,
-  },
-  controlsContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: 'transparent',
-  },
-  topControls: {
-    alignItems: 'flex-start',
-    paddingTop: 50,
-  },
-  bottomControls: {
-    alignItems: 'center',
-    paddingBottom: 50,
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 4,
-    borderColor: '#000',
-  },
-  captureButtonText: {
-    fontSize: 32,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  permissionText: {
-    color: '#fff',
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-});

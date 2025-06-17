@@ -10,6 +10,7 @@
 
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
+import type * as image from "../image.js";
 import type * as messages from "../messages.js";
 import type * as places from "../places.js";
 import type * as placesActions from "../placesActions.js";
@@ -33,6 +34,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   http: typeof http;
+  image: typeof image;
   messages: typeof messages;
   places: typeof places;
   placesActions: typeof placesActions;

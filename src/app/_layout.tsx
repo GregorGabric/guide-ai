@@ -2,12 +2,12 @@ import { Sora_400Regular, useFonts } from '@expo-google-fonts/sora';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useForegroundPermissions } from 'expo-location';
 import { SplashScreen, Stack } from 'expo-router';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import '~/global.css';
@@ -42,6 +42,7 @@ export default function RootLayout() {
   const hasMounted = useRef(false);
   const { colorScheme: _colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
+  const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
 
   const [loaded, error] = useFonts({
     Sora_400Regular,
@@ -56,13 +57,13 @@ export default function RootLayout() {
       return;
     }
 
-    if (Platform.OS === 'web') {
-      // Adds the background color to the html element to prevent white background on overscroll.
-      document.documentElement.classList.add('bg-background');
+    if (!locationPermissionStatus?.granted) {
+      void requestLocationPermission();
     }
+
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
-  }, [loaded, error]);
+  }, [loaded, error, locationPermissionStatus?.granted, requestLocationPermission]);
 
   if (!isColorSchemeLoaded || !loaded || error) {
     return null;
