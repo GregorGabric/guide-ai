@@ -53,8 +53,7 @@ export default function MapScreen() {
       mapRef.current.animateCamera(
         {
           altitude: 1000,
-          pitch: 45,
-          heading: 0,
+          pitch: 60,
           center: {
             latitude: attraction.location.latitude,
             longitude: attraction.location.longitude,
@@ -151,6 +150,7 @@ export default function MapScreen() {
           position: 'absolute',
           inset: 0,
         }}
+        showsScale
         showsBuildings
         showsUserLocation
       >
