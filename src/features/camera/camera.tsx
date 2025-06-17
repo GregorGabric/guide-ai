@@ -15,8 +15,8 @@ import {
   Camera as VisionCamera,
 } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
-import { Sheet } from '~/src/components/ui/sheet';
-import { H4, P } from '~/src/components/ui/typography';
+import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
+import { H2, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
@@ -62,17 +62,17 @@ function AnalysisResultSheet({
         backgroundColor: colors['card-background'],
       }}
     >
-      <View className="flex-1 px-4">
+      <View className="flex-1 overflow-clip rounded-3xl px-4 pb-4">
         <View className="mb-6">
-          <H4 className="mb-4">Analysis Result</H4>
+          <H2 className="mb-4">Analysis Result</H2>
         </View>
 
         <ScrollView
-          className="flex-1"
+          className="flex-1 overflow-clip pb-10"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: insets.bottom }}
         >
-          <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
+          <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5 ">
             <P className="font-medium leading-7 text-slate-700">{analysisText}</P>
           </View>
         </ScrollView>
@@ -87,7 +87,7 @@ export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewPr
 
   // State for analysis sheet
   const [analysisResult, setAnalysisResult] = useState('');
-  const analysisSheetRef = useRef<BottomSheetModal>(null);
+  const analysisSheetRef = useSheetRef();
 
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
