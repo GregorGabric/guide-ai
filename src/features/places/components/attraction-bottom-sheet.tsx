@@ -18,9 +18,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
-import { NavigationIcon } from '~/src/lib/icons/navigation-icon';
 
-import { InfoIcon } from 'lucide-react-native';
+import { InfoIcon, NavigationIcon } from 'lucide-react-native';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
@@ -47,12 +46,12 @@ export function AttractionBottomSheet({
   onClose,
   sheetRef,
 }: AttractionBottomSheetProps) {
-  const [activeTab, setActiveTab] = useState('chat');
+  const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
 
   const translateX = useSharedValue(0);
   const gestureProgress = useSharedValue(0);
-  const tabTransition = useSharedValue(activeTab === 'chat' ? 1 : 0);
+  const tabTransition = useSharedValue(activeTab === 'overview' ? 1 : 0);
   const handleSheetChanges = useCallback(
     (index: number) => {
       if (index === -1) {
@@ -73,7 +72,7 @@ export function AttractionBottomSheet({
         sheetRef.current?.expand();
       }
       setActiveTab(newActiveTab);
-      const targetValue = newActiveTab === 'chat' ? 1 : 0;
+      const targetValue = newActiveTab === 'overview' ? 1 : 0;
       tabTransition.set(withTiming(targetValue, { duration: TAB_TRANSITION_DURATION }));
     },
     [sheetRef, tabTransition]
@@ -107,16 +106,16 @@ export function AttractionBottomSheet({
       // Determine if it's a significant horizontal swipe
       if (Math.abs(translationX) > swipeThreshold || Math.abs(velocityX) > velocityThreshold) {
         if (translationX > 0 || velocityX > 0) {
-          // Swipe right - go to next tab (chat)
-          if (activeTab === 'overview') {
-            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-            runOnJS(updateTabTransition)('chat');
-          }
-        } else {
-          // Swipe left - go to previous tab (overview)
+          // Swipe right - go to previous tab (overview)
           if (activeTab === 'chat') {
             runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
             runOnJS(updateTabTransition)('overview');
+          }
+        } else {
+          // Swipe left - go to next tab (chat)
+          if (activeTab === 'overview') {
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            runOnJS(updateTabTransition)('chat');
           }
         }
       }
@@ -202,7 +201,6 @@ export function AttractionBottomSheet({
   });
 
   const distance = getDistance();
-  const priceLevel = getPriceLevel();
 
   return (
     <Sheet
@@ -229,34 +227,36 @@ export function AttractionBottomSheet({
     >
       {attraction && (
         <View className="flex-1 overflow-hidden">
-          <View className="mb-6 px-4">
+          <View className="mb-6 px-8 pt-2">
             <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
 
             {attraction.formattedAddress && (
-              <View className="flex flex-row items-center gap-2 rounded-2xl">
+              <View className="mb-2 flex flex-row items-center gap-2 rounded-2xl">
                 <P className="flex-1 text-base font-medium text-foreground">
                   {attraction.formattedAddress}
                 </P>
               </View>
             )}
+            {distance && (
+              <Badge
+                variant="default"
+                className="flex-row items-center gap-2 self-start rounded-2xl px-4"
+              >
+                <NavigationIcon size={16} />
+                <Text>{distance} away</Text>
+              </Badge>
+            )}
           </View>
 
-          <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1">
+          <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1 px-8">
             <TabsList
               onLayout={onTabsListLayout}
-              className="native:h-10 relative mx-auto mb-6 w-3/5 flex-col rounded-full p-1"
+              className="native:h-10 relative mb-6 w-full rounded-full p-1"
               style={{
                 borderCurve: 'continuous',
               }}
             >
               <View className="z-20 flex flex-row">
-                <TabsTrigger
-                  value="chat"
-                  className="flex-1 flex-row gap-2 rounded-full bg-transparent"
-                >
-                  <MessageCircleIcon size={14} />
-                  <Text className="native:text-sm">AI Chat</Text>
-                </TabsTrigger>
                 <TabsTrigger
                   value="overview"
                   className="flex-1 flex-row gap-2 rounded-full bg-transparent"
@@ -266,6 +266,13 @@ export function AttractionBottomSheet({
                 >
                   <InfoIcon size={14} />
                   <Text className="native:text-sm">Overview</Text>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="chat"
+                  className="flex-1 flex-row gap-2 rounded-full bg-transparent"
+                >
+                  <MessageCircleIcon size={14} />
+                  <Text className="native:text-sm">AI Chat</Text>
                 </TabsTrigger>
               </View>
               <Animated.View
@@ -283,39 +290,9 @@ export function AttractionBottomSheet({
               <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <GestureDetector gesture={panGesture}>
                   <View className="flex-1">
-                    <View className="mb-6 px-4">
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        <View className="flex flex-row gap-2">
-                          {distance && (
-                            <Badge
-                              variant="secondary"
-                              className="flex flex-row items-center gap-2 rounded-2xl px-4"
-                            >
-                              <NavigationIcon size={16} />
-                              <P>{distance} away</P>
-                            </Badge>
-                          )}
-
-                          {priceLevel && (
-                            <Badge
-                              variant="outline"
-                              className={`flex-row items-center ${priceLevel.bgColor} ${priceLevel.borderColor} rounded-2xl border px-4 py-3 `}
-                            >
-                              <Text
-                                className="text-sm font-bold"
-                                style={{ color: priceLevel.color }}
-                              >
-                                {priceLevel.text}
-                              </Text>
-                            </Badge>
-                          )}
-                        </View>
-                      </ScrollView>
-                    </View>
-
                     {/* Enhanced Description */}
                     {attraction.editorialSummary?.text && (
-                      <View className="mb-6 px-4">
+                      <View className="mb-6 ">
                         <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
                           <P className="font-medium leading-7 text-slate-700">
                             {attraction.editorialSummary.text}
@@ -327,7 +304,7 @@ export function AttractionBottomSheet({
                     {/* Enhanced Nearby Landmarks */}
                     {attraction.addressDescriptor?.landmarks &&
                       attraction.addressDescriptor.landmarks.length > 0 && (
-                        <View className="mb-6 px-4">
+                        <View className="mb-6 ">
                           <H4 className="mb-4">Nearby Landmarks</H4>
                           <View className="overflow-hidden rounded-3xl border border-slate-100 bg-white ">
                             {attraction.addressDescriptor.landmarks

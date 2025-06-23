@@ -69,6 +69,10 @@ export function usePermissions(): UsePermissionsReturn {
     try {
       const { granted } = await AudioModule.requestRecordingPermissionsAsync();
 
+      await AudioModule.setAudioModeAsync({
+        playsInSilentMode: true,
+      });
+
       return granted ? 'granted' : 'denied';
     } catch (error) {
       console.error('Error requesting microphone permission:', error);
