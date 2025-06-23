@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
 import { internalMutation, mutation, query } from './_generated/server';
 
 /**
@@ -47,7 +48,7 @@ export const recordVisit = mutation({
     });
 
     // Update stats
-    // await ctx.runMutation(api.visitedPlaces.updateVisitStats);
+    await ctx.runMutation(internal.visitedPlaces.updateVisitStats);
 
     return visitId;
   },
@@ -98,10 +99,8 @@ export const updateVisitStats = internalMutation({
   handler: async (ctx) => {
     const allVisits = await ctx.db.query('visitedPlaces').collect();
 
-    // Calculate unique places
     const uniquePlaceIds = new Set(allVisits.map((visit) => visit.placeId));
 
-    // Calculate unique countries and cities
     const countries = new Set<string>();
     const cities = new Set<string>();
 
@@ -122,7 +121,6 @@ export const updateVisitStats = internalMutation({
       lastUpdated: Date.now(),
     };
 
-    // Check if stats exist and update or create
     const existingStats = await ctx.db.query('visitStats').first();
 
     if (existingStats) {

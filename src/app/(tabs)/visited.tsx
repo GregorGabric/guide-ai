@@ -2,7 +2,8 @@ import { useQuery } from 'convex/react';
 import { Globe } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import MapView, { MapMarker, Region } from 'react-native-maps';
+import type { Region } from 'react-native-maps';
+import MapView, { MapMarker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge } from '~/src/components/ui/badge';
 import { H3, P } from '~/src/components/ui/typography';
@@ -21,6 +22,7 @@ export default function VisitedPlacesScreen() {
 
   // Query visited places and stats
   const visitedPlaces = useQuery(api.visitedPlaces.getVisitedPlaces) ?? [];
+
   const stats = useQuery(api.visitedPlaces.getVisitStats);
 
   // Calculate map region based on visited places
@@ -79,9 +81,6 @@ export default function VisitedPlacesScreen() {
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      {/* <Header title="Visited Places" showBackButton /> */}
-
-      {/* Stats Header */}
       <View className="border-border/20 border-b bg-background px-6 py-4">
         <View className="mb-3 flex-row items-center gap-4">
           <View className="bg-primary/10 h-12 w-12 items-center justify-center rounded-2xl">
