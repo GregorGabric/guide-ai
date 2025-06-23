@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
-import { XIcon } from 'lucide-react-native';
+import { CircleIcon, XIcon } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
@@ -15,6 +15,7 @@ import {
   Camera as VisionCamera,
 } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
+import { ActivityIndicator } from '~/src/components/ui/loading-indicator';
 import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
 import { H2, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
@@ -77,6 +78,7 @@ function AnalysisResultSheet({
 }
 
 export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewProps>) {
+  const insets = useSafeAreaInsets();
   const device = useCameraDevice('back');
   const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
 
@@ -106,9 +108,7 @@ export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewPr
   const handleCapturePhoto = async () => {
     try {
       if (camera.current) {
-        const photo = await camera.current.takeSnapshot({
-          quality: 90,
-        });
+        const photo = await camera.current.takePhoto();
 
         const base64 = await FileSystem.readAsStringAsync(photo.path, {
           encoding: FileSystem.EncodingType.Base64,
@@ -190,24 +190,35 @@ export function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewPr
           enableLocation={locationPermissionStatus.granted}
         />
 
-        <View className="absolute inset-0 flex-row items-center justify-between bg-transparent p-4">
-          <View className="flex-row items-center justify-start">
-            <Button onPress={handleCloseCamera} variant="secondary" size="icon">
-              <XIcon color="#fff" />
-            </Button>
-          </View>
-
-          <View className="flex-row items-center justify-center">
+        <View
+          style={{
+            bottom: insets.bottom + 40,
+          }}
+          className="absolute inset-x-0 flex-row items-center justify-center px-16"
+        >
+          <View className="ml-7 flex-1 items-center justify-center">
             <Button
               onPress={handleCapturePhoto}
               variant="primary"
-              size="lg"
-              className="rounded-full bg-white p-4"
+              disabled={analyzeImage.isPending}
             >
-              <Text className="text-2xl">📷</Text>
+              <CircleIcon size={44} color={colors.background} />
             </Button>
           </View>
+
+          {/* X button positioned on the right */}
+          <Button
+            onPress={handleCloseCamera}
+            variant="secondary"
+            size="icon"
+            disabled={analyzeImage.isPending}
+          >
+            <XIcon color="#fff" />
+          </Button>
         </View>
+
+        {/* Loading Overlay */}
+        {analyzeImage.isPending && <ActivityIndicator />}
       </View>
 
       {/* Analysis Result Sheet */}

@@ -8,7 +8,7 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabs } from '~/src/components/bottom-tabs';
 import Header from '~/src/components/header';
-import LoadingOverlay from '~/src/components/loading-overlay';
+import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
 import { CameraView } from '~/src/features/camera/camera';

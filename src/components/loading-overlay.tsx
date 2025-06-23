@@ -6,7 +6,7 @@ interface LoadingOverlayProps {
   message?: string;
 }
 
-function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
+export function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
@@ -55,7 +55,7 @@ function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
         }),
       ])
     ).start();
-  }, []);
+  }, [dotsAnim, fadeAnim, scaleAnim, spinAnim]);
 
   const rotation = spinAnim.interpolate({
     inputRange: [0, 1],
@@ -65,7 +65,8 @@ function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
   return (
     <Animated.View
       className="absolute inset-0 z-50 items-center justify-center"
-      style={{ opacity: fadeAnim }}>
+      style={{ opacity: fadeAnim }}
+    >
       {/* Minimal background blur */}
       <View className="bg-background/95 absolute inset-0" />
 
@@ -78,15 +79,17 @@ function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
           shadowOpacity: 0.1,
           shadowRadius: 24,
           elevation: 8,
-        }}>
+        }}
+      >
         {/* Simplified loading indicator */}
         <View className="relative mb-6">
           <Animated.View
             className="bg-primary/10 h-16 w-16 items-center justify-center rounded-2xl"
             style={{
               transform: [{ rotate: rotation }],
-            }}>
-            <View className="bg-primary h-12 w-12 items-center justify-center rounded-xl">
+            }}
+          >
+            <View className="h-12 w-12 items-center justify-center rounded-xl bg-primary">
               <Sparkles size={20} color="#FFFFFF" strokeWidth={2.5} />
             </View>
           </Animated.View>
@@ -95,7 +98,8 @@ function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
         {/* Clean loading text */}
         <Text
           className="text-text font-quicksand-bold mb-3 text-center text-lg"
-          style={{ letterSpacing: -0.2 }}>
+          style={{ letterSpacing: -0.2 }}
+        >
           {message}
         </Text>
 
@@ -126,12 +130,11 @@ function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) {
         {/* Minimal description */}
         <Text
           className="text-text-tertiary font-quicksand mt-4 text-center text-sm"
-          style={{ letterSpacing: 0.1 }}>
+          style={{ letterSpacing: 0.1 }}
+        >
           Just a moment...
         </Text>
       </Animated.View>
     </Animated.View>
   );
 }
-
-export default LoadingOverlay;
