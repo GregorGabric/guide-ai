@@ -24,7 +24,7 @@ import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
 import { Text } from '~/src/components/ui/text';
-import { H3, H4, P } from '~/src/components/ui/typography';
+import { H1, H4, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
@@ -237,7 +237,7 @@ export function AttractionBottomSheet({
       {attraction && (
         <View className="flex-1 overflow-hidden">
           <View className="mb-6 px-8 pt-2">
-            <H3 className="mb-3">{attraction.displayName.text || attraction.name}</H3>
+            <H1 className="mb-3">{attraction.displayName.text || attraction.name}</H1>
 
             {attraction.formattedAddress && (
               <View className="mb-2 flex flex-row items-center gap-2 rounded-2xl">

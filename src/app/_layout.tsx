@@ -1,4 +1,4 @@
-import { Sora_400Regular, useFonts } from '@expo-google-fonts/sora';
+import { IBMPlexSans_400Regular, useFonts } from '@expo-google-fonts/ibm-plex-sans';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -44,7 +44,7 @@ export default function RootLayout() {
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
 
   const [loaded, error] = useFonts({
-    Sora_400Regular,
+    IBMPlexSans_400Regular,
   });
 
   useEffect(() => {

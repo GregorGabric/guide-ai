@@ -1,11 +1,12 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useQuery } from 'convex/react';
 import { Globe } from 'lucide-react-native';
-import { useRef, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import type { Region } from 'react-native-maps';
 import MapView, { MapMarker } from 'react-native-maps';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Badge } from '~/src/components/ui/badge';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
 import { H3, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { colors } from '~/src/utils/theme';
@@ -23,7 +24,7 @@ export default function VisitedPlacesScreen() {
   // Query visited places and stats
   const visitedPlaces = useQuery(api.visitedPlaces.getVisitedPlaces) ?? [];
 
-  const stats = useQuery(api.visitedPlaces.getVisitStats);
+  const _stats = useQuery(api.visitedPlaces.getVisitStats);
 
   // Calculate map region based on visited places
   const getMapRegion = () => {
@@ -79,36 +80,55 @@ export default function VisitedPlacesScreen() {
 
   const centerPoint = getCenterPoint();
 
-  return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      <View className="border-border/20 border-b bg-background px-6 py-4">
-        <View className="mb-3 flex-row items-center gap-4">
-          <View className="bg-primary/10 h-12 w-12 items-center justify-center rounded-2xl">
-            <Globe size={20} color={colors.primary} />
-          </View>
-          <View className="flex-1">
-            <H3>Your Travel Journey</H3>
-            <P className="text-muted-foreground">
-              {stats?.totalVisits || 0} visits • {stats?.uniquePlaces || 0} places
-            </P>
-          </View>
-        </View>
+  const insets = useSafeAreaInsets();
 
-        {/* Quick Stats */}
-        <View className="flex-row gap-3">
-          <Badge variant="secondary" className="flex-row items-center gap-2">
-            <Text className="text-sm font-medium">
-              {stats?.countriesVisited.length || 0} Countries
-            </Text>
-          </Badge>
-          <Badge variant="secondary" className="flex-row items-center gap-2">
-            <Text className="text-sm font-medium">{stats?.citiesVisited.length || 0} Cities</Text>
-          </Badge>
+  const sheetRef = useSheetRef();
+
+  // // Present the sheet when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      sheetRef.current?.present();
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [sheetRef]);
+
+  const tabBarHeight = useBottomTabBarHeight();
+
+  return (
+    <View className="flex-1 px-10" style={{ paddingBottom: insets.bottom }}>
+      <Sheet
+        enableDynamicSizing={false}
+        bottomInset={tabBarHeight}
+        topInset={insets.top}
+        style={{
+          borderCurve: 'continuous',
+          borderRadius: 47,
+          // marginInline: insets.left + 8,
+          zIndex: 10,
+        }}
+        ref={sheetRef}
+        enablePanDownToClose
+        enableBlurKeyboardOnGesture
+        enableOverDrag={false}
+        backgroundStyle={{
+          borderRadius: 47,
+          backgroundColor: colors['card-background'],
+        }}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        snapPoints={[tabBarHeight, '85%']}
+        animateOnMount
+      >
+        <View className="flex-1">
+          <Text>Hello</Text>
         </View>
-      </View>
+      </Sheet>
 
       {/* Map View */}
-      <View className="flex-1">
+      <View style={StyleSheet.absoluteFill} className="flex-1">
         <MapView
           ref={mapRef}
           provider={Platform.OS === 'ios' ? undefined : 'google'}
@@ -207,6 +227,6 @@ export default function VisitedPlacesScreen() {
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
