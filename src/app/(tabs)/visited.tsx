@@ -106,7 +106,6 @@ export default function VisitedPlacesScreen() {
         style={{
           borderCurve: 'continuous',
           borderRadius: 47,
-          // marginInline: insets.left + 8,
           zIndex: 10,
         }}
         ref={sheetRef}

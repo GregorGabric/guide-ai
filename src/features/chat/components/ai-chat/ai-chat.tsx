@@ -238,7 +238,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       const isNextUserMessage = nextItem?.role === 'user' && nextItem.type === 'message';
 
       return (
-        <View className="px-4">
+        <View>
           {item.role === 'user' && (
             <UserMessage message={message} isNextUserMessage={isNextUserMessage} />
           )}
@@ -288,7 +288,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         className="flex-1"
-        contentContainerStyle={{ paddingTop: 8, paddingBottom: 16 }}
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: 16, paddingHorizontal: 0 }}
         showsVerticalScrollIndicator={false}
         maintainScrollAtEnd
         alignItemsAtEnd
@@ -297,7 +297,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         onScrollEndDrag={handleScrollEndDrag}
       />
 
-      <View className="mb-4 gap-2 border-t border-slate-200 px-6 py-3">
+      <View className="-mx-8 mb-4 items-stretch gap-2 border-t border-slate-200 px-8 py-3">
         <ScrollView horizontal contentContainerClassName="flex-row gap-2">
           <Button
             onPress={() => {

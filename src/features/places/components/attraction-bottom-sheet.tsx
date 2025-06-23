@@ -260,15 +260,15 @@ export function AttractionBottomSheet({
           <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1 px-8">
             <TabsList
               onLayout={onTabsListLayout}
-              className="native:h-10 relative mb-6 w-full rounded-full p-1"
+              className="native:h-10 native:px-0 relative mb-6 w-full rounded-full"
               style={{
                 borderCurve: 'continuous',
               }}
             >
-              <View className="z-20 flex flex-row">
+              <View className="z-20 flex-row">
                 <TabsTrigger
                   value="overview"
-                  className="flex-1 flex-row gap-2 rounded-full bg-transparent"
+                  className="flex-1 flex-row  gap-2 rounded-full bg-transparent"
                   style={{
                     borderCurve: 'continuous',
                   }}
