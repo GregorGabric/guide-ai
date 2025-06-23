@@ -16,6 +16,7 @@ import type * as places from "../places.js";
 import type * as placesActions from "../placesActions.js";
 import type * as streaming from "../streaming.js";
 import type * as textToSpeech from "../textToSpeech.js";
+import type * as visitedPlaces from "../visitedPlaces.js";
 
 import type {
   ApiFromModules,
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   placesActions: typeof placesActions;
   streaming: typeof streaming;
   textToSpeech: typeof textToSpeech;
+  visitedPlaces: typeof visitedPlaces;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

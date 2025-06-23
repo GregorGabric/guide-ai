@@ -39,21 +39,23 @@ export default function TabLayout() {
             />
           </Animated.View>
         ),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Discover',
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="two"
+      {/* <Tabs.Screen
+        name="visited"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          animation: 'fade',
+          title: 'Visited',
+          tabBarIcon: ({ color }) => <TabBarIcon name="globe" color={color} />,
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

@@ -1,9 +1,9 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 
 import * as Haptics from 'expo-haptics';
 import type React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import { Dimensions, ScrollView, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -29,6 +29,25 @@ import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { colors } from '~/src/utils/theme';
+
+// Helper functions for address parsing
+const extractCountryFromAddress = (address?: string): string | undefined => {
+  if (!address) {
+    return undefined;
+  }
+  // Simple country extraction - in a real app, you'd use a geocoding service
+  const parts = address.split(', ');
+  return parts[parts.length - 1];
+};
+
+const extractCityFromAddress = (address?: string): string | undefined => {
+  if (!address) {
+    return undefined;
+  }
+  // Simple city extraction - in a real app, you'd use a geocoding service
+  const parts = address.split(', ');
+  return parts[parts.length - 2];
+};
 
 interface AttractionBottomSheetProps {
   attraction: PlacesResponse['places'][number] | null;
@@ -130,48 +149,6 @@ export function AttractionBottomSheet({
     return null;
   };
 
-  const getPriceLevel = () => {
-    switch (attraction?.priceLevel) {
-      case 'PRICE_LEVEL_FREE':
-        return {
-          text: 'Free',
-          color: '#10B981',
-          bgColor: 'bg-emerald-50',
-          borderColor: 'border-emerald-200',
-        };
-      case 'PRICE_LEVEL_INEXPENSIVE':
-        return {
-          text: '$',
-          color: '#6366F1',
-          bgColor: 'bg-indigo-50',
-          borderColor: 'border-indigo-200',
-        };
-      case 'PRICE_LEVEL_MODERATE':
-        return {
-          text: '$$',
-          color: '#F59E0B',
-          bgColor: 'bg-amber-50',
-          borderColor: 'border-amber-200',
-        };
-      case 'PRICE_LEVEL_EXPENSIVE':
-        return {
-          text: '$$$',
-          color: '#EF4444',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-        };
-      case 'PRICE_LEVEL_VERY_EXPENSIVE':
-        return {
-          text: '$$$$',
-          color: '#DC2626',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-300',
-        };
-      default:
-        return null;
-    }
-  };
-
   const [tabsListWidth, setTabsListWidth] = useState(0);
 
   const onTabsListLayout = useCallback((event: LayoutChangeEvent) => {
@@ -201,6 +178,38 @@ export function AttractionBottomSheet({
   });
 
   const distance = getDistance();
+
+  // Add visit tracking
+  const recordVisit = useMutation(api.visitedPlaces.recordVisit);
+
+  // Automatically record visit when attraction is opened
+  useEffect(() => {
+    if (attraction) {
+      // Extract location info for visit tracking
+      const placeName = attraction.displayName?.text || attraction.name || 'Unknown Place';
+      const placeAddress = attraction.formattedAddress;
+      const latitude = attraction.location?.latitude;
+      const longitude = attraction.location?.longitude;
+      const placeId = attraction.id;
+
+      if (latitude && longitude && placeId) {
+        // Record the visit automatically
+        recordVisit({
+          placeId,
+          placeName,
+          placeAddress,
+          latitude,
+          longitude,
+          visitType: 'automatic',
+          // Extract country/city from address if available
+          country: extractCountryFromAddress(placeAddress),
+          city: extractCityFromAddress(placeAddress),
+        }).catch((error: unknown) => {
+          console.warn('Failed to record visit:', error);
+        });
+      }
+    }
+  }, [attraction, recordVisit]);
 
   return (
     <Sheet

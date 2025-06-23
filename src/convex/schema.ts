@@ -207,4 +207,32 @@ export default defineSchema({
     .index('by_location', ['searchLatitude', 'searchLongitude', 'searchRadius'])
     .index('by_google_place_id', ['googlePlaceId'])
     .index('by_last_updated', ['lastUpdated']),
+
+  // New tables for visited places tracking
+  visitedPlaces: defineTable({
+    placeId: v.string(), // Google Place ID or custom identifier
+    placeName: v.string(),
+    placeAddress: v.optional(v.string()),
+    latitude: v.number(),
+    longitude: v.number(),
+    visitedAt: v.number(), // timestamp
+    visitType: v.union(v.literal('automatic'), v.literal('manual')),
+    notes: v.optional(v.string()),
+    photos: v.optional(v.array(v.string())), // File IDs for user photos
+    country: v.optional(v.string()),
+    city: v.optional(v.string()),
+  })
+    .index('by_visited_at', ['visitedAt'])
+    .index('by_place_id', ['placeId'])
+    .index('by_visit_type', ['visitType'])
+    .index('by_country', ['country']),
+
+  visitStats: defineTable({
+    totalVisits: v.number(),
+    uniquePlaces: v.number(),
+    countriesVisited: v.array(v.string()),
+    citiesVisited: v.array(v.string()),
+    lastUpdated: v.number(),
+    distanceTraveled: v.optional(v.number()), // in kilometers
+  }),
 });

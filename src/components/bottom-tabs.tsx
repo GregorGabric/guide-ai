@@ -1,5 +1,6 @@
 import { BlurView } from 'expo-blur';
-import { CameraIcon, LocateIcon, MapIcon } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { CameraIcon, Globe, LocateIcon, MapIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useCameraPermission } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
@@ -11,6 +12,7 @@ interface BottomTabsProps {
 
 export function BottomTabs({ setOpen }: BottomTabsProps) {
   const { hasPermission, requestPermission } = useCameraPermission();
+  const router = useRouter();
 
   return (
     <BlurView
@@ -23,6 +25,16 @@ export function BottomTabs({ setOpen }: BottomTabsProps) {
       </View>
       <Button variant="primary" className="native:rounded-full" size="icon">
         <LocateIcon color="#fff" />
+      </Button>
+      <Button
+        className="native:rounded-full"
+        size={'icon'}
+        variant={'plain'}
+        onPress={() => {
+          router.push('/visited');
+        }}
+      >
+        <Globe size={20} color="#666" />
       </Button>
       <Button
         className="native:rounded-full"
