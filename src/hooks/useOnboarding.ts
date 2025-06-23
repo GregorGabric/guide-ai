@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 const ONBOARDING_STORAGE_KEY = 'guide-ai-onboarding';
-const ONBOARDING_VERSION = '1.0.0'; // Update this when onboarding flow changes
+const ONBOARDING_VERSION = '1.0.0';
 
 export interface OnboardingState {
   hasCompletedOnboarding: boolean;

@@ -22,13 +22,11 @@ export function OnboardingWrapper({ children }: OnboardingWrapperProps) {
     isLoading: isPermissionsLoading,
   } = usePermissions();
 
-  // Check permission statuses on mount
   useEffect(() => {
     void checkAllPermissions();
   }, [checkAllPermissions]);
 
   const handleContinue = () => {
-    // Check if all required permissions are granted
     const allRequiredGranted = REQUIRED_PERMISSIONS.every(
       (type) => permissionStatuses[type] === 'granted'
     );
