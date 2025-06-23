@@ -30,14 +30,13 @@ export const AttractionCarousel = ({
 }: PropsWithChildren<AttractionCarouselProps>) => {
   const scrollOffsetX = useSharedValue(0);
   const [width, setWidth] = useState(0);
-
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollOffsetX.set(event.contentOffset.x);
   });
 
   const { bottom: tabBarPaddingBottom } = useSafeAreaInsets();
 
-  const paddingBottom = tabBarPaddingBottom + 12;
+  const paddingBottom = tabBarPaddingBottom;
 
   return (
     <View

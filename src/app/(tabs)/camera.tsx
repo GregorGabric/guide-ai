@@ -1,11 +1,13 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
-import { CircleIcon, XIcon } from 'lucide-react-native';
-import type { PropsWithChildren, RefObject } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { CircleIcon } from 'lucide-react-native';
+import type { RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Camera } from 'react-native-vision-camera';
@@ -19,13 +21,7 @@ import { ActivityIndicator } from '~/src/components/ui/loading-indicator';
 import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
 import { H2, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
-import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
-
-interface CameraViewProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}
 
 // Analysis Result Sheet Component
 function AnalysisResultSheet({
@@ -77,15 +73,14 @@ function AnalysisResultSheet({
   );
 }
 
-export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<CameraViewProps>) {
+export default function CameraAnalysis() {
   const insets = useSafeAreaInsets();
   const device = useCameraDevice('back');
   const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
-
-  // State for analysis sheet
   const [analysisResult, setAnalysisResult] = useState('');
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const analysisSheetRef = useSheetRef();
-
+  const tabBarHeight = useBottomTabBarHeight();
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
 
@@ -94,6 +89,14 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
   const analyzeImage = useMutation({
     mutationFn: analyzeImageAction,
   });
+
+  // Handle tab focus to activate/deactivate camera
+  useFocusEffect(
+    useCallback(() => {
+      setIsCameraActive(true);
+      return () => setIsCameraActive(false);
+    }, [])
+  );
 
   useEffect(() => {
     if (!hasPermission) {
@@ -114,12 +117,20 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
           encoding: FileSystem.EncodingType.Base64,
         });
 
+        // Get location if available, otherwise use default coordinates
+        const location = locationPermissionStatus?.granted
+          ? {
+              latitude: 0, // You might want to get actual location here
+              longitude: 0,
+            }
+          : {
+              latitude: 0,
+              longitude: 0,
+            };
+
         const analysis = await analyzeImage.mutateAsync({
           imageBase64: base64,
-          location: {
-            latitude: 0,
-            longitude: 0,
-          },
+          location,
         });
 
         console.log('Analysis result:', analysis);
@@ -134,26 +145,10 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
     }
   };
 
-  const handleCloseCamera = () => {
-    setIsOpen(false);
-  };
-
-  // TODO: this sucks
-  if (!locationPermissionStatus?.granted) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text>Location permission is required</Text>
-        <Button onPress={() => requestLocationPermission()} variant="primary">
-          <Text>Grant Permission</Text>
-        </Button>
-      </View>
-    );
-  }
-
   if (!hasPermission) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text>Camera permission is required</Text>
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="mb-4 text-white">Camera permission is required</Text>
         <Button onPress={() => requestPermission()} variant="primary">
           <Text>Grant Permission</Text>
         </Button>
@@ -163,59 +158,60 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
 
   if (!device) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text>No camera device found</Text>
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white">No camera device found</Text>
       </View>
     );
   }
 
   return (
     <>
-      <View
-        className={cn('absolute inset-0 z-20', {
-          'opacity-100': isOpen,
-          'opacity-0': !isOpen,
-          hidden: !isOpen,
-        })}
-      >
+      <View className="flex-1">
         <VisionCamera
-          video
           ref={camera}
           style={{
             flex: 1,
           }}
           device={device}
-          isActive={isOpen}
+          isActive
           photo
-          enableLocation={locationPermissionStatus.granted}
+          enableLocation={locationPermissionStatus?.granted}
         />
 
         <View
           style={{
-            bottom: insets.bottom + 40,
+            bottom: insets.bottom + tabBarHeight,
           }}
           className="absolute inset-x-0 flex-row items-center justify-center px-16"
         >
-          <View className="ml-7 flex-1 items-center justify-center">
+          <View className="flex-1 items-center justify-center">
             <Button
               onPress={handleCapturePhoto}
               variant="primary"
               disabled={analyzeImage.isPending}
+              className="h-16 w-16 rounded-full"
             >
               <CircleIcon size={44} color={colors.background} />
             </Button>
           </View>
-
-          {/* X button positioned on the right */}
-          <Button
-            onPress={handleCloseCamera}
-            variant="secondary"
-            size="icon"
-            disabled={analyzeImage.isPending}
-          >
-            <XIcon color="#fff" />
-          </Button>
         </View>
+
+        {/* Optional location permission banner */}
+        {!locationPermissionStatus?.granted && (
+          <View className="absolute inset-x-0 top-0 bg-yellow-500/90 p-3">
+            <Text className="text-center text-sm text-white">
+              Enable location for better analysis results
+            </Text>
+            <Button
+              onPress={() => requestLocationPermission()}
+              variant="secondary"
+              size="sm"
+              className="mt-2"
+            >
+              <Text className="text-xs">Enable Location</Text>
+            </Button>
+          </View>
+        )}
 
         {/* Loading Overlay */}
         {analyzeImage.isPending && <ActivityIndicator />}

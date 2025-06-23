@@ -3,6 +3,7 @@ import { Globe } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge } from '~/src/components/ui/badge';
 import { H3, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
@@ -77,7 +78,7 @@ export default function VisitedPlacesScreen() {
   const centerPoint = getCenterPoint();
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       {/* <Header title="Visited Places" showBackButton /> */}
 
       {/* Stats Header */}
@@ -207,6 +208,6 @@ export default function VisitedPlacesScreen() {
           </View>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

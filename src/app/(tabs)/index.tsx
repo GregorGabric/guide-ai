@@ -6,12 +6,10 @@ import { Platform, Text, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomTabs } from '~/src/components/bottom-tabs';
 import Header from '~/src/components/header';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import { CameraView } from '~/src/features/camera/camera';
 // import { Camera } from '~/src/features/camera/camera';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
@@ -182,8 +180,6 @@ export default function MapScreen() {
         ))}
       </MapView>
 
-      <CameraView isOpen={open} setIsOpen={setOpen} />
-
       {data && (
         <AttractionCarousel
           data={data}
@@ -191,7 +187,7 @@ export default function MapScreen() {
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
         >
-          <BottomTabs isOpen={open} setOpen={setOpen} />
+          {/* <BottomTabs isOpen={open} setOpen={setOpen} /> */}
         </AttractionCarousel>
       )}
 
