@@ -1,60 +1,46 @@
 import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
-import { CameraIcon, Globe, LocateIcon, MapIcon } from 'lucide-react-native';
-import { View } from 'react-native';
-import { useCameraPermission } from 'react-native-vision-camera';
+import { Link } from 'expo-router';
+import { CameraIcon, EarthIcon, NavigationIcon } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '~/src/components/ui/button';
 
 interface BottomTabsProps {
   isOpen: boolean;
   setOpen: (open: boolean) => void;
+  centerMap: () => void;
 }
 
-export function BottomTabs({ setOpen }: BottomTabsProps) {
-  const { hasPermission, requestPermission } = useCameraPermission();
-  const router = useRouter();
+export function BottomTabs({ centerMap }: BottomTabsProps) {
+  const { bottom } = useSafeAreaInsets();
+
+  const paddingBottom = bottom;
 
   return (
     <BlurView
+      className="absolute bottom-0 left-1/2 -translate-x-1/2 flex-row items-center gap-6 overflow-hidden rounded-full border px-4 py-2"
+      style={{ marginBottom: paddingBottom, borderCurve: 'continuous' }}
       experimentalBlurMethod="dimezisBlurView"
-      tint="prominent"
-      className="mx-auto w-min flex-row items-center justify-center gap-4 overflow-hidden rounded-full border border-background bg-background px-4 py-2"
+      tint="dark"
+      intensity={100}
     >
-      <View>
-        <MapIcon />
-      </View>
-      <Button variant="primary" className="native:rounded-full" size="icon">
-        <LocateIcon color="#fff" />
-      </Button>
+      <Link href="/visited" asChild>
+        <Button variant="tonal" className="native:rounded-full size-11" size="icon">
+          <EarthIcon color="#fff" />
+        </Button>
+      </Link>
       <Button
-        className="native:rounded-full"
-        size={'icon'}
-        variant={'plain'}
-        onPress={() => {
-          router.push('/visited');
-        }}
+        variant="primary"
+        className="native:rounded-full size-14"
+        size="icon"
+        onPress={centerMap}
       >
-        <Globe size={20} color="#666" />
+        <NavigationIcon color="#fff" />
       </Button>
-      <Button
-        className="native:rounded-full"
-        size={'icon'}
-        variant={'plain'}
-        onPress={async () => {
-          if (!hasPermission) {
-            const result = await requestPermission();
-            if (result) {
-              setOpen(true);
-            } else {
-              console.log('Permission denied');
-            }
-            return;
-          }
-          setOpen(true);
-        }}
-      >
-        <CameraIcon />
-      </Button>
+      <Link href="/camera" asChild>
+        <Button className="native:rounded-full size-11" size={'icon'} variant={'tonal'}>
+          <CameraIcon color="#fff" />
+        </Button>
+      </Link>
     </BlurView>
   );
 }

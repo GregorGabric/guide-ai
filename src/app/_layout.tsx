@@ -75,7 +75,19 @@ export default function RootLayout() {
                   <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
                   <OnboardingWrapper>
                     <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="(tabs)/index" />
+                      <Stack.Screen
+                        name="visited"
+                        options={{
+                          presentation: 'modal',
+                        }}
+                      />
+                      <Stack.Screen name="index" />
+                      <Stack.Screen
+                        name="camera"
+                        options={{
+                          presentation: 'modal',
+                        }}
+                      />
                     </Stack>
                   </OnboardingWrapper>
                 </ThemeProvider>

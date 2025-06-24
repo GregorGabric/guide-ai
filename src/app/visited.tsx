@@ -1,12 +1,11 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useQuery } from 'convex/react';
 import { Globe } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import type { Region } from 'react-native-maps';
 import MapView, { MapMarker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
+import { useSheetRef } from '~/src/components/ui/sheet';
 import { H3, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { colors } from '~/src/utils/theme';
@@ -95,13 +94,13 @@ export default function VisitedPlacesScreen() {
     };
   }, [sheetRef]);
 
-  const tabBarHeight = useBottomTabBarHeight();
+  // const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <View className="flex-1 px-10" style={{ paddingBottom: insets.bottom }}>
-      <Sheet
+      {/* <Sheet
         enableDynamicSizing={false}
-        bottomInset={tabBarHeight}
+        bottomInset={insets.bottom}
         topInset={insets.top}
         style={{
           borderCurve: 'continuous',
@@ -118,16 +117,16 @@ export default function VisitedPlacesScreen() {
         }}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
-        snapPoints={[tabBarHeight, '85%']}
+        snapPoints={[insets.bottom + 60, '85%']}
         animateOnMount
       >
         <View className="flex-1">
           <Text>Hello</Text>
         </View>
-      </Sheet>
+      </Sheet> */}
 
       {/* Map View */}
-      <View style={StyleSheet.absoluteFill} className="flex-1">
+      <View className="flex-1">
         <MapView
           ref={mapRef}
           provider={Platform.OS === 'ios' ? undefined : 'google'}

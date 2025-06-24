@@ -1,5 +1,4 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
@@ -80,7 +79,7 @@ export default function CameraAnalysis() {
   const [analysisResult, setAnalysisResult] = useState('');
   const [isCameraActive, setIsCameraActive] = useState(false);
   const analysisSheetRef = useSheetRef();
-  const tabBarHeight = useBottomTabBarHeight();
+  // const tabBarHeight = useBottomTabBarHeight();
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
 
@@ -180,7 +179,7 @@ export default function CameraAnalysis() {
 
         <View
           style={{
-            bottom: insets.bottom + tabBarHeight,
+            bottom: insets.bottom,
           }}
           className="absolute inset-x-0 flex-row items-center justify-center px-16"
         >

@@ -19,6 +19,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="visited"
         options={{
+          freezeOnBlur: true,
           animation: 'fade',
           title: 'Visited',
           tabBarIcon: ({ color }) => <GlobeIcon color={color} />,
@@ -27,6 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          freezeOnBlur: true,
           title: 'Discover',
           tabBarIcon: ({ color }) => <MapIcon color={color} />,
         }}
@@ -34,6 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="camera"
         options={{
+          freezeOnBlur: true,
           animation: 'fade',
           title: 'Camera',
           tabBarIcon: ({ color }) => <CameraIcon color={color} />,

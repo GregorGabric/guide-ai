@@ -6,6 +6,7 @@ import { Platform, Text, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BottomTabs } from '~/src/components/bottom-tabs';
 import Header from '~/src/components/header';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
@@ -186,10 +187,24 @@ export default function MapScreen() {
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
-        >
-          {/* <BottomTabs isOpen={open} setOpen={setOpen} /> */}
-        </AttractionCarousel>
+        />
       )}
+
+      <BottomTabs
+        isOpen={open}
+        setOpen={setOpen}
+        centerMap={() => {
+          if (mapRef.current) {
+            mapRef.current.animateCamera({
+              center: {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              },
+              zoom: 15,
+            });
+          }
+        }}
+      />
 
       {selectedAttraction && (
         <SafeAreaView edges={['bottom']}>

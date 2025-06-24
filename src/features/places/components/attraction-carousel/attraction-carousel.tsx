@@ -36,7 +36,7 @@ export const AttractionCarousel = ({
 
   const { bottom: tabBarPaddingBottom } = useSafeAreaInsets();
 
-  const paddingBottom = tabBarPaddingBottom;
+  const paddingBottom = tabBarPaddingBottom * 4;
 
   return (
     <View
