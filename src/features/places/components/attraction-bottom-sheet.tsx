@@ -331,7 +331,7 @@ export function AttractionBottomSheet({
                               .slice(0, 3)
                               .map((landmark, index) => (
                                 <View
-                                  key={landmark.displayName.text}
+                                  key={landmark.placeId}
                                   className={`flex-row items-center p-4 ${
                                     index <
                                       (attraction.addressDescriptor?.landmarks?.length ?? 0) - 1 &&
