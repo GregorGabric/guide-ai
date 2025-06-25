@@ -1,9 +1,10 @@
-import { SparklesIcon } from 'lucide-react-native';
+import { LandmarkIcon } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { Button } from '~/src/components/ui/button';
 import type { PlacesResponse } from '~/src/features/places/services/types';
-import { COLORS } from '~/src/lib/theme/colors';
 import { cn } from '~/src/lib/utils';
-import { Marker } from '../../../components/ui/map';
+import { colors } from '~/src/utils/theme';
+import { Marker } from '../../../components/ui/map.native';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(Marker);
 
@@ -44,16 +45,13 @@ export function StaggeredMapMarker({
         initialExitingDelay + (exitDirection === 1 ? index * stagger : (count - index) * stagger)
       )}
     >
-      <Animated.View style={{ alignItems: 'center' }}>
-        <Animated.View
-          className={cn(
-            'rounded-full bg-white p-2 shadow-lg transition-transform',
-            isSelected && 'scale-125'
-          )}
-        >
-          <SparklesIcon size={16} color={COLORS.light.primary} />
-        </Animated.View>
-      </Animated.View>
+      <Button
+        size={'icon'}
+        variant="tonal"
+        className={cn('rounded-full  p-2 shadow-lg', isSelected && 'scale-125')}
+      >
+        <LandmarkIcon size={16} color={colors['text-on-primary']} />
+      </Button>
     </AnimatedMapMarker>
   );
 }

@@ -1,4 +1,3 @@
-// Theme constants for NativeWind v4
 export const colors = {
   primary: '#007AFF',
   'primary-light': '#4DA6FF',
