@@ -2,13 +2,13 @@ import { useQuery } from 'convex/react';
 import { Globe } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
-import type { Region } from 'react-native-maps';
-import MapView, { MapMarker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { H3, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { colors } from '~/src/utils/theme';
+import type { Region } from '../components/ui/map';
+import MapView, { MapMarker } from '../components/ui/map';
 
 const isAndroid = Platform.OS === 'android';
 

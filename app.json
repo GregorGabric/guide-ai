@@ -6,7 +6,6 @@
     "scheme": "guide-ai",
     "web": {
       "bundler": "metro",
-      "output": "server",
       "favicon": "./src/assets/favicon.png"
     },
     "experiments": {

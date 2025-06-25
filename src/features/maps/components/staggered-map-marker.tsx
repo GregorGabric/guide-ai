@@ -1,9 +1,9 @@
 import { SparklesIcon } from 'lucide-react-native';
-import { Marker } from 'react-native-maps';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { COLORS } from '~/src/lib/theme/colors';
 import { cn } from '~/src/lib/utils';
+import { Marker } from '../../../components/ui/map';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(Marker);
 
