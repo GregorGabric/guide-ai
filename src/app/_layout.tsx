@@ -88,6 +88,12 @@ export default function RootLayout() {
                           presentation: 'modal',
                         }}
                       />
+                      <Stack.Screen
+                        name="settings"
+                        options={{
+                          presentation: 'modal',
+                        }}
+                      />
                     </Stack>
                   </OnboardingWrapper>
                 </ThemeProvider>

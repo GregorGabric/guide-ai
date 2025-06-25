@@ -43,7 +43,8 @@ function Header({
       style={{
         height: 96 + getStatusBarHeight(),
         paddingTop: Platform.OS === 'ios' ? 44 : (StatusBar.currentHeight || 0) + 12,
-      }}>
+      }}
+    >
       {/* Back Button */}
       {showBackButton ? (
         <TouchableOpacity
@@ -60,7 +61,8 @@ function Header({
             shadowOpacity: variant === 'gradient' ? 0.1 : 0.05,
             shadowRadius: 8,
             elevation: 2,
-          }}>
+          }}
+        >
           <ChevronLeft
             size={20}
             color={variant === 'gradient' ? '#FFFFFF' : '#374151'}
@@ -79,7 +81,8 @@ function Header({
           }`}
           style={{
             letterSpacing: -0.5,
-          }}>
+          }}
+        >
           {title}
         </Text>
       </View>
@@ -100,7 +103,8 @@ function Header({
             shadowOpacity: variant === 'gradient' ? 0.1 : 0.05,
             shadowRadius: 8,
             elevation: 2,
-          }}>
+          }}
+        >
           <MoreVertical
             size={20}
             color={variant === 'gradient' ? '#FFFFFF' : '#6B7280'}
@@ -127,7 +131,8 @@ function Header({
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="relative">
+        className="relative"
+      >
         {renderContent()}
         {/* Subtle bottom border */}
         <View className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />

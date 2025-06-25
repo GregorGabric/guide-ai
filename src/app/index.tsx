@@ -5,9 +5,8 @@ import { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import MapView, { MapMarker } from 'react-native-maps';
 import Animated from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomTabs } from '~/src/components/bottom-tabs';
-import Header from '~/src/components/header';
+import { FloatingProfileButton } from '~/src/components/floating-profile-button';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
@@ -100,7 +99,6 @@ export default function MapScreen() {
   if (!location) {
     return (
       <View className="flex-1 bg-background">
-        <Header title="Discover" showBackButton={false} />
         <View className="flex-1 items-center justify-center px-6">
           <View className="items-center">
             <View
@@ -129,6 +127,9 @@ export default function MapScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Floating Profile Button */}
+        <FloatingProfileButton />
       </View>
     );
   }
@@ -146,8 +147,6 @@ export default function MapScreen() {
         }}
         style={{
           flex: 1,
-          position: 'absolute',
-          inset: 0,
         }}
         showsScale
         showsBuildings
@@ -207,14 +206,15 @@ export default function MapScreen() {
       />
 
       {selectedAttraction && (
-        <SafeAreaView edges={['bottom']}>
-          <AttractionBottomSheet
-            sheetRef={sheetRef}
-            attraction={selectedAttraction}
-            onClose={closeBottomSheet}
-          />
-        </SafeAreaView>
+        <AttractionBottomSheet
+          sheetRef={sheetRef}
+          attraction={selectedAttraction}
+          onClose={closeBottomSheet}
+        />
       )}
+
+      {/* Floating Profile Button */}
+      <FloatingProfileButton />
     </View>
   );
 }

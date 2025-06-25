@@ -186,10 +186,10 @@ export function AttractionBottomSheet({
   useEffect(() => {
     if (attraction) {
       // Extract location info for visit tracking
-      const placeName = attraction.displayName?.text || attraction.name || 'Unknown Place';
+      const placeName = attraction.displayName.text || attraction.name || 'Unknown Place';
       const placeAddress = attraction.formattedAddress;
-      const latitude = attraction.location?.latitude;
-      const longitude = attraction.location?.longitude;
+      const latitude = attraction.location.latitude;
+      const longitude = attraction.location.longitude;
       const placeId = attraction.id;
 
       if (latitude && longitude && placeId) {
@@ -219,7 +219,6 @@ export function AttractionBottomSheet({
       topInset={insets.top}
       style={{
         borderCurve: 'continuous',
-        marginInline: insets.left + 8,
       }}
       ref={sheetRef}
       snapPoints={snapPoints}
@@ -235,7 +234,10 @@ export function AttractionBottomSheet({
       keyboardBlurBehavior="restore"
     >
       {attraction && (
-        <View className="flex-1 overflow-hidden">
+        <View
+          className="flex-1 overflow-hidden"
+          style={{ backgroundColor: colors['card-background'] }}
+        >
           <View className="mb-6 px-8 pt-2">
             <H1 className="mb-3">{attraction.displayName.text || attraction.name}</H1>
 
@@ -257,7 +259,12 @@ export function AttractionBottomSheet({
             )}
           </View>
 
-          <Tabs value={activeTab} onValueChange={updateTabTransition} className="flex-1 px-8">
+          <Tabs
+            value={activeTab}
+            onValueChange={updateTabTransition}
+            className="flex-1 px-8"
+            style={{ backgroundColor: 'transparent' }}
+          >
             <TabsList
               onLayout={onTabsListLayout}
               className="native:h-10 native:px-0 relative mb-6 w-full rounded-full"
@@ -290,12 +297,16 @@ export function AttractionBottomSheet({
               />
             </TabsList>
 
-            <TabsContent value="chat" className="flex-1">
+            <TabsContent value="chat" className="flex-1" style={{ backgroundColor: 'transparent' }}>
               <GestureDetector gesture={panGesture}>
                 <AiChat attraction={attraction} userMessages={userMessages} />
               </GestureDetector>
             </TabsContent>
-            <TabsContent value="overview" className="flex-1">
+            <TabsContent
+              value="overview"
+              className="flex-1"
+              style={{ backgroundColor: 'transparent' }}
+            >
               <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <GestureDetector gesture={panGesture}>
                   <View className="flex-1">
