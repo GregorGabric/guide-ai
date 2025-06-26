@@ -1,4 +1,5 @@
-import { IconChevronRight, IconX } from '@tabler/icons-react-native';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { IconChevronRight, IconLogout, IconX } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,9 +10,19 @@ import { H2 } from '~/src/components/ui/typography';
 
 export default function SettingsModal() {
   const insets = useSafeAreaInsets();
+  const { signOut } = useAuthActions();
 
   const handleClose = () => {
     router.back();
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -184,6 +195,21 @@ export default function SettingsModal() {
                 </View>
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* Sign Out Section */}
+          <View className="mb-8">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleSignOut}
+              style={{ borderCurve: 'continuous' }}
+              className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5"
+            >
+              <View className="flex-row items-center justify-center">
+                <IconLogout size={20} color="#EF4444" />
+                <Text className="font-quicksand-bold ml-3 text-lg text-red-500">Sign Out</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>

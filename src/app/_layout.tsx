@@ -2,6 +2,7 @@ import { IBMPlexSans_400Regular, useFonts } from '@expo-google-fonts/ibm-plex-sa
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useConvexAuth } from 'convex/react';
 import { SplashScreen, Stack } from 'expo-router';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { SQLiteProvider } from 'expo-sqlite';
@@ -14,7 +15,6 @@ import '~/polyfills';
 import { OnboardingWrapper } from '~/src/components/onboarding-wrapper';
 import { ConvexClientProvider } from '~/src/context/convex-provider';
 import { QueryProvider } from '~/src/context/query-context';
-import { useInitCat } from '~/src/features/revenue-cat/use-init-cat';
 import { NAV_THEME } from '~/src/lib/constants';
 import { useColorScheme } from '~/src/lib/useColorScheme';
 
@@ -43,14 +43,13 @@ export default function RootLayout() {
   const hasMounted = useRef(false);
   const { colorScheme: _colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
-
   const [loaded, error] = useFonts({
     IBMPlexSans_400Regular,
   });
 
   useEffect(() => {
     if (loaded || error) {
-      void SplashScreen.hideAsync();
+      // Don't hide splash screen yet - let AuthWrapper handle it
     }
 
     if (hasMounted.current) {
@@ -61,7 +60,7 @@ export default function RootLayout() {
     hasMounted.current = true;
   }, [loaded, error]);
 
-  useInitCat();
+  // useInitCat();
 
   if (!isColorSchemeLoaded || !loaded || error) {
     return null;
@@ -77,27 +76,7 @@ export default function RootLayout() {
                 <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
                   <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
                   <OnboardingWrapper>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen
-                        name="visited"
-                        options={{
-                          presentation: 'modal',
-                        }}
-                      />
-                      <Stack.Screen name="index" />
-                      <Stack.Screen
-                        name="camera"
-                        options={{
-                          presentation: 'modal',
-                        }}
-                      />
-                      <Stack.Screen
-                        name="settings"
-                        options={{
-                          presentation: 'modal',
-                        }}
-                      />
-                    </Stack>
+                    <AuthWrapper />
                   </OnboardingWrapper>
                 </ThemeProvider>
               </KeyboardProvider>
@@ -106,6 +85,55 @@ export default function RootLayout() {
         </QueryProvider>
       </ConvexClientProvider>
     </SQLiteProvider>
+  );
+}
+
+function AuthWrapper() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      void SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  if (isLoading) {
+    return null; // Keep splash screen visible
+  }
+
+  return <Screens isAuthenticated={isAuthenticated} />;
+}
+
+function Screens({ isAuthenticated }: { isAuthenticated: boolean }) {
+  console.log('isAuthenticated', isAuthenticated);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!isAuthenticated}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={isAuthenticated}>
+        <Stack.Screen name="index" />
+        <Stack.Screen
+          name="visited"
+          options={{
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="camera"
+          options={{
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{
+            presentation: 'modal',
+          }}
+        />
+      </Stack.Protected>
+    </Stack>
   );
 }
 

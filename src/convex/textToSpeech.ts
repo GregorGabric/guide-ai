@@ -25,7 +25,6 @@ export class RateLimitError extends Error {
   }
 }
 
-// Simple TTS action - processes text to speech with ElevenLabs
 export const generateTTS = action({
   args: {
     text: v.string(),
@@ -56,6 +55,3 @@ export const generateTTS = action({
     }
   },
 });
-
-// Note: Removed convertTextToSpeech action - replaced with mutation-based system
-// Use ttsRequests.requestTextToSpeech mutation instead for new implementations

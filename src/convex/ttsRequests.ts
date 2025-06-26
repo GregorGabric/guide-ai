@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
@@ -9,7 +10,6 @@ export const RATE_LIMIT_MAX_REQUESTS = 20; // Max requests per hour
 // Mutation: Create a TTS request and validate user limits
 export const requestTextToSpeech = mutation({
   args: {
-    userId: v.string(),
     text: v.string(),
     voiceId: v.optional(v.string()),
   },
@@ -17,22 +17,14 @@ export const requestTextToSpeech = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
 
-    // Get or create user
-    let user = await ctx.db
-      .query('users')
-      .withIndex('by_user_id', (q) => q.eq('userId', args.userId))
-      .first();
-
-    if (!user) {
-      // Create new user with trial
-      const userId = await ctx.db.insert('users', {
-        userId: args.userId,
-        trialTtsCount: 0,
-        trialExpiresAt: now + 3 * 24 * 60 * 60 * 1000, // 3 days from now
-        createdAt: now,
-      });
-      user = await ctx.db.get(userId);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('User not authenticated');
     }
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_id', (q) => q.eq('_id', userId))
+      .first();
 
     if (!user) {
       throw new Error('Failed to create or retrieve user');
@@ -40,7 +32,7 @@ export const requestTextToSpeech = mutation({
 
     // Check trial limits - both count limit AND time limit
     const trialExpired = user.trialExpiresAt && now > user.trialExpiresAt;
-    const trialCountExceeded = user.trialTtsCount >= TRIAL_TTS_LIMIT;
+    const trialCountExceeded = user.trialTtsCount && user.trialTtsCount >= TRIAL_TTS_LIMIT;
 
     if (trialExpired || trialCountExceeded) {
       throw new Error('TRIAL_LIMIT_EXCEEDED');
@@ -50,7 +42,7 @@ export const requestTextToSpeech = mutation({
     const recentRequests = await ctx.db
       .query('ttsRequests')
       .withIndex('by_user_and_created', (q) =>
-        q.eq('userId', args.userId).gte('createdAt', now - RATE_LIMIT_WINDOW_MS)
+        q.eq('userId', userId).gte('createdAt', now - RATE_LIMIT_WINDOW_MS)
       )
       .collect();
 
@@ -60,7 +52,7 @@ export const requestTextToSpeech = mutation({
 
     // Create TTS request record
     const requestId = await ctx.db.insert('ttsRequests', {
-      userId: args.userId,
+      userId: userId,
       text: args.text,
       status: 'pending',
       createdAt: now,
@@ -68,7 +60,7 @@ export const requestTextToSpeech = mutation({
 
     // Update user trial count
     await ctx.db.patch(user._id, {
-      trialTtsCount: user.trialTtsCount + 1,
+      trialTtsCount: (user.trialTtsCount || 0) + 1,
     });
 
     return requestId;
@@ -135,13 +127,14 @@ export const getUserTtsRequests = query({
 
 // Query: Get user trial info
 export const getUserTrialInfo = query({
-  args: {
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
     const user = await ctx.db
       .query('users')
-      .withIndex('by_user_id', (q) => q.eq('userId', args.userId))
+      .withIndex('by_id', (q) => q.eq('_id', userId))
       .first();
 
     if (!user) {
@@ -162,7 +155,7 @@ export const getUserTrialInfo = query({
       trialTtsLimit: TRIAL_TTS_LIMIT,
       trialExpiresAt: user.trialExpiresAt,
       trialActive,
-      canUseTts: trialActive && user.trialTtsCount < TRIAL_TTS_LIMIT,
+      canUseTts: trialActive && (user.trialTtsCount || 0) < TRIAL_TTS_LIMIT,
     };
   },
 });

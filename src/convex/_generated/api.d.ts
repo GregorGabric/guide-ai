@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
 import type * as image from "../image.js";
@@ -17,6 +18,7 @@ import type * as placesActions from "../placesActions.js";
 import type * as streaming from "../streaming.js";
 import type * as textToSpeech from "../textToSpeech.js";
 import type * as ttsRequests from "../ttsRequests.js";
+import type * as user from "../user.js";
 import type * as visitedPlaces from "../visitedPlaces.js";
 
 import type {
@@ -34,6 +36,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   chat: typeof chat;
   http: typeof http;
   image: typeof image;
@@ -43,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   streaming: typeof streaming;
   textToSpeech: typeof textToSpeech;
   ttsRequests: typeof ttsRequests;
+  user: typeof user;
   visitedPlaces: typeof visitedPlaces;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

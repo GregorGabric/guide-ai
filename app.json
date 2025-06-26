@@ -20,15 +20,18 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gregorgabric.guide-ai",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app uses the microphone to record audio.",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "owner": "gregorgabric",
@@ -57,7 +60,9 @@
       [
         "expo-font",
         {
-          "fonts": ["node_modules/@expo-google-fonts/sora/400Regular/Sora_400Regular.ttf"]
+          "fonts": [
+            "node_modules/@expo-google-fonts/sora/400Regular/Sora_400Regular.ttf"
+          ]
         }
       ],
       "expo-web-browser",
@@ -76,7 +81,9 @@
       [
         "expo-asset",
         {
-          "assets": ["./src/assets/"]
+          "assets": [
+            "./src/assets/"
+          ]
         }
       ],
       [
@@ -102,7 +109,9 @@
             "useSQLCipher": false
           },
           "ios": {
-            "customBuildFlags": ["-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"]
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
+            ]
           }
         }
       ],
@@ -111,7 +120,8 @@
         {
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

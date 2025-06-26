@@ -1,6 +1,8 @@
+import { authTables } from '@convex-dev/auth/server';
 import { StreamIdValidator } from '@convex-dev/persistent-text-streaming';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+
 export const placesSchema = v.object({
   places: v.optional(
     v.array(
@@ -106,6 +108,20 @@ export const attractionSchema = v.object({
 });
 
 export default defineSchema({
+  ...authTables,
+  users: defineTable({
+    trialTtsCount: v.optional(v.number()),
+    trialExpiresAt: v.optional(v.number()),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+  })
+    .index('email', ['email'])
+    .index('phone', ['phone']),
   messages: defineTable({
     role: v.union(v.literal('user'), v.literal('assistant')),
     content: v.string(),
@@ -236,20 +252,9 @@ export default defineSchema({
     distanceTraveled: v.optional(v.number()), // in kilometers
   }),
 
-  // User management for TTS features
-  users: defineTable({
-    userId: v.string(), // User identifier (could be device ID, auth ID, etc.)
-    trialTtsCount: v.number(), // Number of TTS requests used in trial
-    trialExpiresAt: v.optional(v.number()), // Timestamp when trial expires
-    createdAt: v.number(), // Timestamp when user was created
-  })
-    .index('by_user_id', ['userId'])
-    .index('by_trial_expires', ['trialExpiresAt']),
-
-  // TTS request tracking and management
   ttsRequests: defineTable({
-    userId: v.string(), // User who made the request
-    text: v.string(), // Text to be converted to speech
+    userId: v.string(),
+    text: v.string(),
     status: v.union(
       v.literal('pending'), // Request created, waiting for processing
       v.literal('processing'), // Currently generating audio
