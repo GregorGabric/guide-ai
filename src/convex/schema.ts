@@ -235,4 +235,34 @@ export default defineSchema({
     lastUpdated: v.number(),
     distanceTraveled: v.optional(v.number()), // in kilometers
   }),
+
+  // User management for TTS features
+  users: defineTable({
+    userId: v.string(), // User identifier (could be device ID, auth ID, etc.)
+    trialTtsCount: v.number(), // Number of TTS requests used in trial
+    trialExpiresAt: v.optional(v.number()), // Timestamp when trial expires
+    createdAt: v.number(), // Timestamp when user was created
+  })
+    .index('by_user_id', ['userId'])
+    .index('by_trial_expires', ['trialExpiresAt']),
+
+  // TTS request tracking and management
+  ttsRequests: defineTable({
+    userId: v.string(), // User who made the request
+    text: v.string(), // Text to be converted to speech
+    status: v.union(
+      v.literal('pending'), // Request created, waiting for processing
+      v.literal('processing'), // Currently generating audio
+      v.literal('completed'), // Successfully completed
+      v.literal('failed') // Failed with error
+    ),
+    audioData: v.optional(v.string()), // Base64 encoded audio or file reference
+    createdAt: v.number(), // When request was created
+    completedAt: v.optional(v.number()), // When request was completed/failed
+    errorMessage: v.optional(v.string()), // Error details if failed
+  })
+    .index('by_user_id', ['userId'])
+    .index('by_status', ['status'])
+    .index('by_created_at', ['createdAt'])
+    .index('by_user_and_created', ['userId', 'createdAt']), // For rate limiting queries
 });

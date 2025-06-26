@@ -2,7 +2,7 @@ import { useChat } from '@ai-sdk/react';
 import type { LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { LegendList } from '@legendapp/list';
 import { useMutation as useTanstackMutation } from '@tanstack/react-query';
-import { useAction, useMutation } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useSQLiteContext } from 'expo-sqlite';
 import { fetch as expoFetch } from 'expo/fetch';
@@ -17,6 +17,7 @@ import { AiChatInput } from '~/src/features/chat/components/ai-chat/ai-chat-inpu
 import { AIMessage, UserMessage } from '~/src/features/chat/components/ai-chat/ai-chat-message';
 import { AudioLinesIcon } from '~/src/lib/icons/audio-lines';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
+import { getUserId } from '~/src/lib/userId';
 import { getConvexSiteUrl } from '~/src/lib/utils';
 
 export type Attraction = {
@@ -49,11 +50,24 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   const [drivenIds, setDrivenIds] = useState<Set<string>>(() => new Set());
   const scrollViewRef = useRef<ScrollView | null>(null);
   const player = useAudioPlayer();
+  const [userId, setUserId] = useState<string | null>(null);
 
   const playerStatus = useAudioPlayerStatus(player);
   const isPlaying = playerStatus.playing;
 
   const attractionId = attraction?.id ?? '';
+
+  // Initialize user ID
+  useEffect(() => {
+    getUserId()
+      .then(setUserId)
+      .catch((error) => {
+        console.error('Failed to get user ID:', error);
+      });
+  }, []);
+
+  // Get user trial info for UI display
+  const userTrialInfo = useQuery(api.ttsRequests.getUserTrialInfo, userId ? { userId } : 'skip');
 
   const { messages, error, append, status } = useChat({
     api: `${getConvexSiteUrl()}/chat`,
@@ -76,6 +90,11 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   });
 
   const sendMessage = useMutation(api.messages.sendMessage);
+
+  // New TTS mutations
+  const requestTTS = useMutation(api.ttsRequests.requestTextToSpeech);
+  const generateTTS = useAction(api.textToSpeech.generateTTS);
+  const updateTTSStatus = useMutation(api.ttsRequests.updateRequestStatus);
 
   const isLoading = status === 'streaming';
 
@@ -117,13 +136,17 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   }, [player, isPlaying]);
 
   const db = useSQLiteContext();
-  const convertTextToSpeech = useAction(api.textToSpeech.convertTextToSpeech);
 
   const { mutateAsync, isPending: isGeneratingAudio } = useTanstackMutation({
     mutationFn: async (text: string) => {
-      const textHash = btoa(text).slice(0, 16);
+      if (!userId) {
+        throw new Error('User ID not initialized');
+      }
 
+      const textHash = btoa(text).slice(0, 16);
       const cacheKey = `tts_${textHash}`;
+
+      // Check cache first
       const result = await db.getFirstAsync<{ text: string; audio: string }>(
         'SELECT * FROM audio_cache WHERE cache_key = ?',
         [cacheKey]
@@ -131,23 +154,65 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
       if (result) {
         console.log(`Using cached audio for text (${text.length} chars)`);
-        const cachedAudio = result.audio;
-        return cachedAudio;
+        return result.audio;
       }
-
-      const audioBase64 = await convertTextToSpeech({ text });
 
       try {
-        await db.runAsync('INSERT INTO audio_cache (cache_key, audio) VALUES (?, ?)', [
-          cacheKey,
-          audioBase64,
-        ]);
-        console.log(`Cached audio for future use`);
-      } catch (error) {
-        console.warn('Failed to cache audio - localStorage full?', error);
-      }
+        // Step 1: Request TTS and validate limits
+        const requestId = await requestTTS({
+          userId,
+          text,
+          voiceId: 'EkK5I93UQWFDigLMpZcX', // Default voice
+        });
 
-      return audioBase64;
+        // Step 2: Update status to processing
+        await updateTTSStatus({
+          requestId,
+          status: 'processing',
+        });
+
+        // Step 3: Generate the actual TTS audio
+        const audioBase64 = await generateTTS({
+          text,
+          voiceId: 'EkK5I93UQWFDigLMpZcX',
+        });
+
+        // Step 4: Update status to completed with audio data
+        await updateTTSStatus({
+          requestId,
+          status: 'completed',
+          audioData: audioBase64,
+          completedAt: Date.now(),
+        });
+
+        // Cache the result
+        try {
+          await db.runAsync('INSERT INTO audio_cache (cache_key, audio) VALUES (?, ?)', [
+            cacheKey,
+            audioBase64,
+          ]);
+          console.log('Cached audio for future use');
+        } catch (error) {
+          console.warn('Failed to cache audio - localStorage full?', error);
+        }
+
+        return audioBase64;
+      } catch (error) {
+        console.error('TTS generation failed:', error);
+
+        // Handle specific error types without showing paywall (as requested)
+        if (error instanceof Error) {
+          if (error.message === 'TRIAL_LIMIT_EXCEEDED') {
+            throw new Error(
+              `Trial limit reached! You've used ${userTrialInfo?.trialTtsCount || 0}/${userTrialInfo?.trialTtsLimit || 10} free TTS requests.`
+            );
+          } else if (error.message === 'RATE_LIMIT_EXCEEDED') {
+            throw new Error('Rate limit exceeded. Please wait before making more TTS requests.');
+          }
+        }
+
+        throw error;
+      }
     },
   });
 

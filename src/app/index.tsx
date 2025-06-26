@@ -42,7 +42,7 @@ export default function MapScreen() {
   });
   const data = placesQuery.data?.places;
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<typeof MapView>(null);
   const sheetRef = useSheetRef();
 
   const [open, setOpen] = useState(false);

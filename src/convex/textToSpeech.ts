@@ -10,7 +10,23 @@ const client = new ElevenLabsClient({
   apiKey,
 });
 
-export const convertTextToSpeech = action({
+// Error types for client handling
+export class TtsLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TtsLimitError';
+  }
+}
+
+export class RateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
+// Simple TTS action - processes text to speech with ElevenLabs
+export const generateTTS = action({
   args: {
     text: v.string(),
     voiceId: v.optional(v.string()),
@@ -18,7 +34,7 @@ export const convertTextToSpeech = action({
   returns: v.string(),
   handler: async (_ctx, args) => {
     try {
-      const voiceId = 'EkK5I93UQWFDigLMpZcX';
+      const voiceId = args.voiceId || 'EkK5I93UQWFDigLMpZcX';
 
       const audioStream = await client.textToSpeech.stream(voiceId, {
         text: args.text,
@@ -40,3 +56,6 @@ export const convertTextToSpeech = action({
     }
   },
 });
+
+// Note: Removed convertTextToSpeech action - replaced with mutation-based system
+// Use ttsRequests.requestTextToSpeech mutation instead for new implementations
