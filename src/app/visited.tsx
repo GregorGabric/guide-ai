@@ -1,18 +1,18 @@
 import { IconWorld } from '@tabler/icons-react-native';
 import { useQuery } from 'convex/react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSheetRef } from '~/src/components/ui/sheet';
+import { Button } from '~/src/components/ui/button';
+import MapView, { MapMarker, type Region } from '~/src/components/ui/map.native';
 import { H3, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
+import { CheckIcon } from '~/src/lib/icons/check-icon';
+import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
-import type { Region } from '../components/ui/map';
-import MapView, { MapMarker } from '../components/ui/map';
 
 const isAndroid = Platform.OS === 'android';
 
-// Zoom threshold - when latitudeDelta is greater than this, show clustered marker
 const CLUSTER_ZOOM_THRESHOLD = 10;
 
 export default function VisitedPlacesScreen() {
@@ -23,7 +23,7 @@ export default function VisitedPlacesScreen() {
   // Query visited places and stats
   const visitedPlaces = useQuery(api.visitedPlaces.getVisitedPlaces) ?? [];
 
-  const _stats = useQuery(api.visitedPlaces.getVisitStats);
+  // const stats = useQuery(api.visitedPlaces.getVisitStats);
 
   // Calculate map region based on visited places
   const getMapRegion = () => {
@@ -72,59 +72,16 @@ export default function VisitedPlacesScreen() {
     };
   };
 
-  // Determine if we should show clustered or individual markers
   const shouldShowCluster = currentRegion
     ? currentRegion.latitudeDelta > CLUSTER_ZOOM_THRESHOLD
-    : true; // Default to cluster view
+    : true;
 
   const centerPoint = getCenterPoint();
 
   const insets = useSafeAreaInsets();
 
-  const sheetRef = useSheetRef();
-
-  // // Present the sheet when component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      sheetRef.current?.present();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [sheetRef]);
-
-  // const tabBarHeight = useBottomTabBarHeight();
-
   return (
-    <View className="flex-1 px-10" style={{ paddingBottom: insets.bottom }}>
-      {/* <Sheet
-        enableDynamicSizing={false}
-        bottomInset={insets.bottom}
-        topInset={insets.top}
-        style={{
-          borderCurve: 'continuous',
-          borderRadius: 47,
-          zIndex: 10,
-        }}
-        ref={sheetRef}
-        enablePanDownToClose
-        enableBlurKeyboardOnGesture
-        enableOverDrag={false}
-        backgroundStyle={{
-          borderRadius: 47,
-          backgroundColor: colors['card-background'],
-        }}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        snapPoints={[insets.bottom + 60, '85%']}
-        animateOnMount
-      >
-        <View className="flex-1">
-          <Text>Hello</Text>
-        </View>
-      </Sheet> */}
-
+    <View className="flex-1" style={{ paddingBottom: insets.bottom }}>
       {/* Map View */}
       <View className="flex-1">
         <MapView
@@ -136,9 +93,9 @@ export default function VisitedPlacesScreen() {
           style={{
             flex: 1,
           }}
-          showsScale
-          showsBuildings
-          showsUserLocation={false}
+          // showsScale
+          // showsBuildings
+          // showsUserLocation={false}
         >
           {shouldShowCluster && centerPoint && visitedPlaces.length > 0 ? (
             // Clustered marker when zoomed out
@@ -160,19 +117,10 @@ export default function VisitedPlacesScreen() {
                 }
               }}
             >
-              <View
-                className="items-center justify-center rounded-full bg-primary p-3"
-                style={{
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 5,
-                  minWidth: 50,
-                  minHeight: 50,
-                }}
-              >
-                <Text className="text-lg font-bold text-white">{visitedPlaces.length}</Text>
+              <View className="items-center justify-center rounded-full bg-primary p-3">
+                <Text className="font-quicksand-bold text-text-on-primary text-lg">
+                  {visitedPlaces.length}
+                </Text>
               </View>
             </MapMarker>
           ) : (
@@ -190,21 +138,12 @@ export default function VisitedPlacesScreen() {
                   setSelectedVisit(visit._id);
                 }}
               >
-                <View
-                  className={`items-center justify-center rounded-full p-2`}
-                  style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4,
-                    elevation: 5,
-                  }}
+                <Button
+                  size={'icon'}
+                  className={cn('native:rounded-full bg-secondary  p-2 shadow')}
                 >
-                  <IconWorld
-                    size={16}
-                    color={selectedVisit === visit._id ? '#fff' : colors.primary}
-                  />
-                </View>
+                  <CheckIcon size={16} color={colors['text-on-primary']} />
+                </Button>
               </MapMarker>
             ))
           )}

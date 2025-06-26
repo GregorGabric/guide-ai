@@ -97,8 +97,6 @@ function Code({ className, asChild = false, ...props }: TypographyProps) {
   const Component = asChild ? Slot.Text : RNText;
   return (
     <Component
-      // @ts-ignore - role of code renders code element on the web
-      role={Platform.OS === 'web' ? 'code' : undefined}
       className={cn(
         'relative rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-sans text-sm font-semibold text-foreground web:select-text',
         className

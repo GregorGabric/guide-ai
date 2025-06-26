@@ -2,7 +2,7 @@ import * as SelectPrimitive from '@rn-primitives/select';
 import * as React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Check } from '~/src/lib/icons/Check';
+import { CheckIcon } from '~/src/lib/icons/check-icon';
 import { ChevronDown } from '~/src/lib/icons/chevron-down';
 import { ChevronUp } from '~/src/lib/icons/chevron-up';
 import { cn } from '~/src/lib/utils';
@@ -157,7 +157,7 @@ function SelectItem({
     >
       <View className="native:left-3.5 native:pt-px absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <Check size={16} strokeWidth={3} className="text-popover-foreground" />
+          <CheckIcon size={16} strokeWidth={3} className="text-popover-foreground" />
         </SelectPrimitive.ItemIndicator>
       </View>
       <SelectPrimitive.ItemText className="native:text-lg native:text-base text-sm text-popover-foreground web:group-focus:text-accent-foreground" />
