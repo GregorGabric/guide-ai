@@ -9,7 +9,7 @@ import { FloatingProfileButton } from '~/src/components/floating-profile-button'
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import MapView, { MapMarker } from '../components/ui/map.native';
+import { MapMarker, MapView } from '../components/ui/map.native';
 // import { Camera } from '~/src/features/camera/camera';
 import { IconNavigation } from '@tabler/icons-react-native';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';

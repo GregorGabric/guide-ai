@@ -1,7 +1,7 @@
-import { SafeAreaView } from 'react-native';
+import { ScrollView } from '~/src/components/ui/scroll-view';
 
 export const Container = ({ children }: { children: React.ReactNode }) => {
-  return <SafeAreaView className={styles.container}>{children}</SafeAreaView>;
+  return <ScrollView className={styles.container}>{children}</ScrollView>;
 };
 
 const styles = {

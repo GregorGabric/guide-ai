@@ -13,9 +13,9 @@ import { Button } from '~/src/components/ui/button';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
-import { Marker } from '../../../components/ui/map.native';
+import { MapMarker } from '../../../components/ui/map.native';
 
-const AnimatedMapMarker = Animated.createAnimatedComponent(Marker);
+const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
 
 const stagger = 100;
 const initialExitingDelay = 0;

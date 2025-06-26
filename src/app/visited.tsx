@@ -1,168 +1,159 @@
-import { IconWorld } from '@tabler/icons-react-native';
-import { useQuery } from 'convex/react';
 import { useRef, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button } from '~/src/components/ui/button';
-import MapView, { MapMarker, type Region } from '~/src/components/ui/map.native';
-import { H3, P } from '~/src/components/ui/typography';
-import { api } from '~/src/convex/_generated/api';
-import { CheckIcon } from '~/src/lib/icons/check-icon';
+import { MapMarker, MapView } from '~/src/components/ui/map.native';
+import { ScrollView } from '~/src/components/ui/scroll-view';
+import { H2, H4 } from '~/src/components/ui/typography';
 import { cn } from '~/src/lib/utils';
-import { colors } from '~/src/utils/theme';
 
-const isAndroid = Platform.OS === 'android';
+// Placeholder data for visited places
+const PLACEHOLDER_DATA = {
+  stats: {
+    countriesVisited: 23,
+    totalCountries: 195,
+    citiesVisited: 67,
+    continentsVisited: 5,
+    totalContinents: 7,
+    totalTrips: 34,
+    totalMiles: 156780,
+    favoriteMonth: 'September',
+  },
+  visitedPlaces: [
+    {
+      _id: '1',
+      placeName: 'Paris, France',
+      country: 'France',
+      latitude: 48.8566,
+      longitude: 2.3522,
+      visitedAt: '2024-06-15',
+      notes: 'Amazing trip to the City of Light!',
+      category: 'City',
+      duration: 5,
+      rating: 5,
+    },
+    {
+      _id: '2',
+      placeName: 'Tokyo, Japan',
+      country: 'Japan',
+      latitude: 35.6762,
+      longitude: 139.6503,
+      visitedAt: '2024-03-22',
+      notes: 'Incredible culture and food',
+      category: 'City',
+      duration: 8,
+      rating: 5,
+    },
+  ],
+};
 
-const CLUSTER_ZOOM_THRESHOLD = 10;
+type ViewMode = 'map' | 'list';
 
 export default function VisitedPlacesScreen() {
-  const mapRef = useRef<MapView>(null);
-  const [selectedVisit, setSelectedVisit] = useState<string | null>(null);
-  const [currentRegion, setCurrentRegion] = useState<Region | null>(null);
-
-  // Query visited places and stats
-  const visitedPlaces = useQuery(api.visitedPlaces.getVisitedPlaces) ?? [];
-
-  // const stats = useQuery(api.visitedPlaces.getVisitStats);
-
-  // Calculate map region based on visited places
-  const getMapRegion = () => {
-    if (visitedPlaces.length === 0) {
-      // Default to world view
-      return {
-        latitude: 20,
-        longitude: 0,
-        latitudeDelta: 80,
-        longitudeDelta: 80,
-      };
-    }
-
-    // Calculate bounds of all visited places
-    const latitudes = visitedPlaces.map((place) => place.latitude);
-    const longitudes = visitedPlaces.map((place) => place.longitude);
-
-    const minLat = Math.min(...latitudes);
-    const maxLat = Math.max(...latitudes);
-    const minLng = Math.min(...longitudes);
-    const maxLng = Math.max(...longitudes);
-
-    const latDelta = Math.max(maxLat - minLat, 0.1) * 1.2; // Add padding
-    const lngDelta = Math.max(maxLng - minLng, 0.1) * 1.2;
-
-    return {
-      latitude: (minLat + maxLat) / 2,
-      longitude: (minLng + maxLng) / 2,
-      latitudeDelta: latDelta,
-      longitudeDelta: lngDelta,
-    };
-  };
-
-  // Calculate center point of all visited places for clustering
-  const getCenterPoint = () => {
-    if (visitedPlaces.length === 0) {
-      return null;
-    }
-
-    const totalLat = visitedPlaces.reduce((sum, place) => sum + place.latitude, 0);
-    const totalLng = visitedPlaces.reduce((sum, place) => sum + place.longitude, 0);
-
-    return {
-      latitude: totalLat / visitedPlaces.length,
-      longitude: totalLng / visitedPlaces.length,
-    };
-  };
-
-  const shouldShowCluster = currentRegion
-    ? currentRegion.latitudeDelta > CLUSTER_ZOOM_THRESHOLD
-    : true;
-
-  const centerPoint = getCenterPoint();
-
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
   const insets = useSafeAreaInsets();
+  const mapRef = useRef<typeof MapView>(null);
+  const { stats, visitedPlaces } = PLACEHOLDER_DATA;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   return (
-    <View className="flex-1" style={{ paddingBottom: insets.bottom }}>
-      {/* Map View */}
-      <View className="flex-1">
-        <MapView
-          ref={mapRef}
-          provider={Platform.OS === 'ios' ? undefined : 'google'}
-          mapType={isAndroid ? 'satellite' : 'hybridFlyover'}
-          initialRegion={getMapRegion()}
-          onRegionChangeComplete={setCurrentRegion}
-          style={{
-            flex: 1,
-          }}
-          // showsScale
-          // showsBuildings
-          // showsUserLocation={false}
-        >
-          {shouldShowCluster && centerPoint && visitedPlaces.length > 0 ? (
-            // Clustered marker when zoomed out
-            <MapMarker
-              coordinate={centerPoint}
-              title={`${visitedPlaces.length} Visited Places`}
-              description="Zoom in to see individual locations"
+    <View className="flex-1 ">
+      <MapView
+        ref={mapRef}
+        mapType={Platform.OS === 'ios' ? 'hybridFlyover' : 'satellite'}
+        initialRegion={{
+          latitude: 20,
+          longitude: 0,
+          latitudeDelta: 80,
+          longitudeDelta: 80,
+        }}
+        style={{ flex: 1 }}
+        showsScale
+        showsBuildings
+      >
+        {visitedPlaces.map((place) => (
+          <MapMarker
+            key={place._id}
+            coordinate={{
+              latitude: place.latitude,
+              longitude: place.longitude,
+            }}
+            title={place.placeName}
+            description={place.country}
+          />
+        ))}
+      </MapView>
+
+      <View
+        className="bg-white"
+        style={{
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          paddingBottom: insets.bottom,
+        }}
+      >
+        <View className="items-center py-3">
+          <View className="h-1 w-10 rounded-full bg-gray-300" />
+        </View>
+
+        <View className="px-6 pb-4">
+          <H2 className="mb-1 text-foreground">My Travels</H2>
+          <Text className="text-sm text-muted-foreground">
+            {stats.countriesVisited} countries • {stats.citiesVisited} cities
+          </Text>
+        </View>
+
+        <View className="mx-4 mb-4 rounded-2xl bg-primary p-4">
+          <Text className="text-center text-lg font-bold text-white">
+            {stats.countriesVisited} Countries • {stats.citiesVisited} Cities
+          </Text>
+        </View>
+
+        <View className="px-4 pb-4">
+          <View className="flex-row rounded-xl bg-gray-100 p-1">
+            <TouchableOpacity
+              className={cn(
+                'flex-1 items-center justify-center rounded-lg py-3',
+                viewMode === 'map' && 'bg-primary'
+              )}
               onPress={() => {
-                // Zoom to fit all markers
-                if (mapRef.current && visitedPlaces.length > 0) {
-                  const coordinates = visitedPlaces.map((place) => ({
-                    latitude: place.latitude,
-                    longitude: place.longitude,
-                  }));
-                  mapRef.current.fitToCoordinates(coordinates, {
-                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-                    animated: true,
-                  });
-                }
+                setViewMode('map');
               }}
             >
-              <View className="items-center justify-center rounded-full bg-primary p-3">
-                <Text className="font-quicksand-bold text-text-on-primary text-lg">
-                  {visitedPlaces.length}
-                </Text>
-              </View>
-            </MapMarker>
-          ) : (
-            // Individual markers when zoomed in
-            visitedPlaces.map((visit) => (
-              <MapMarker
-                key={visit._id}
-                coordinate={{
-                  latitude: visit.latitude,
-                  longitude: visit.longitude,
-                }}
-                title={visit.placeName}
-                description={`Visited ${new Date(visit.visitedAt).toLocaleDateString()}`}
-                onPress={() => {
-                  setSelectedVisit(visit._id);
-                }}
-              >
-                <Button
-                  size={'icon'}
-                  className={cn('native:rounded-full bg-secondary  p-2 shadow')}
-                >
-                  <CheckIcon size={16} color={colors['text-on-primary']} />
-                </Button>
-              </MapMarker>
-            ))
-          )}
-        </MapView>
-      </View>
-
-      {visitedPlaces.length === 0 && (
-        <View className="absolute inset-0 items-center justify-center px-6">
-          <View className="items-center">
-            <View className="bg-muted/20 mb-6 h-20 w-20 items-center justify-center rounded-3xl">
-              <IconWorld size={28} color={colors.accent} strokeWidth={2} />
-            </View>
-            <H3 className="mb-3 text-center">Start Exploring</H3>
-            <P className="max-w-sm text-center text-muted-foreground">
-              Open attraction details to automatically track your visits, or add places manually.
-            </P>
+              <Text className={viewMode === 'map' ? 'text-white' : 'text-black'}>Map</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className={cn(
+                'flex-1 items-center justify-center rounded-lg py-3',
+                viewMode === 'list' && 'bg-primary'
+              )}
+              onPress={() => {
+                setViewMode('list');
+              }}
+            >
+              <Text className={viewMode === 'list' ? 'text-white' : 'text-black'}>List</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      )}
+
+        {viewMode === 'list' && (
+          <ScrollView className="max-h-60 px-4">
+            {visitedPlaces.map((visit) => (
+              <View key={visit._id} className="mb-3 rounded-lg bg-gray-50 p-4">
+                <H4 className="mb-1">{visit.placeName}</H4>
+                <Text className="text-sm text-gray-600">{visit.country}</Text>
+                <Text className="text-sm text-gray-500">{formatDate(visit.visitedAt)}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }

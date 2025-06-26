@@ -1,123 +1,144 @@
-# Project Scratchpad
+# TextToSpeech Refactor with RevenueCat Integration
 
 ## Background and Motivation
 
-The user wants to redesign the current visited places screen (`src/app/visited.tsx`) to be a proper visited places screen inspired by the "Been" app. The current implementation has basic map functionality but lacks the polish and features expected from a travel tracking app.
+We need to refactor the current textToSpeech.ts implementation from a direct action pattern to Convex's recommended mutation + scheduled action pattern. This change is driven by:
 
-Key requirements:
+1. **Rate Limiting**: Server-side enforcement to prevent API abuse and control costs
+2. **Free Trial Management**: Track usage limits for trial users
+3. **RevenueCat Integration**: Validate subscription status before processing TTS requests
+4. **Business Model Enforcement**: Bulletproof server-side validation that can't be bypassed
 
-- Transform into a proper visited places screen similar to Been app
-- Use placeholder data instead of implementing backend logic
-- The view is displayed in a modal
-- Focus on UI/UX design and user experience
+Current implementation uses a direct action that clients call, which doesn't provide the necessary controls for a freemium business model.
 
 ## Key Challenges and Analysis
 
-1. **Been App Analysis**: The Been app is known for its beautiful, engaging interface that gamifies travel tracking with:
+### Technical Challenges
 
-   - World map with country/region coverage visualization
-   - Statistics and achievements
-   - Visual progress indicators
-   - Clean, modern design
-   - Engaging animations and interactions
+- Refactoring from direct action to mutation + internal action pattern
+- Adding database schema for TTS request tracking and user management
+- Integrating RevenueCat subscription validation server-side
+- Implementing proper rate limiting and trial management
+- Maintaining backward compatibility during transition
 
-2. **Current State Issues**:
+### Business Logic Requirements
 
-   - Basic map implementation without visual appeal
-   - Limited statistics or gamification elements
-   - No proper empty states or onboarding
-   - Missing key Been-app features like country coverage, travel stats, etc.
-
-3. **Modal Context**: Being in a modal means we need to:
-   - Optimize for mobile viewing
-   - Include proper modal navigation/close actions
-   - Ensure content fits well in modal constraints
+- Free trial: Limited TTS requests (e.g., 10 free requests or 3-day trial)
+- Subscription validation: Check RevenueCat entitlements server-side
+- Rate limiting: Prevent abuse (e.g., max 20 requests per hour per user)
+- Paywall integration: Return specific errors that trigger paywall on client
 
 ## High-level Task Breakdown
 
-### Phase 1: Planning and Design Analysis
+### Phase 1: Database Schema Updates
 
-- [ ] **Task 1.1**: Analyze Been app features and create component structure
-  - Success Criteria: Clear breakdown of UI components needed
-  - Estimated Time: Planning phase
+- [ ] **Task 1.1**: Add `users` table for trial tracking
 
-### Phase 2: Create Placeholder Data Structure
+  - Success criteria: Schema includes `userId`, `trialTtsCount`, `trialExpiresAt`, `createdAt`
+  - Verify: Schema validates and migrations work
 
-- [ ] **Task 2.1**: Create comprehensive placeholder data
-  - Success Criteria: Rich, realistic data for testing all UI states
-  - Components: Countries visited, cities, travel stats, achievements
+- [ ] **Task 1.2**: Add `subscriptions` table for RevenueCat sync
 
-### Phase 3: Header and Navigation Design
+  - Success criteria: Schema includes `userId`, `entitlements`, `isActive`, `expiresAt`, `revenuekatUserId`
+  - Verify: Schema validates and can store RevenueCat data structure
 
-- [ ] **Task 3.1**: Design modal header with statistics summary
-  - Success Criteria: Clean header with key stats (countries visited, cities, etc.)
-  - Features: Modal close button, title, key metrics
+- [ ] **Task 1.3**: Add `ttsRequests` table for request tracking
+  - Success criteria: Schema includes `userId`, `text`, `status`, `audioData`, `createdAt`, `completedAt`, `errorMessage`
+  - Verify: Schema supports tracking request lifecycle and rate limiting queries
 
-### Phase 4: Map Visualization Enhancement
+### Phase 2: RevenueCat Server Integration
 
-- [ ] **Task 4.1**: Enhance map with country/region coverage visualization
-  - Success Criteria: Visually appealing map showing visited regions
-  - Features: Country highlighting, better markers, zoom interactions
+- [ ] **Task 2.1**: Create RevenueCat webhook handler
 
-### Phase 5: Statistics and Achievements Section
+  - Success criteria: HTTP endpoint receives and validates RevenueCat webhooks
+  - Verify: Webhook updates subscription status in database correctly
 
-- [ ] **Task 5.1**: Create travel statistics dashboard
-  - Success Criteria: Engaging stats display with progress indicators
-  - Features: Country count, continent progress, travel badges
+- [ ] **Task 2.2**: Implement subscription validation utilities
+  - Success criteria: Functions to check active subscription and entitlements
+  - Verify: Correctly identifies trial vs paid users, handles edge cases
 
-### Phase 6: List View and Details
+### Phase 3: TTS Mutation Implementation
 
-- [ ] **Task 6.1**: Create list view toggle for visited places
-  - Success Criteria: Clean list with photos, dates, and details
-  - Features: Search, filter, detailed place cards
+- [ ] **Task 3.1**: Create `requestTextToSpeech` mutation
 
-### Phase 7: Empty State and Onboarding
+  - Success criteria: Validates user limits, creates request record, schedules internal action
+  - Verify: Returns appropriate errors for rate limits, expired trials, inactive subscriptions
 
-- [ ] **Task 7.1**: Design compelling empty state
-  - Success Criteria: Motivational empty state that encourages exploration
-  - Features: Illustration, call-to-action, progress visualization
+- [ ] **Task 3.2**: Convert existing action to `generateTextToSpeech` internal action
+  - Success criteria: Handles ElevenLabs API calls, updates request status, stores results
+  - Verify: Maintains same audio quality and error handling as current implementation
 
-### Phase 8: Polish and Animations
+### Phase 4: Rate Limiting & Business Logic
 
-- [ ] **Task 8.1**: Add micro-interactions and polish
-  - Success Criteria: Smooth, engaging user experience
-  - Features: Animations, haptics, loading states
+- [ ] **Task 4.1**: Implement trial limit enforcement
+
+  - Success criteria: Tracks trial usage, blocks requests when limits exceeded
+  - Verify: Trial users can't exceed limits, proper error responses trigger paywall
+
+- [ ] **Task 4.2**: Implement rate limiting logic
+  - Success criteria: Prevents abuse with configurable limits (e.g., 20/hour)
+  - Verify: Rate limits work correctly, don't block legitimate usage
+
+### Phase 5: Client Integration
+
+- [ ] **Task 5.1**: Update client code to use new mutation
+
+  - Success criteria: Replace direct action calls with mutation calls
+  - Verify: Same user experience, proper error handling
+
+- [ ] **Task 5.2**: Integrate paywall triggers
+  - Success criteria: Show paywall when TTS limits exceeded or subscription expired
+  - Verify: Paywall appears at right times, successful purchases restore access
+
+### Phase 6: Testing & Cleanup
+
+- [ ] **Task 6.1**: Write comprehensive tests
+
+  - Success criteria: Test trial limits, rate limiting, subscription validation, error cases
+  - Verify: All business logic edge cases covered
+
+- [ ] **Task 6.2**: Remove old direct action (if not needed)
+  - Success criteria: Clean up unused code, update any remaining references
+  - Verify: No breaking changes, all functionality preserved
 
 ## Project Status Board
 
-### To Do
+### Current Status / Progress Tracking
 
-- [ ] Analyze Been app features and create component breakdown
-- [ ] Create placeholder data structure
-- [ ] Design modal header with key statistics
-- [ ] Enhance map visualization
-- [ ] Create statistics dashboard
-- [ ] Implement list view toggle
-- [ ] Design empty state experience
-- [ ] Add animations and polish
+- [ ] Phase 1: Database Schema Updates
+  - [ ] Task 1.1: Add `users` table for trial tracking
+  - [ ] Task 1.2: Add `subscriptions` table for RevenueCat sync
+  - [ ] Task 1.3: Add `ttsRequests` table for request tracking
+- [ ] Phase 2: RevenueCat Server Integration
+  - [ ] Task 2.1: Create RevenueCat webhook handler
+  - [ ] Task 2.2: Implement subscription validation utilities
+- [ ] Phase 3: TTS Mutation Implementation
+  - [ ] Task 3.1: Create `requestTextToSpeech` mutation
+  - [ ] Task 3.2: Convert existing action to `generateTextToSpeech` internal action
+- [ ] Phase 4: Rate Limiting & Business Logic
+  - [ ] Task 4.1: Implement trial limit enforcement
+  - [ ] Task 4.2: Implement rate limiting logic
+- [ ] Phase 5: Client Integration
+  - [ ] Task 5.1: Update client code to use new mutation
+  - [ ] Task 5.2: Integrate paywall triggers
+- [ ] Phase 6: Testing & Cleanup
+  - [ ] Task 6.1: Write comprehensive tests
+  - [ ] Task 6.2: Remove old direct action (if not needed)
 
-### In Progress
+### Configuration Requirements
 
-- [x] **Phase 1-2**: Creating component structure and placeholder data (Started)
-
-### Completed
-
-- [x] Initial project analysis and task breakdown
-
-## Current Status / Progress Tracking
-
-**Current Phase**: Executor Mode - Implementing Phase 1 & 2
-**Next Action**: Creating placeholder data and implementing Been-app-inspired UI
-
-Starting implementation of the Been-app-inspired visited places screen. Beginning with comprehensive placeholder data and component structure.
+- Rate limit: 20 TTS requests per hour per user
+- Trial limit: 10 free TTS requests OR 3-day trial period
+- Required entitlement: 'pro' (matching existing paywall code)
 
 ## Executor's Feedback or Assistance Requests
 
-**Currently Working On**: Phase 1 & 2 - Foundation setup
-
-- Creating realistic placeholder data for testing all UI states
-- Implementing Been-app-like component structure with statistics and achievements
+_This section will be updated by the Executor during implementation_
 
 ## Lessons
 
-_No lessons recorded yet_
+_This section will capture any implementation insights, bug fixes, or corrections during development_
+
+---
+
+_Plan created: Ready for Executor implementation_

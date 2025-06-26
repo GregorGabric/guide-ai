@@ -1,7 +1,6 @@
-// Native implementation - re-exports react-native-maps
-import MapViewComponent, { Marker as ReactNativeMarker } from 'react-native-maps';
+'use client';
+import NativeMapView from 'react-native-maps';
 
-export default MapViewComponent;
-export const MapMarker = ReactNativeMarker;
-export const Marker = ReactNativeMarker;
-export type { Region } from 'react-native-maps';
+export const MapView = NativeMapView;
+
+export { MapMarker, Region, UrlTile } from 'react-native-maps';

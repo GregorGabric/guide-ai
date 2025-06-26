@@ -14,6 +14,7 @@ import '~/polyfills';
 import { OnboardingWrapper } from '~/src/components/onboarding-wrapper';
 import { ConvexClientProvider } from '~/src/context/convex-provider';
 import { QueryProvider } from '~/src/context/query-context';
+import { useInitCat } from '~/src/features/revenue-cat/use-init-cat';
 import { NAV_THEME } from '~/src/lib/constants';
 import { useColorScheme } from '~/src/lib/useColorScheme';
 
@@ -59,6 +60,8 @@ export default function RootLayout() {
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
   }, [loaded, error]);
+
+  useInitCat();
 
   if (!isColorSchemeLoaded || !loaded || error) {
     return null;
