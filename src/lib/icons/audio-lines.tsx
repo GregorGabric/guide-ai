@@ -1,4 +1,4 @@
-import { AudioLinesIcon } from 'lucide-react-native';
+import { IconVolume } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(AudioLinesIcon);
-export { AudioLinesIcon };
+iconWithClassName(IconVolume);
+export { IconVolume as AudioLinesIcon };

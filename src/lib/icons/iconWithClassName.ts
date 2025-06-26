@@ -1,7 +1,7 @@
-import type { LucideIcon } from 'lucide-react-native';
+import type { Icon } from '@tabler/icons-react-native';
 import { cssInterop } from 'nativewind';
 
-export function iconWithClassName(icon: LucideIcon) {
+export function iconWithClassName(icon: Icon) {
   cssInterop(icon, {
     className: {
       target: 'style',

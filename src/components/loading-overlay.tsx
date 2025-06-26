@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react-native';
+import { IconSparkles } from '@tabler/icons-react-native';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
 
@@ -90,7 +90,7 @@ export function LoadingOverlay({ message = 'Loading...' }: LoadingOverlayProps) 
             }}
           >
             <View className="h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Sparkles size={20} color="#FFFFFF" strokeWidth={2.5} />
+              <IconSparkles size={20} color="#FFFFFF" strokeWidth={2.5} />
             </View>
           </Animated.View>
         </View>

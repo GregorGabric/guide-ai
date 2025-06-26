@@ -1,4 +1,4 @@
-import { Sun } from 'lucide-react-native';
+import { IconSun } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(Sun);
-export { Sun };
+iconWithClassName(IconSun);
+export { IconSun as Sun };

@@ -1,5 +1,5 @@
+import { IconCamera, IconMap, IconWorld } from '@tabler/icons-react-native';
 import { Tabs } from 'expo-router';
-import { CameraIcon, GlobeIcon, MapIcon } from 'lucide-react-native';
 import { colors } from '~/src/utils/theme';
 
 export default function TabLayout() {
@@ -22,7 +22,7 @@ export default function TabLayout() {
           freezeOnBlur: true,
           animation: 'fade',
           title: 'Visited',
-          tabBarIcon: ({ color }) => <GlobeIcon color={color} />,
+          tabBarIcon: ({ color }) => <IconWorld color={color} />,
         }}
       />
       <Tabs.Screen
@@ -30,7 +30,7 @@ export default function TabLayout() {
         options={{
           freezeOnBlur: true,
           title: 'Discover',
-          tabBarIcon: ({ color }) => <MapIcon color={color} />,
+          tabBarIcon: ({ color }) => <IconMap color={color} />,
         }}
       />
       <Tabs.Screen
@@ -39,7 +39,7 @@ export default function TabLayout() {
           freezeOnBlur: true,
           animation: 'fade',
           title: 'Camera',
-          tabBarIcon: ({ color }) => <CameraIcon color={color} />,
+          tabBarIcon: ({ color }) => <IconCamera color={color} />,
         }}
       />
     </Tabs>

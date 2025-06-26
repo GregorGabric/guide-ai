@@ -1,5 +1,5 @@
+import { IconChevronRight, IconX } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
-import { ChevronRight, X } from 'lucide-react-native';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeSelector } from '~/src/components/settings/theme-selector';
@@ -29,7 +29,7 @@ export default function SettingsModal() {
             onPress={handleClose}
             className="h-8 w-8 rounded-full"
           >
-            <X size={20} className="text-text-secondary" />
+            <IconX size={20} className="text-text-secondary" />
           </Button>
         </View>
 
@@ -60,7 +60,7 @@ export default function SettingsModal() {
                     Tap to edit profile
                   </Text>
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <IconChevronRight size={20} color="#9CA3AF" />
               </View>
             </TouchableOpacity>
           </View>
@@ -99,7 +99,7 @@ export default function SettingsModal() {
                     <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
                       <Text className="font-quicksand-medium text-sm text-primary">Natural</Text>
                     </View>
-                    <ChevronRight size={20} color="#9CA3AF" />
+                    <IconChevronRight size={20} color="#9CA3AF" />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -121,7 +121,7 @@ export default function SettingsModal() {
                     <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
                       <Text className="font-quicksand-medium text-sm text-primary">English</Text>
                     </View>
-                    <ChevronRight size={20} color="#9CA3AF" />
+                    <IconChevronRight size={20} color="#9CA3AF" />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -153,7 +153,7 @@ export default function SettingsModal() {
                     <View className="mr-3 rounded-full bg-green-500/10 px-3 py-2">
                       <Text className="font-quicksand-medium text-sm text-green-600">On</Text>
                     </View>
-                    <ChevronRight size={20} color="#9CA3AF" />
+                    <IconChevronRight size={20} color="#9CA3AF" />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -167,7 +167,7 @@ export default function SettingsModal() {
                       Data & privacy settings
                     </Text>
                   </View>
-                  <ChevronRight size={20} color="#9CA3AF" />
+                  <IconChevronRight size={20} color="#9CA3AF" />
                 </View>
               </TouchableOpacity>
 
@@ -180,7 +180,7 @@ export default function SettingsModal() {
                       App version 1.0.0
                     </Text>
                   </View>
-                  <ChevronRight size={20} color="#9CA3AF" />
+                  <IconChevronRight size={20} color="#9CA3AF" />
                 </View>
               </TouchableOpacity>
             </View>

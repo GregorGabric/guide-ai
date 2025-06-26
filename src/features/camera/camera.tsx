@@ -1,9 +1,9 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { IconCircle, IconX } from '@tabler/icons-react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
-import { CircleIcon, XIcon } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
@@ -202,7 +202,7 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
               variant="primary"
               disabled={analyzeImage.isPending}
             >
-              <CircleIcon size={44} color={colors.background} />
+              <IconCircle size={44} color={colors.background} />
             </Button>
           </View>
 
@@ -213,7 +213,7 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
             size="icon"
             disabled={analyzeImage.isPending}
           >
-            <XIcon color="#fff" />
+            <IconX color="#fff" />
           </Button>
         </View>
 

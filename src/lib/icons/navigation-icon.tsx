@@ -1,4 +1,4 @@
-import { NavigationIcon } from 'lucide-react-native';
+import { IconNavigation } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(NavigationIcon);
-export { NavigationIcon };
+iconWithClassName(IconNavigation);
+export { IconNavigation as NavigationIcon };

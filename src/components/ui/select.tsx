@@ -2,9 +2,9 @@ import * as SelectPrimitive from '@rn-primitives/select';
 import * as React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Check } from '~/lib/icons/Check';
-import { ChevronDown } from '~/lib/icons/ChevronDown';
-import { ChevronUp } from '~/lib/icons/ChevronUp';
+import { Check } from '~/src/lib/icons/Check';
+import { ChevronDown } from '~/src/lib/icons/chevron-down';
+import { ChevronUp } from '~/src/lib/icons/chevron-up';
 import { cn } from '~/src/lib/utils';
 
 type Option = SelectPrimitive.Option;
@@ -32,7 +32,8 @@ function SelectTrigger({
         props.disabled && 'opacity-50 web:cursor-not-allowed',
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children}
       <ChevronDown size={16} aria-hidden={true} className="text-foreground opacity-50" />
     </SelectPrimitive.Trigger>
@@ -49,7 +50,8 @@ function SelectScrollUpButton({ className, ...props }: SelectPrimitive.ScrollUpB
   return (
     <SelectPrimitive.ScrollUpButton
       className={cn('flex items-center justify-center py-1 web:cursor-default', className)}
-      {...props}>
+      {...props}
+    >
       <ChevronUp size={14} className="text-foreground" />
     </SelectPrimitive.ScrollUpButton>
   );
@@ -65,7 +67,8 @@ function SelectScrollDownButton({ className, ...props }: SelectPrimitive.ScrollD
   return (
     <SelectPrimitive.ScrollDownButton
       className={cn('flex items-center justify-center py-1 web:cursor-default', className)}
-      {...props}>
+      {...props}
+    >
       <ChevronDown size={14} className="text-foreground" />
     </SelectPrimitive.ScrollDownButton>
   );
@@ -99,14 +102,16 @@ function SelectContent({
               className
             )}
             position={position}
-            {...props}>
+            {...props}
+          >
             <SelectScrollUpButton />
             <SelectPrimitive.Viewport
               className={cn(
                 'p-1',
                 position === 'popper' &&
                   'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]'
-              )}>
+              )}
+            >
               {children}
             </SelectPrimitive.Viewport>
             <SelectScrollDownButton />
@@ -148,7 +153,8 @@ function SelectItem({
         props.disabled && 'opacity-50 web:pointer-events-none',
         className
       )}
-      {...props}>
+      {...props}
+    >
       <View className="native:left-3.5 native:pt-px absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <Check size={16} strokeWidth={3} className="text-popover-foreground" />

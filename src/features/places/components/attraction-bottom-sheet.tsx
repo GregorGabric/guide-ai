@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
 
-import { InfoIcon, NavigationIcon } from 'lucide-react-native';
+import { IconInfoCircle, IconNavigation } from '@tabler/icons-react-native';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
@@ -280,7 +280,7 @@ export function AttractionBottomSheet({
                 variant="default"
                 className="flex-row items-center gap-2 self-start rounded-2xl px-4"
               >
-                <NavigationIcon size={16} />
+                <IconNavigation size={16} />
                 <Text>{distance} away</Text>
               </Badge>
             )}
@@ -307,7 +307,7 @@ export function AttractionBottomSheet({
                     borderCurve: 'continuous',
                   }}
                 >
-                  <InfoIcon size={14} />
+                  <IconInfoCircle size={14} />
                   <Text className="native:text-sm">Overview</Text>
                 </TabsTrigger>
                 <TabsTrigger

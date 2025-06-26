@@ -1,6 +1,6 @@
+import { IconCamera, IconNavigation, IconRoute } from '@tabler/icons-react-native';
 import { BlurView } from 'expo-blur';
 import { Link } from 'expo-router';
-import { CameraIcon, EarthIcon, NavigationIcon } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '~/src/components/ui/button';
 
@@ -25,7 +25,7 @@ export function BottomTabs({ centerMap }: BottomTabsProps) {
     >
       <Link href="/visited" asChild>
         <Button variant="tonal" className="native:rounded-full size-11" size="icon">
-          <EarthIcon color="#fff" />
+          <IconRoute color="#fff" />
         </Button>
       </Link>
       <Button
@@ -34,11 +34,11 @@ export function BottomTabs({ centerMap }: BottomTabsProps) {
         size="icon"
         onPress={centerMap}
       >
-        <NavigationIcon color="#fff" />
+        <IconNavigation color="#fff" size={24} />
       </Button>
       <Link href="/camera" asChild>
         <Button className="native:rounded-full size-11" size={'icon'} variant={'tonal'}>
-          <CameraIcon color="#fff" />
+          <IconCamera color="#fff" />
         </Button>
       </Link>
     </BlurView>

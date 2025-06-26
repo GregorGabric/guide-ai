@@ -1,4 +1,4 @@
-import { Check, CircleDashedIcon } from 'lucide-react-native';
+import { IconCheck, IconCircleDashed } from '@tabler/icons-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '~/src/components/ui/button';
@@ -45,9 +45,9 @@ function PermissionItem({ type, status, onPress }: PermissionItemProps) {
 
       <View className="h-6 w-6 items-center justify-center">
         {status === 'granted' ? (
-          <Check size={20} className="text-primary" />
+          <IconCheck size={20} className="text-primary" />
         ) : (
-          <CircleDashedIcon size={20} className="text-muted-foreground" />
+          <IconCircleDashed size={20} className="text-muted-foreground" />
         )}
       </View>
     </Pressable>

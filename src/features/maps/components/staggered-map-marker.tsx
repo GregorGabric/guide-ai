@@ -1,27 +1,61 @@
-import { LandmarkIcon } from 'lucide-react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { IconMapPin } from '@tabler/icons-react-native';
+import { useEffect } from 'react';
+import Animated, {
+  FadeInDown,
+  FadeOutDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated';
 import { Button } from '~/src/components/ui/button';
 import type { PlacesResponse } from '~/src/features/places/services/types';
+import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
 import { Marker } from '../../../components/ui/map.native';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(Marker);
 
+const stagger = 100;
+const initialExitingDelay = 0;
+
 export function StaggeredMapMarker({
   attraction,
   index,
   onPress,
-  count,
+  count: _count,
+  isSelected,
 }: {
   attraction: PlacesResponse['places'][number];
   index: number;
   onPress: () => void;
   count: number;
+  isSelected: boolean;
 }) {
-  const enterDirection = 1;
-  const exitDirection = 1;
-  const stagger = 100;
-  const initialExitingDelay = 0;
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    if (!isSelected) {
+      rotation.set(withSpring(0));
+      return;
+    }
+
+    rotation.set(
+      withRepeat(
+        withSequence(
+          withSpring(3, { damping: 20, stiffness: 100 }),
+          withSpring(-3, { damping: 20, stiffness: 100 })
+        ),
+        -1,
+        true
+      )
+    );
+  }, [isSelected, rotation]);
+
+  const animatedStyles = useAnimatedStyle(() => ({
+    transform: [{ translateY: rotation.value }],
+  }));
 
   return (
     <AnimatedMapMarker
@@ -32,15 +66,12 @@ export function StaggeredMapMarker({
       title={attraction.displayName.text}
       description={attraction.editorialSummary?.text}
       onPress={onPress}
-      entering={FadeInDown.duration(250).delay(
-        0 + (enterDirection === 1 ? index * stagger : (count - index) * stagger)
-      )}
-      exiting={FadeOutDown.duration(250).delay(
-        initialExitingDelay + (exitDirection === 1 ? index * stagger : (count - index) * stagger)
-      )}
+      style={animatedStyles}
+      entering={FadeInDown.duration(250).delay(index * stagger)}
+      exiting={FadeOutDown.duration(250).delay(initialExitingDelay + index * stagger)}
     >
-      <Button size={'icon'} className={'rounded-full bg-secondary  p-2 shadow-lg'}>
-        <LandmarkIcon size={16} color={colors['text-on-primary']} />
+      <Button size={'icon'} className={cn('native:rounded-full bg-secondary  p-2 shadow-lg')}>
+        <IconMapPin size={16} color={colors['text-on-primary']} />
       </Button>
     </AnimatedMapMarker>
   );

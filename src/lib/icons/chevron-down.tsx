@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react-native';
+import { IconChevronDown } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(ChevronDown);
-export { ChevronDown };
+iconWithClassName(IconChevronDown);
+export { IconChevronDown as ChevronDown };

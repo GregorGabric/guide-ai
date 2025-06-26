@@ -1,7 +1,7 @@
+import { IconVolume2 } from '@tabler/icons-react-native';
 import type { Message } from 'ai';
 import type { AudioPlayer } from 'expo-audio';
 import { useAudioPlayerStatus } from 'expo-audio';
-import { Volume2, VolumeX } from 'lucide-react-native';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
@@ -54,7 +54,7 @@ export function AIMessage(props: MessageProps) {
   return (
     <View className="mb-4 items-start">
       <View className="max-w-[80%] rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
-        <P className="text-slate-800">{visibleText}</P>
+        <P>{visibleText}</P>
         <Button
           variant="plain"
           size="sm"
@@ -70,14 +70,12 @@ export function AIMessage(props: MessageProps) {
           {props.isGeneratingAudio ? (
             <LoaderIcon className="animate-spin" />
           ) : isPlaying ? (
-            <VolumeX size={16} />
+            <IconVolume2 size={16} />
           ) : (
-            <Volume2 size={16} />
+            <IconVolume2 size={16} />
           )}
 
-          <P className="text-xs text-slate-600">
-            {props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}
-          </P>
+          <P>{props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}</P>
         </Button>
       </View>
     </View>

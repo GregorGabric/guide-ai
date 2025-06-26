@@ -1,4 +1,4 @@
-import { Moon, Smartphone, Sun } from 'lucide-react-native';
+import { IconDeviceMobile, IconMoon, IconSun } from '@tabler/icons-react-native';
 import { TouchableOpacity, View } from 'react-native';
 import { Text } from '~/src/components/ui/text';
 import { useColorScheme } from '~/src/lib/useColorScheme';
@@ -29,19 +29,19 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
       id: 'light' as const,
       name: 'Light',
       description: 'Light theme',
-      icon: Sun,
+      icon: IconSun,
     },
     {
       id: 'dark' as const,
       name: 'Dark',
       description: 'Dark theme',
-      icon: Moon,
+      icon: IconMoon,
     },
     {
       id: 'system' as const,
       name: 'System',
       description: 'Follow system',
-      icon: Smartphone,
+      icon: IconDeviceMobile,
     },
   ];
 

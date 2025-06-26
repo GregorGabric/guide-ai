@@ -1,4 +1,4 @@
-import { MessageCircleIcon } from 'lucide-react-native';
+import { IconMessageCircle } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(MessageCircleIcon);
-export { MessageCircleIcon };
+iconWithClassName(IconMessageCircle);
+export { IconMessageCircle as MessageCircleIcon };

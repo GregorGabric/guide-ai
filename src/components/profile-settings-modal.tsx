@@ -1,4 +1,4 @@
-import { X } from 'lucide-react-native';
+import { IconX } from '@tabler/icons-react-native';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeSelector } from '~/src/components/settings/theme-selector';
@@ -22,7 +22,7 @@ export function ProfileSettingsModal({ sheetRef, onClose }: ProfileSettingsModal
         <View className="flex-row items-center justify-between py-4">
           <H2 className="font-quicksand-bold text-text">Settings</H2>
           <Button variant="plain" size="icon" onPress={onClose} className="h-8 w-8 rounded-full">
-            <X size={20} className="text-text-secondary" />
+            <IconX size={20} className="text-text-secondary" />
           </Button>
         </View>
 

@@ -1,8 +1,8 @@
+import { IconStar } from '@tabler/icons-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
-import { StarIcon } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -84,7 +84,7 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction, onLayout }
             <View className="flex-row items-center gap-1">
               <View className="flex-row items-center gap-1">
                 <Text className="text-sm font-semibold">{place.rating}</Text>
-                <StarIcon size={12} fill="#FBBF24" stroke="#FBBF24" />
+                <IconStar size={12} fill="#FBBF24" stroke="#FBBF24" />
                 <Text className="text-xs font-semibold">
                   ({Intl.NumberFormat('en-US').format(place.userRatingCount)})
                 </Text>

@@ -1,7 +1,7 @@
+import { IconChevronLeft, IconDotsVertical } from '@tabler/icons-react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { ChevronLeft, MoreVertical } from 'lucide-react-native';
 import { Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 
 interface HeaderProps {
@@ -63,7 +63,7 @@ function Header({
             elevation: 2,
           }}
         >
-          <ChevronLeft
+          <IconChevronLeft
             size={20}
             color={variant === 'gradient' ? '#FFFFFF' : '#374151'}
             strokeWidth={2.5}
@@ -105,7 +105,7 @@ function Header({
             elevation: 2,
           }}
         >
-          <MoreVertical
+          <IconDotsVertical
             size={20}
             color={variant === 'gradient' ? '#FFFFFF' : '#6B7280'}
             strokeWidth={2.5}

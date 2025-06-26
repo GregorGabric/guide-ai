@@ -1,10 +1,10 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useFocusEffect } from '@react-navigation/native';
+import { IconCircle } from '@tabler/icons-react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
-import { CircleIcon } from 'lucide-react-native';
 import type { RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
@@ -190,7 +190,7 @@ export default function CameraAnalysis() {
               disabled={analyzeImage.isPending}
               className="h-16 w-16 rounded-full"
             >
-              <CircleIcon size={44} color={colors.background} />
+              <IconCircle size={44} color={colors.background} />
             </Button>
           </View>
         </View>

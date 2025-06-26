@@ -1,4 +1,4 @@
-import { MoonStar } from 'lucide-react-native';
+import { IconMoonStars } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(MoonStar);
-export { MoonStar };
+iconWithClassName(IconMoonStars);
+export { IconMoonStars as MoonStar };

@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react-native';
+import { IconArrowUpRight } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(ArrowUpRight);
-export { ArrowUpRight };
+iconWithClassName(IconArrowUpRight);
+export { IconArrowUpRight as ArrowUpRight };

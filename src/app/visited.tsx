@@ -1,5 +1,5 @@
+import { IconWorld } from '@tabler/icons-react-native';
 import { useQuery } from 'convex/react';
-import { Globe } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -200,7 +200,10 @@ export default function VisitedPlacesScreen() {
                     elevation: 5,
                   }}
                 >
-                  <Globe size={16} color={selectedVisit === visit._id ? '#fff' : colors.primary} />
+                  <IconWorld
+                    size={16}
+                    color={selectedVisit === visit._id ? '#fff' : colors.primary}
+                  />
                 </View>
               </MapMarker>
             ))
@@ -212,7 +215,7 @@ export default function VisitedPlacesScreen() {
         <View className="absolute inset-0 items-center justify-center px-6">
           <View className="items-center">
             <View className="bg-muted/20 mb-6 h-20 w-20 items-center justify-center rounded-3xl">
-              <Globe size={28} color={colors.accent} strokeWidth={2} />
+              <IconWorld size={28} color={colors.accent} strokeWidth={2} />
             </View>
             <H3 className="mb-3 text-center">Start Exploring</H3>
             <P className="max-w-sm text-center text-muted-foreground">

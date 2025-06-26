@@ -1,4 +1,4 @@
-import { LoaderIcon } from 'lucide-react-native';
+import { IconLoader } from '@tabler/icons-react-native';
 import { iconWithClassName } from './iconWithClassName';
-iconWithClassName(LoaderIcon);
-export { LoaderIcon };
+iconWithClassName(IconLoader);
+export { IconLoader as LoaderIcon };

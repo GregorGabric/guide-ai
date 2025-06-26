@@ -1,6 +1,6 @@
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
-import { Navigation } from 'lucide-react-native';
+
 import { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -11,6 +11,7 @@ import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
 import MapView, { MapMarker } from '../components/ui/map.native';
 // import { Camera } from '~/src/features/camera/camera';
+import { IconNavigation } from '@tabler/icons-react-native';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
@@ -111,7 +112,7 @@ export default function MapScreen() {
                 elevation: 4,
               }}
             >
-              <Navigation size={28} color="#F59E0B" strokeWidth={2.5} />
+              <IconNavigation size={28} color="#F59E0B" strokeWidth={2.5} />
             </View>
             <Text
               className="font-quicksand-bold text-text mb-3 text-center text-xl"
@@ -160,13 +161,14 @@ export default function MapScreen() {
           title="Your Location"
         >
           <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
-            <Navigation size={18} color="#fff" />
+            <IconNavigation size={18} color="#fff" />
           </View>
         </AnimatedMapMarker>
 
         {data?.map((attraction, index) => (
           <StaggeredMapMarker
             key={attraction.id}
+            isSelected={selectedAttraction?.id === attraction.id}
             attraction={attraction}
             index={index}
             onPress={() => {
