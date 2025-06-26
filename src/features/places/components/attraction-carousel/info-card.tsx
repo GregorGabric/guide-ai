@@ -9,16 +9,14 @@ import Animated, { useSharedValue, withDelay, withTiming } from 'react-native-re
 import { api } from '~/src/convex/_generated/api';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 
-// On card change, this is a distance the card passes from it comes fully visible to final position
-const _translateXGap = 25;
-
 interface Props {
   place: PlacesResponse['places'][number];
   width: number;
   onOpenAttraction: (attraction: PlacesResponse['places'][number]) => void;
+  onLayout?: () => void;
 }
 
-export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) => {
+export const InfoItem = ({ place, width: itemWidth, onOpenAttraction, onLayout }: Props) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
   const hasAnimated = useRef(false);
@@ -39,7 +37,7 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) =
   }, [opacity]);
 
   return (
-    <Animated.View style={{ opacity }}>
+    <Animated.View style={{ opacity }} onLayout={onLayout}>
       <Pressable
         className="px-5"
         style={{ width: itemWidth }}
@@ -92,9 +90,6 @@ export const InfoItem = ({ place, width: itemWidth, onOpenAttraction }: Props) =
                 </Text>
               </View>
             </View>
-            {/* <View className="flex-row items-center gap-2">
-              <Text className="text-sm text-neutral-500">{place.displayName.text}</Text>
-            </View> */}
           </View>
         </BlurView>
       </Pressable>

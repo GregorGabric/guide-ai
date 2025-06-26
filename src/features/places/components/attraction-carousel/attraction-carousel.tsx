@@ -67,9 +67,12 @@ export const AttractionCarousel = ({
             place={place}
             onOpenAttraction={(attraction) => {
               startTransition(() => {
-                setSelectedAttraction(attraction);
                 onAttractionPress?.(attraction);
+                setSelectedAttraction(attraction);
               });
+            }}
+            onLayout={() => {
+              setSelectedAttraction(place);
             }}
             key={place.id}
           />

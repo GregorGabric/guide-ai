@@ -191,11 +191,7 @@ export default function VisitedPlacesScreen() {
                 }}
               >
                 <View
-                  className={`items-center justify-center rounded-full p-2 ${
-                    selectedVisit === visit._id
-                      ? 'scale-125 bg-primary'
-                      : 'border-2 border-primary bg-white'
-                  }`}
+                  className={`items-center justify-center rounded-full p-2`}
                   style={{
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 2 },

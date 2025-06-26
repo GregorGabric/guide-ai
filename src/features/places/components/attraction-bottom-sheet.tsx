@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
-import { Dimensions, ScrollView, View } from 'react-native';
+import { Alert, Dimensions, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -30,12 +30,11 @@ import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { colors } from '~/src/utils/theme';
 
-// Helper functions for address parsing
 const extractCountryFromAddress = (address?: string): string | undefined => {
   if (!address) {
     return undefined;
   }
-  // Simple country extraction - in a real app, you'd use a geocoding service
+
   const parts = address.split(', ');
   return parts[parts.length - 1];
 };
@@ -44,9 +43,37 @@ const extractCityFromAddress = (address?: string): string | undefined => {
   if (!address) {
     return undefined;
   }
-  // Simple city extraction - in a real app, you'd use a geocoding service
+
   const parts = address.split(', ');
   return parts[parts.length - 2];
+};
+
+const openMapsNavigation = (latitude: number, longitude: number, label: string) => {
+  const encodedLabel = encodeURIComponent(label);
+
+  let mapsUrl: string;
+
+  if (Platform.OS === 'ios') {
+    mapsUrl = `maps://?q=${encodedLabel}&ll=${latitude},${longitude}`;
+  } else {
+    mapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodedLabel})`;
+  }
+
+  Linking.canOpenURL(mapsUrl)
+    .then((supported) => {
+      if (supported) {
+        return Linking.openURL(mapsUrl);
+      }
+      const fallbackUrl =
+        Platform.OS === 'ios'
+          ? `https://maps.apple.com/?q=${encodedLabel}&ll=${latitude},${longitude}`
+          : `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+      return Linking.openURL(fallbackUrl);
+    })
+    .catch((error: unknown) => {
+      console.error('Error opening maps:', error);
+      Alert.alert('Error', 'Unable to open maps navigation');
+    });
 };
 
 interface AttractionBottomSheetProps {
@@ -330,7 +357,14 @@ export function AttractionBottomSheet({
                             {attraction.addressDescriptor.landmarks
                               .slice(0, 3)
                               .map((landmark, index) => (
-                                <View
+                                <Pressable
+                                  onPress={() => {
+                                    openMapsNavigation(
+                                      attraction.location.latitude,
+                                      attraction.location.longitude,
+                                      landmark.displayName.text
+                                    );
+                                  }}
                                   key={landmark.placeId}
                                   className={`flex-row items-center p-4 ${
                                     index <
@@ -351,7 +385,7 @@ export function AttractionBottomSheet({
                                   <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100">
                                     <ArrowUpRight size={18} color="#6B7280" />
                                   </View>
-                                </View>
+                                </Pressable>
                               ))}
                           </View>
                         </View>

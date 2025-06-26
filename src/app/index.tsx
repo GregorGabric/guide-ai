@@ -9,7 +9,7 @@ import { FloatingProfileButton } from '~/src/components/floating-profile-button'
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import MapView, { MapMarker } from '../components/ui/map';
+import MapView, { MapMarker } from '../components/ui/map.native';
 // import { Camera } from '~/src/features/camera/camera';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
 import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
@@ -159,12 +159,9 @@ export default function MapScreen() {
           }}
           title="Your Location"
         >
-          <Animated.View className="relative">
-            <View className="bg-primary/20 absolute inset-0 h-12 w-12 rounded-full" />
-            <View className="border-3 h-10 w-10 items-center justify-center rounded-full border-white bg-primary">
-              <Navigation size={18} color="#fff" />
-            </View>
-          </Animated.View>
+          <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
+            <Navigation size={18} color="#fff" />
+          </View>
         </AnimatedMapMarker>
 
         {data?.map((attraction, index) => (
@@ -172,7 +169,6 @@ export default function MapScreen() {
             key={attraction.id}
             attraction={attraction}
             index={index}
-            selectedAttractionId={selectedAttraction?.id}
             onPress={() => {
               handleAttractionPress(attraction);
             }}

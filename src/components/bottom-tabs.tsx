@@ -30,7 +30,7 @@ export function BottomTabs({ centerMap }: BottomTabsProps) {
       </Link>
       <Button
         variant="primary"
-        className="native:rounded-full size-14"
+        className="native:rounded-full size-14 border border-white"
         size="icon"
         onPress={centerMap}
       >

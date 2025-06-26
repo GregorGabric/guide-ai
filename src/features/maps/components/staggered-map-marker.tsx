@@ -2,28 +2,22 @@ import { LandmarkIcon } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { Button } from '~/src/components/ui/button';
 import type { PlacesResponse } from '~/src/features/places/services/types';
-import { cn } from '~/src/lib/utils';
 import { colors } from '~/src/utils/theme';
 import { Marker } from '../../../components/ui/map.native';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(Marker);
 
-// Custom animated marker component with staggered entrance animation
 export function StaggeredMapMarker({
   attraction,
   index,
-  selectedAttractionId,
   onPress,
   count,
 }: {
   attraction: PlacesResponse['places'][number];
   index: number;
-  selectedAttractionId: string | undefined;
   onPress: () => void;
   count: number;
 }) {
-  const isSelected = selectedAttractionId === attraction.id;
-
   const enterDirection = 1;
   const exitDirection = 1;
   const stagger = 100;
@@ -45,11 +39,7 @@ export function StaggeredMapMarker({
         initialExitingDelay + (exitDirection === 1 ? index * stagger : (count - index) * stagger)
       )}
     >
-      <Button
-        size={'icon'}
-        variant="tonal"
-        className={cn('rounded-full  p-2 shadow-lg', isSelected && 'scale-125')}
-      >
+      <Button size={'icon'} className={'rounded-full bg-secondary  p-2 shadow-lg'}>
         <LandmarkIcon size={16} color={colors['text-on-primary']} />
       </Button>
     </AnimatedMapMarker>
