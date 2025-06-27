@@ -345,6 +345,11 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   return (
     <View className="flex-1" collapsable={false}>
       <LegendList
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        estimatedItemSize={200}
+        contentContainerClassName="py-4 android:pb-12"
+        recycleItems
         ref={listRef}
         data={listData}
         onLoad={() => {

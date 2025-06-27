@@ -30,7 +30,7 @@ function H2({ className, asChild = false, ...props }: TypographyProps) {
       role="heading"
       aria-level="2"
       className={cn(
-        'border-b border-border pb-2 font-serif text-3xl font-semibold tracking-tight text-foreground first:mt-0 web:select-text web:scroll-m-20',
+        'pb-2 font-serif text-3xl font-semibold tracking-tight text-foreground first:mt-0 web:select-text web:scroll-m-20',
         className
       )}
       {...props}

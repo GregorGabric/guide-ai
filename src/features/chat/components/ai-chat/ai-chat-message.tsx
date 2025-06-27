@@ -8,6 +8,7 @@ import { Button } from '~/src/components/ui/button';
 import { P } from '~/src/components/ui/typography';
 import { useSmoothText } from '~/src/lib/hooks';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 import { cn } from '~/src/lib/utils';
 
 interface UserMessageProps {
@@ -22,9 +23,9 @@ export function UserMessage({ message, isNextUserMessage }: UserMessageProps) {
         style={{
           borderCurve: 'continuous',
         }}
-        className="max-w-[80%] items-end rounded-2xl bg-secondary px-4 py-2"
+        className="max-w-[80%] items-end rounded-2xl bg-primary px-4 py-2"
       >
-        <P className="text-white">{message.content}</P>
+        <P className="text-primary-foreground">{message.content}</P>
       </View>
     </View>
   );
@@ -47,13 +48,14 @@ export function AIMessage(props: MessageProps) {
   const [visibleText] = useSmoothText(props.message.content);
   const playerStatus = useAudioPlayerStatus(props.player);
   const isPlaying = playerStatus.playing;
+  const { colors } = useTheme();
   if (!visibleText) {
     return null;
   }
 
   return (
     <View className="mb-4 items-start">
-      <View className="max-w-[80%] rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
+      <View className="max-w-[80%] rounded-2xl border border-border bg-background px-4 py-3">
         <P>{visibleText}</P>
         <Button
           variant="plain"
@@ -68,11 +70,11 @@ export function AIMessage(props: MessageProps) {
           }}
         >
           {props.isGeneratingAudio ? (
-            <LoaderIcon className="animate-spin" />
+            <LoaderIcon className="animate-spin" color={colors.card} />
           ) : isPlaying ? (
-            <IconVolume2 size={16} />
+            <IconVolume2 size={16} color={colors.card} />
           ) : (
-            <IconVolume2 size={16} />
+            <IconVolume2 size={16} color={colors.card} />
           )}
 
           <P>{props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}</P>

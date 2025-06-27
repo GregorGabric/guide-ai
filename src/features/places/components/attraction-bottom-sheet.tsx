@@ -19,16 +19,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
 
-import { IconInfoCircle, IconNavigation } from '@tabler/icons-react-native';
+import { IconInfoCircle } from '@tabler/icons-react-native';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
 import { Text } from '~/src/components/ui/text';
-import { H1, H4, P } from '~/src/components/ui/typography';
+import { H1, H4, Large, P, Small } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
-import { colors } from '~/src/utils/theme';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 
 const extractCountryFromAddress = (address?: string): string | undefined => {
   if (!address) {
@@ -94,7 +94,7 @@ export function AttractionBottomSheet({
 }: AttractionBottomSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
-
+  const { colors } = useTheme();
   const translateX = useSharedValue(0);
   const gestureProgress = useSharedValue(0);
   const tabTransition = useSharedValue(activeTab === 'overview' ? 1 : 0);
@@ -242,7 +242,7 @@ export function AttractionBottomSheet({
     <Sheet
       enableDynamicSizing={false}
       detached
-      bottomInset={insets.bottom}
+      // bottomInset={insets.bottom}
       topInset={insets.top}
       style={{
         borderCurve: 'continuous',
@@ -255,33 +255,42 @@ export function AttractionBottomSheet({
       enableOverDrag={false}
       backgroundStyle={{
         borderRadius: 47 - (insets.left + 12),
-        backgroundColor: colors['card-background'],
+        backgroundColor: colors.card,
       }}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
     >
       {attraction && (
-        <View
-          className="flex-1 overflow-hidden"
-          style={{ backgroundColor: colors['card-background'] }}
-        >
+        <View className="flex-1 overflow-hidden">
           <View className="mb-6 px-8 pt-2">
             <H1 className="mb-3">{attraction.displayName.text || attraction.name}</H1>
 
             {attraction.formattedAddress && (
               <View className="mb-2 flex flex-row items-center gap-2 rounded-2xl">
-                <P className="flex-1 text-base font-medium text-foreground">
-                  {attraction.formattedAddress}
-                </P>
+                <Small className="flex-1">{attraction.formattedAddress}</Small>
               </View>
             )}
             {distance && (
               <Badge
                 variant="default"
                 className="flex-row items-center gap-2 self-start rounded-2xl px-4"
+                asChild
               >
-                <IconNavigation size={16} />
-                <Text>{distance} away</Text>
+                <Pressable
+                  onPress={() => {
+                    if (!attraction.location) {
+                      return;
+                    }
+                    openMapsNavigation(
+                      attraction.location.latitude,
+                      attraction.location.longitude,
+                      attraction.displayName.text || attraction.name
+                    );
+                  }}
+                >
+                  <Text>{distance} away</Text>
+                  <ArrowUpRight size={16} />
+                </Pressable>
               </Badge>
             )}
           </View>
@@ -307,19 +316,19 @@ export function AttractionBottomSheet({
                     borderCurve: 'continuous',
                   }}
                 >
-                  <IconInfoCircle size={14} />
+                  <IconInfoCircle size={14} color={colors.foreground} />
                   <Text className="native:text-sm">Overview</Text>
                 </TabsTrigger>
                 <TabsTrigger
                   value="chat"
                   className="flex-1 flex-row gap-2 rounded-full bg-transparent"
                 >
-                  <MessageCircleIcon size={14} />
+                  <MessageCircleIcon size={14} color={colors.foreground} />
                   <Text className="native:text-sm">AI Chat</Text>
                 </TabsTrigger>
               </View>
               <Animated.View
-                className="absolute inset-x-0 z-10 mx-1 h-full rounded-full bg-white"
+                className="absolute inset-x-0 z-10 mx-1 h-full rounded-full bg-background"
                 style={tabIndicatorStyle}
               />
             </TabsList>
@@ -340,8 +349,8 @@ export function AttractionBottomSheet({
                     {/* Enhanced Description */}
                     {attraction.editorialSummary?.text && (
                       <View className="mb-6 ">
-                        <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
-                          <P className="font-medium leading-7 text-slate-700">
+                        <View className="rounded-3xl border border-border bg-background p-5">
+                          <P className="font-medium leading-7">
                             {attraction.editorialSummary.text}
                           </P>
                         </View>
@@ -353,7 +362,7 @@ export function AttractionBottomSheet({
                       attraction.addressDescriptor.landmarks.length > 0 && (
                         <View className="mb-6 ">
                           <H4 className="mb-4">Nearby Landmarks</H4>
-                          <View className="overflow-hidden rounded-3xl border border-slate-100 bg-white ">
+                          <View className="overflow-hidden rounded-3xl border border-border bg-background">
                             {attraction.addressDescriptor.landmarks
                               .slice(0, 3)
                               .map((landmark, index) => (
@@ -370,20 +379,20 @@ export function AttractionBottomSheet({
                                     index <
                                       (attraction.addressDescriptor?.landmarks?.length ?? 0) - 1 &&
                                     index < 2
-                                      ? 'border-b border-slate-100'
+                                      ? 'border-b border-border'
                                       : ''
                                   }`}
                                 >
                                   <View className="flex-1">
-                                    <Text className="text-base font-semibold text-slate-800">
+                                    <Large className="font-semibold">
                                       {landmark.displayName.text}
-                                    </Text>
-                                    <Text className="mt-1 text-sm text-slate-500">
+                                    </Large>
+                                    <Small className="mt-1">
                                       {Math.round(landmark.straightLineDistanceMeters)}m away
-                                    </Text>
+                                    </Small>
                                   </View>
-                                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100">
-                                    <ArrowUpRight size={18} color="#6B7280" />
+                                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-card">
+                                    <ArrowUpRight size={18} color={colors.foreground} />
                                   </View>
                                 </Pressable>
                               ))}

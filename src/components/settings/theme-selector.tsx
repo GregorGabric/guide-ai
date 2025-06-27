@@ -1,60 +1,53 @@
 import { IconDeviceMobile, IconMoon, IconSun } from '@tabler/icons-react-native';
-import { TouchableOpacity, View } from 'react-native';
-import { Text } from '~/src/components/ui/text';
-import { useColorScheme } from '~/src/lib/useColorScheme';
+import { Appearance, View } from 'react-native';
+import { Button } from '~/src/components/ui/button';
+import { H2, H3, P } from '~/src/components/ui/typography';
+import { useTheme } from '~/src/lib/theme/theme-provider';
+import { colors } from '~/src/utils/theme';
 
-interface ThemeSelectorProps {
-  onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
-}
+const themes = [
+  {
+    id: 'light' as const,
+    name: 'Light',
+    description: 'Light theme',
+    icon: IconSun,
+  },
+  {
+    id: 'dark' as const,
+    name: 'Dark',
+    description: 'Dark theme',
+    icon: IconMoon,
+  },
+  {
+    id: 'system' as const,
+    name: 'System',
+    description: 'Follow system',
+    icon: IconDeviceMobile,
+  },
+];
 
-export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
-  const { colorScheme, setColorScheme } = useColorScheme();
+export function ThemeSelector() {
+  const { theme, setTheme } = useTheme();
 
-  const handleThemeSelect = (theme: 'light' | 'dark' | 'system') => {
-    if (theme === 'system') {
+  const handleThemeSelect = (newTheme: 'light' | 'dark' | 'system') => {
+    if (newTheme === 'system') {
+      const systemTheme = Appearance.getColorScheme();
       // For system theme, we'll use the current system preference
       // This is a simplified implementation - in a real app you'd want to detect system theme
-      void setColorScheme(colorScheme === 'dark' ? 'light' : 'dark');
+      setTheme(systemTheme === 'dark' ? 'dark' : 'light');
     } else {
-      void setColorScheme(theme);
-    }
-
-    if (onThemeChange) {
-      onThemeChange(theme);
+      setTheme(newTheme);
     }
   };
 
-  const themes = [
-    {
-      id: 'light' as const,
-      name: 'Light',
-      description: 'Light theme',
-      icon: IconSun,
-    },
-    {
-      id: 'dark' as const,
-      name: 'Dark',
-      description: 'Dark theme',
-      icon: IconMoon,
-    },
-    {
-      id: 'system' as const,
-      name: 'System',
-      description: 'Follow system',
-      icon: IconDeviceMobile,
-    },
-  ];
-
-  const currentTheme = colorScheme;
+  const currentTheme = theme;
 
   return (
     <View>
       {/* Section Header */}
       <View className="mb-4">
-        <Text className="font-quicksand-bold text-text text-lg">Theme</Text>
-        <Text className="text-text-secondary font-quicksand mt-0.5 text-sm">
-          Choose your preferred theme
-        </Text>
+        <H2>Theme</H2>
+        <P>Choose your preferred theme</P>
       </View>
 
       {/* Theme Options */}
@@ -64,38 +57,30 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
           const IconComponent = theme.icon;
 
           return (
-            <TouchableOpacity
+            <Button
+              variant="primary"
               key={theme.id}
               onPress={() => {
                 handleThemeSelect(theme.id);
               }}
               className={`flex-row items-center justify-between rounded-xl p-3 ${
-                isSelected ? 'bg-primary/10' : 'bg-transparent'
+                isSelected ? 'bg-primary' : 'bg-transparent'
               }`}
-              activeOpacity={0.7}
             >
               <View className="flex-1 flex-row items-center">
                 <View className="mr-3">
                   <IconComponent
                     size={20}
-                    color={isSelected ? '#6B7280' : '#9CA3AF'}
+                    color={isSelected ? colors['text-on-primary'] : colors.secondary}
                     strokeWidth={2}
                   />
                 </View>
                 <View className="flex-1">
-                  <Text
-                    className={`font-quicksand-medium ${isSelected ? 'text-primary' : 'text-text'}`}
-                  >
-                    {theme.name}
-                  </Text>
-                  <Text className="text-text-secondary font-quicksand text-sm">
-                    {theme.description}
-                  </Text>
+                  <H3>{theme.name}</H3>
+                  <P>{theme.description}</P>
                 </View>
               </View>
-
-              {isSelected && <View className="h-2 w-2 rounded-full bg-primary" />}
-            </TouchableOpacity>
+            </Button>
           );
         })}
       </View>

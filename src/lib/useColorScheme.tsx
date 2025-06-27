@@ -5,11 +5,16 @@ import { Platform } from 'react-native';
 import { COLORS } from '~/src/lib/theme/colors';
 
 function useColorScheme() {
-  const { colorScheme, setColorScheme: setNativeWindColorScheme } = useNativewindColorScheme();
+  const theme = useNativewindColorScheme();
+
+  console.log(theme.colorScheme, 'theme.colorScheme');
 
   async function setColorScheme(colorScheme: 'light' | 'dark') {
-    setNativeWindColorScheme(colorScheme);
-    if (Platform.OS !== 'android') return;
+    theme.setColorScheme(colorScheme);
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
     try {
       await setNavigationBar(colorScheme);
     } catch (error) {
@@ -18,15 +23,15 @@ function useColorScheme() {
   }
 
   function toggleColorScheme() {
-    return setColorScheme(colorScheme === 'light' ? 'dark' : 'light');
+    return setColorScheme(theme.colorScheme === 'light' ? 'dark' : 'light');
   }
 
   return {
-    colorScheme: colorScheme ?? 'light',
-    isDarkColorScheme: colorScheme === 'dark',
+    colorScheme: theme.colorScheme ?? 'light',
+    isDarkColorScheme: theme.colorScheme === 'dark',
     setColorScheme,
     toggleColorScheme,
-    colors: COLORS[colorScheme ?? 'light'],
+    colors: COLORS[theme.colorScheme ?? 'light'],
   };
 }
 
@@ -36,11 +41,13 @@ function useColorScheme() {
 function useInitialAndroidBarSync() {
   const { colorScheme } = useColorScheme();
   React.useEffect(() => {
-    if (Platform.OS !== 'android') return;
-    setNavigationBar(colorScheme).catch((error) => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+    setNavigationBar(colorScheme).catch((error: unknown) => {
       console.error('useColorScheme.tsx", "useInitialColorScheme', error);
     });
-  }, []);
+  }, [colorScheme]);
 }
 
 export { useColorScheme, useInitialAndroidBarSync };

@@ -1,8 +1,7 @@
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-
-import { useColorScheme } from '~/src/lib/useColorScheme';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 
 const Sheet = ({
   ref,
@@ -14,7 +13,7 @@ const Sheet = ({
 }: React.ComponentPropsWithoutRef<typeof BottomSheetModal> & {
   ref?: React.RefObject<BottomSheetModal | null>;
 }) => {
-  const { colors } = useColorScheme();
+  const { colors } = useTheme();
 
   const renderBackdrop = React.useCallback(
     (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} />,
@@ -23,7 +22,7 @@ const Sheet = ({
   return (
     <BottomSheetModal
       ref={ref}
-      index={0}
+      index={index}
       backgroundStyle={
         backgroundStyle ?? {
           backgroundColor: colors.card,

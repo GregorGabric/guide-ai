@@ -21,7 +21,7 @@ export function AiChatInput({
 
   return (
     <BottomSheetTextInput
-      className="rounded-2xl border border-slate-300 bg-white px-4 py-3"
+      className="rounded-2xl border border-border bg-background px-4 py-3"
       placeholder="Ask about this location..."
       editable={!isLoading}
       value={text}

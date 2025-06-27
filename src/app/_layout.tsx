@@ -1,7 +1,11 @@
 import { IBMPlexSans_400Regular, useFonts } from '@expo-google-fonts/ibm-plex-sans';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import type { Theme } from '@react-navigation/native';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as NativewindThemeProvider,
+} from '@react-navigation/native';
 import { useConvexAuth } from 'convex/react';
 import { SplashScreen, Stack } from 'expo-router';
 import type { SQLiteDatabase } from 'expo-sqlite';
@@ -16,6 +20,7 @@ import { OnboardingWrapper } from '~/src/components/onboarding-wrapper';
 import { ConvexClientProvider } from '~/src/context/convex-provider';
 import { QueryProvider } from '~/src/context/query-context';
 import { NAV_THEME } from '~/src/lib/constants';
+import { ThemeProvider } from '~/src/lib/theme/theme-provider';
 import { useColorScheme } from '~/src/lib/useColorScheme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -29,19 +34,11 @@ const DARK_THEME: Theme = {
   colors: NAV_THEME.dark,
 };
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(drawer)',
-};
+export { ErrorBoundary } from 'expo-router';
 
 export default function RootLayout() {
   const hasMounted = useRef(false);
-  const { colorScheme: _colorScheme, isDarkColorScheme } = useColorScheme();
+  const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false);
   const [loaded, error] = useFonts({
     IBMPlexSans_400Regular,
@@ -73,12 +70,15 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
               <KeyboardProvider>
-                <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-                  <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-                  <OnboardingWrapper>
-                    <AuthWrapper />
-                  </OnboardingWrapper>
-                </ThemeProvider>
+                <NativewindThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+                  <ThemeProvider>
+                    {/* <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}> */}
+                    <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+                    <OnboardingWrapper>
+                      <ScreensWrapper />
+                    </OnboardingWrapper>
+                  </ThemeProvider>
+                </NativewindThemeProvider>
               </KeyboardProvider>
             </BottomSheetModalProvider>
           </GestureHandlerRootView>
@@ -88,7 +88,7 @@ export default function RootLayout() {
   );
 }
 
-function AuthWrapper() {
+function ScreensWrapper() {
   const { isAuthenticated, isLoading } = useConvexAuth();
 
   useEffect(() => {
@@ -105,8 +105,6 @@ function AuthWrapper() {
 }
 
 function Screens({ isAuthenticated }: { isAuthenticated: boolean }) {
-  console.log('isAuthenticated', isAuthenticated);
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!isAuthenticated}>
