@@ -9,7 +9,6 @@ import { fetch as expoFetch } from 'expo/fetch';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
-import { Text } from '~/src/components/ui/text';
 import { P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import type { Doc } from '~/src/convex/_generated/dataModel';
@@ -367,14 +366,14 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
         onScrollEndDrag={handleScrollEndDrag}
       />
 
-      <View className="-mx-8 mb-4 items-stretch gap-2 border-t border-slate-200 px-8 py-3">
+      <View className="-mx-8 mb-4 items-stretch gap-2 border-t border-border px-8 py-3">
         <ScrollView horizontal contentContainerClassName="flex-row gap-2">
           <Button
             onPress={() => {
               void clearMessages();
             }}
           >
-            <Text>Clear</Text>
+            <P>Clear</P>
           </Button>
           <Button
             onPress={() => {
@@ -394,9 +393,9 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             {isGeneratingAudio ? (
               <LoaderIcon className="animate-spin" />
             ) : isPlaying ? (
-              <Text>Stop</Text>
+              <P>Stop</P>
             ) : (
-              <Text>Read it</Text>
+              <P>Read it</P>
             )}
           </Button>
         </ScrollView>

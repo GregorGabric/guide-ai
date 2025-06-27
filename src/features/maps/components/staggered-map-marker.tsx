@@ -12,7 +12,8 @@ import Animated, {
 import { Button } from '~/src/components/ui/button';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { cn } from '~/src/lib/utils';
-import { colors } from '~/src/utils/theme';
+
+import { useTheme } from '~/src/lib/theme/theme-provider';
 import { MapMarker } from '../../../components/ui/map.native';
 
 const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
@@ -34,7 +35,7 @@ export function StaggeredMapMarker({
   isSelected: boolean;
 }) {
   const rotation = useSharedValue(0);
-
+  const { colors } = useTheme();
   useEffect(() => {
     if (!isSelected) {
       rotation.set(withSpring(0));
@@ -70,8 +71,12 @@ export function StaggeredMapMarker({
       entering={FadeInDown.duration(250).delay(index * stagger)}
       exiting={FadeOutDown.duration(250).delay(initialExitingDelay + index * stagger)}
     >
-      <Button size={'icon'} className={cn('native:rounded-full bg-secondary  p-2 shadow-lg')}>
-        <IconMapPin size={16} color={colors['text-on-primary']} />
+      <Button
+        size={'icon'}
+        className={cn('native:rounded-full bg-background p-2 shadow')}
+        onPress={onPress}
+      >
+        <IconMapPin size={16} color={colors.foreground} />
       </Button>
     </AnimatedMapMarker>
   );

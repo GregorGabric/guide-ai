@@ -3,7 +3,7 @@ import { Appearance, View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
 import { H2, H3, P } from '~/src/components/ui/typography';
 import { useTheme } from '~/src/lib/theme/theme-provider';
-import { colors } from '~/src/utils/theme';
+import { cn } from '~/src/lib/utils';
 
 const themes = [
   {
@@ -27,7 +27,7 @@ const themes = [
 ];
 
 export function ThemeSelector() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, colors } = useTheme();
 
   const handleThemeSelect = (newTheme: 'light' | 'dark' | 'system') => {
     if (newTheme === 'system') {
@@ -63,21 +63,27 @@ export function ThemeSelector() {
               onPress={() => {
                 handleThemeSelect(theme.id);
               }}
-              className={`flex-row items-center justify-between rounded-xl p-3 ${
+              className={cn(
+                'flex-row items-center justify-between rounded-xl p-3',
                 isSelected ? 'bg-primary' : 'bg-transparent'
-              }`}
+              )}
+              size={'lg'}
             >
               <View className="flex-1 flex-row items-center">
                 <View className="mr-3">
                   <IconComponent
                     size={20}
-                    color={isSelected ? colors['text-on-primary'] : colors.secondary}
+                    color={isSelected ? colors.background : colors.primary}
                     strokeWidth={2}
                   />
                 </View>
                 <View className="flex-1">
-                  <H3>{theme.name}</H3>
-                  <P>{theme.description}</P>
+                  <H3 className={cn(isSelected ? 'text-background' : 'text-foreground')}>
+                    {theme.name}
+                  </H3>
+                  <P className={cn(isSelected ? 'text-background' : 'text-muted-foreground')}>
+                    {theme.description}
+                  </P>
                 </View>
               </View>
             </Button>

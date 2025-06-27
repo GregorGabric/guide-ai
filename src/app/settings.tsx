@@ -77,7 +77,7 @@ export default function SettingsModal() {
                     <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
                       <P className="text-sm text-foreground">Natural</P>
                     </View>
-                    <IconChevronRight size={20} color={colors.text} />
+                    <IconChevronRight size={20} color={colors.foreground} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -96,7 +96,7 @@ export default function SettingsModal() {
                     <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
                       <P className="text-sm text-foreground">English</P>
                     </View>
-                    <IconChevronRight size={20} color={colors.text} />
+                    <IconChevronRight size={20} color={colors.foreground} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -120,7 +120,7 @@ export default function SettingsModal() {
                     <View className="mr-3 rounded-full bg-green-500/10 px-3 py-2">
                       <P className="text-sm text-green-600">On</P>
                     </View>
-                    <IconChevronRight size={20} color={colors.text} />
+                    <IconChevronRight size={20} color={colors.foreground} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function SettingsModal() {
                     <Large className="mb-1">Privacy</Large>
                     <P>Data & privacy settings</P>
                   </View>
-                  <IconChevronRight size={20} color={colors.text} />
+                  <IconChevronRight size={20} color={colors.foreground} />
                 </View>
               </TouchableOpacity>
 
@@ -157,8 +157,8 @@ export default function SettingsModal() {
               className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5"
             >
               <View className="flex-row items-center justify-center">
-                <IconLogout size={20} color={colors.error} />
-                <Large className="ml-3 text-red-500">Sign Out</Large>
+                <IconLogout size={20} color={colors.destructive} />
+                <Large className="ml-3 text-destructive">Sign Out</Large>
               </View>
             </TouchableOpacity>
           </View>
