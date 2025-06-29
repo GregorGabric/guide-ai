@@ -16,6 +16,7 @@ const buttonVariants = cva('flex-row items-center justify-center gap-2', {
       tonal:
         'ios:bg-primary/10 dark:ios:bg-primary/10 ios:active:bg-primary/15 bg-primary/15 dark:bg-primary/30',
       plain: 'ios:active:opacity-70',
+      destructive: 'ios:active:opacity-80 bg-destructive',
     },
     size: {
       none: '',
@@ -53,6 +54,7 @@ const buttonTextVariants = cva('font-medium', {
       secondary: 'ios:text-primary text-foreground',
       tonal: 'ios:text-primary text-foreground',
       plain: 'text-foreground',
+      destructive: 'text-destructive-foreground',
     },
     size: {
       none: '',
@@ -94,6 +96,7 @@ const ANDROID_RIPPLE = {
     },
     plain: { color: convertToRGBA(COLORS.dark.grey5, 0.8), borderless: false },
     tonal: { color: convertToRGBA(COLORS.dark.grey5, 0.8), borderless: false },
+    destructive: { color: convertToRGBA(COLORS.dark.grey5, 0.8), borderless: false },
   },
   light: {
     primary: {
@@ -145,7 +148,8 @@ const Button = React.forwardRef<React.ComponentRef<typeof Pressable>, ButtonProp
               size,
               className: androidRootClassName,
             }),
-          })}>
+          })}
+        >
           <Pressable
             className={cn(
               props.disabled && 'opacity-50',

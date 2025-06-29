@@ -1,6 +1,7 @@
 import { useChat } from '@ai-sdk/react';
 import type { LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { LegendList } from '@legendapp/list';
+import { IconTrash } from '@tabler/icons-react-native';
 import { useMutation as useTanstackMutation } from '@tanstack/react-query';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
@@ -8,14 +9,17 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { fetch as expoFetch } from 'expo/fetch';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
+import { useStore } from 'zustand';
 import { Button } from '~/src/components/ui/button';
-import { P } from '~/src/components/ui/typography';
+import { Text } from '~/src/components/ui/text';
 import { api } from '~/src/convex/_generated/api';
 import type { Doc } from '~/src/convex/_generated/dataModel';
 import { AiChatInput } from '~/src/features/chat/components/ai-chat/ai-chat-input';
 import { AIMessage, UserMessage } from '~/src/features/chat/components/ai-chat/ai-chat-message';
+import { languageStore } from '~/src/features/settings/store';
 import { AudioLinesIcon } from '~/src/lib/icons/audio-lines';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 import { getUserId } from '~/src/lib/userId';
 import { getConvexSiteUrl } from '~/src/lib/utils';
 
@@ -50,6 +54,7 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const player = useAudioPlayer();
   const [userId, setUserId] = useState<string | null>(null);
+  const voiceId = useStore(languageStore, (state) => state.language.voiceId);
 
   const playerStatus = useAudioPlayerStatus(player);
   const isPlaying = playerStatus.playing;
@@ -60,13 +65,13 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   useEffect(() => {
     getUserId()
       .then(setUserId)
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error('Failed to get user ID:', error);
       });
   }, []);
 
   // Get user trial info for UI display
-  const userTrialInfo = useQuery(api.ttsRequests.getUserTrialInfo, userId ? { userId } : 'skip');
+  const userTrialInfo = useQuery(api.ttsRequests.getUserTrialInfo);
 
   const { messages, error, append, status } = useChat({
     api: `${getConvexSiteUrl()}/chat`,
@@ -152,28 +157,21 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
       );
 
       if (result) {
-        console.log(`Using cached audio for text (${text.length} chars)`);
         return result.audio;
       }
 
       try {
-        // Step 1: Request TTS and validate limits
         const requestId = await requestTTS({
-          userId,
           text,
-          voiceId: 'EkK5I93UQWFDigLMpZcX', // Default voice
         });
-
-        // Step 2: Update status to processing
         await updateTTSStatus({
           requestId,
           status: 'processing',
         });
 
-        // Step 3: Generate the actual TTS audio
         const audioBase64 = await generateTTS({
           text,
-          voiceId: 'EkK5I93UQWFDigLMpZcX',
+          voiceId,
         });
 
         // Step 4: Update status to completed with audio data
@@ -190,9 +188,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             cacheKey,
             audioBase64,
           ]);
-          console.log('Cached audio for future use');
         } catch (error) {
-          console.warn('Failed to cache audio - localStorage full?', error);
+          console.warn('Failed to cache audio', error);
         }
 
         return audioBase64;
@@ -284,13 +281,15 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
     return items;
   }, [messages, userMessages.length, attraction]);
 
+  const { colors } = useTheme();
+
   const renderItem = useCallback(
     ({ item, index }: LegendListRenderItemProps<MessageItem>) => {
       if (item.type === 'placeholder') {
         return (
           <View className="mb-4 items-start px-4">
-            <View className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3">
-              <P className="text-slate-600">{item.content}</P>
+            <View className="rounded-2xl border border-border bg-card px-4 py-3">
+              <Text variant={'body'}>{item.content}</Text>
             </View>
           </View>
         );
@@ -338,7 +337,11 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   );
 
   if (error) {
-    return <P className="text-red-500">{error.message}</P>;
+    return (
+      <Text variant={'body'} className="text-destructive">
+        {error.message}
+      </Text>
+    );
   }
 
   return (
@@ -373,7 +376,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
               void clearMessages();
             }}
           >
-            <P>Clear</P>
+            <Text>Clear</Text>
+            <IconTrash size={16} color={colors.background} />
           </Button>
           <Button
             onPress={() => {
@@ -389,13 +393,13 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             }}
             disabled={!lastAiMessage}
           >
-            <AudioLinesIcon size={16} />
+            <AudioLinesIcon size={16} color={colors.background} />
             {isGeneratingAudio ? (
               <LoaderIcon className="animate-spin" />
             ) : isPlaying ? (
-              <P>Stop</P>
+              <Text>Stop</Text>
             ) : (
-              <P>Read it</P>
+              <Text>Read it</Text>
             )}
           </Button>
         </ScrollView>

@@ -6,6 +6,7 @@ import {
   DefaultTheme,
   ThemeProvider as NativewindThemeProvider,
 } from '@react-navigation/native';
+import { PortalHost } from '@rn-primitives/portal';
 import { useConvexAuth } from 'convex/react';
 import { SplashScreen, Stack } from 'expo-router';
 import type { SQLiteDatabase } from 'expo-sqlite';
@@ -106,32 +107,35 @@ function ScreensWrapper() {
 
 function Screens({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="login" />
-      </Stack.Protected>
-      <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="visited"
-          options={{
-            presentation: 'modal',
-          }}
-        />
-        <Stack.Screen
-          name="camera"
-          options={{
-            presentation: 'modal',
-          }}
-        />
-        <Stack.Screen
-          name="settings"
-          options={{
-            presentation: 'modal',
-          }}
-        />
-      </Stack.Protected>
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="login" />
+        </Stack.Protected>
+        <Stack.Protected guard={isAuthenticated}>
+          <Stack.Screen name="index" />
+          <Stack.Screen
+            name="visited"
+            options={{
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="camera"
+            options={{
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{
+              presentation: 'modal',
+            }}
+          />
+        </Stack.Protected>
+      </Stack>
+      <PortalHost />
+    </>
   );
 }
 

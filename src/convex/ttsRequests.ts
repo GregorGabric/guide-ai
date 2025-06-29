@@ -11,7 +11,6 @@ export const RATE_LIMIT_MAX_REQUESTS = 20; // Max requests per hour
 export const requestTextToSpeech = mutation({
   args: {
     text: v.string(),
-    voiceId: v.optional(v.string()),
   },
   returns: v.id('ttsRequests'),
   handler: async (ctx, args) => {
@@ -50,7 +49,6 @@ export const requestTextToSpeech = mutation({
       throw new Error('RATE_LIMIT_EXCEEDED');
     }
 
-    // Create TTS request record
     const requestId = await ctx.db.insert('ttsRequests', {
       userId: userId,
       text: args.text,
@@ -58,7 +56,6 @@ export const requestTextToSpeech = mutation({
       createdAt: now,
     });
 
-    // Update user trial count
     await ctx.db.patch(user._id, {
       trialTtsCount: (user.trialTtsCount || 0) + 1,
     });

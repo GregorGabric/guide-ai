@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { startTransition, useState } from 'react';
 import { View } from 'react-native';
+import type NativeMapView from 'react-native-maps';
 import Animated, {
   runOnJS,
   useAnimatedScrollHandler,
@@ -19,6 +20,8 @@ interface AttractionCarouselProps {
   onPressOut: (attraction: PlacesResponse['places'][number]) => void;
   onAttractionPress?: (attraction: PlacesResponse['places'][number]) => void;
   setSelectedAttraction: (attraction: PlacesResponse['places'][number]) => void;
+  mapRef: React.RefObject<NativeMapView>;
+  selectedAttraction: PlacesResponse['places'][number] | null;
 }
 
 export const AttractionCarousel = ({
@@ -27,6 +30,8 @@ export const AttractionCarousel = ({
   onAttractionPress,
   setSelectedAttraction,
   children,
+  mapRef,
+  selectedAttraction,
 }: PropsWithChildren<AttractionCarouselProps>) => {
   const scrollOffsetX = useSharedValue(0);
   const [width, setWidth] = useState(0);
@@ -63,6 +68,8 @@ export const AttractionCarousel = ({
       >
         {data.map((place) => (
           <InfoItem
+            selectedAttraction={selectedAttraction}
+            mapRef={mapRef}
             width={width}
             place={place}
             onOpenAttraction={(attraction) => {

@@ -2,6 +2,7 @@
 
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { v } from 'convex/values';
+import { VOICE_CONFIG } from '../features/chat/voice-config';
 import { action } from './_generated/server';
 
 const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -33,7 +34,7 @@ export const generateTTS = action({
   returns: v.string(),
   handler: async (_ctx, args) => {
     try {
-      const voiceId = args.voiceId || 'EkK5I93UQWFDigLMpZcX';
+      const voiceId = args.voiceId || VOICE_CONFIG.english.voiceId;
 
       const audioStream = await client.textToSpeech.stream(voiceId, {
         text: args.text,

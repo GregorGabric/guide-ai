@@ -5,7 +5,7 @@ import { useAudioPlayerStatus } from 'expo-audio';
 import type { ScrollView } from 'react-native';
 import { View } from 'react-native';
 import { Button } from '~/src/components/ui/button';
-import { P } from '~/src/components/ui/typography';
+import { Text } from '~/src/components/ui/text';
 import { useSmoothText } from '~/src/lib/hooks';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
 import { useTheme } from '~/src/lib/theme/theme-provider';
@@ -25,7 +25,9 @@ export function UserMessage({ message, isNextUserMessage }: UserMessageProps) {
         }}
         className="max-w-[80%] items-end rounded-2xl bg-primary px-4 py-2"
       >
-        <P className="text-primary-foreground">{message.content}</P>
+        <Text variant={'body'} className="text-primary-foreground">
+          {message.content}
+        </Text>
       </View>
     </View>
   );
@@ -55,8 +57,8 @@ export function AIMessage(props: MessageProps) {
 
   return (
     <View className="mb-4 items-start">
-      <View className="max-w-[80%] rounded-2xl border border-border bg-background px-4 py-3">
-        <P>{visibleText}</P>
+      <View className="max-w-[80%] rounded-2xl border border-border bg-card px-4 py-3">
+        <Text variant={'body'}>{visibleText}</Text>
         <Button
           variant="plain"
           size="sm"
@@ -70,14 +72,14 @@ export function AIMessage(props: MessageProps) {
           }}
         >
           {props.isGeneratingAudio ? (
-            <LoaderIcon className="animate-spin" color={colors.card} />
+            <LoaderIcon className="animate-spin" color={colors.foreground} />
           ) : isPlaying ? (
-            <IconVolume2 size={16} color={colors.card} />
+            <IconVolume2 size={16} color={colors.foreground} />
           ) : (
-            <IconVolume2 size={16} color={colors.card} />
+            <IconVolume2 size={16} color={colors.foreground} />
           )}
 
-          <P>{props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}</P>
+          <Text>{props.isGeneratingAudio ? 'Loading...' : isPlaying ? 'Stop' : 'Listen'}</Text>
         </Button>
       </View>
     </View>

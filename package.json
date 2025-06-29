@@ -71,6 +71,8 @@
     "react-dom": "19.0.0",
     "react-native": "0.79.4",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-ios-context-menu": "3.1.0",
+    "react-native-ios-utilities": "5.1.2",
     "react-native-keyboard-controller": "^1.17.4",
     "react-native-maps": "1.20.1",
     "react-native-purchases": "^8.11.7",
@@ -86,6 +88,7 @@
     "reanimated-color-picker": "^4.1.0",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "zeego": "^3.0.6",
     "zustand": "^4.5.1"
   },
   "devDependencies": {

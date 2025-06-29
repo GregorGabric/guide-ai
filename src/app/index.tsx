@@ -12,12 +12,15 @@ import { api } from '~/src/convex/_generated/api';
 import { MapMarker, MapView } from '../components/ui/map.native';
 // import { Camera } from '~/src/features/camera/camera';
 import { IconNavigation } from '@tabler/icons-react-native';
+import type NativeMapView from 'react-native-maps';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
-import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
+import {
+  AttractionBottomSheet,
+  useSheetStore,
+} from '~/src/features/places/components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { currentLocation as getCurrentLocation } from '~/src/services/queries';
-
 const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
 
 export default function MapScreen() {
@@ -42,13 +45,29 @@ export default function MapScreen() {
   });
   const data = placesQuery.data?.places;
 
-  const mapRef = useRef<typeof MapView>(null);
+  const mapRef = useRef<NativeMapView>(null);
   const sheetRef = useSheetRef();
 
   const [open, setOpen] = useState(false);
-
+  const isSheetOpen = useSheetStore((state) => state.isOpen);
   const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
     if (mapRef.current) {
+      if (open) {
+        mapRef.current.animateCamera(
+          {
+            altitude: 1000,
+            pitch: 60,
+            // heading: (heading.current = (heading.current - 50) % 360),
+            center: {
+              latitude: attraction.location.latitude,
+              longitude: attraction.location.longitude,
+            },
+            zoom: 15,
+          },
+          { duration: 500 }
+        );
+        return;
+      }
       mapRef.current.animateCamera(
         {
           altitude: 1000,
@@ -184,6 +203,8 @@ export default function MapScreen() {
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}
+          mapRef={mapRef}
+          selectedAttraction={selectedAttraction}
         />
       )}
 

@@ -20,11 +20,11 @@ import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
 
 import { IconInfoCircle } from '@tabler/icons-react-native';
+import { create } from 'zustand';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
 import { Text } from '~/src/components/ui/text';
-import { H1, H4, Large, P, Small } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
@@ -81,11 +81,21 @@ interface AttractionBottomSheetProps {
   onClose: () => void;
   sheetRef: React.RefObject<BottomSheetModal | null>;
 }
-const snapPoints = ['95%'];
+const snapPoints = ['65%', '100%'];
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const TAB_TRANSITION_DURATION = 150;
+
+export const useSheetStore = create<{
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}>((set) => ({
+  isOpen: false,
+  setIsOpen: (isOpen) => {
+    set({ isOpen });
+  },
+}));
 
 export function AttractionBottomSheet({
   attraction,
@@ -98,13 +108,16 @@ export function AttractionBottomSheet({
   const translateX = useSharedValue(0);
   const gestureProgress = useSharedValue(0);
   const tabTransition = useSharedValue(activeTab === 'overview' ? 1 : 0);
+  const setIsOpen = useSheetStore((state) => state.setIsOpen);
+
   const handleSheetChanges = useCallback(
     (index: number) => {
+      setIsOpen(index > -1);
       if (index === -1) {
         onClose();
       }
     },
-    [onClose]
+    [onClose, setIsOpen]
   );
 
   const userMessages =
@@ -263,11 +276,15 @@ export function AttractionBottomSheet({
       {attraction && (
         <View className="flex-1 overflow-hidden">
           <View className="mb-6 px-8 pt-2">
-            <H1 className="mb-3">{attraction.displayName.text || attraction.name}</H1>
+            <Text variant={'largeTitle'} className="mb-3">
+              {attraction.displayName.text || attraction.name}
+            </Text>
 
             {attraction.formattedAddress && (
               <View className="mb-2 flex flex-row items-center gap-2 rounded-2xl">
-                <Small className="flex-1">{attraction.formattedAddress}</Small>
+                <Text variant={'subhead'} className="flex-1">
+                  {attraction.formattedAddress}
+                </Text>
               </View>
             )}
             {distance && (
@@ -349,10 +366,8 @@ export function AttractionBottomSheet({
                     {/* Enhanced Description */}
                     {attraction.editorialSummary?.text && (
                       <View className="mb-6 ">
-                        <View className="rounded-3xl border border-border bg-background p-5">
-                          <P className="font-medium leading-7">
-                            {attraction.editorialSummary.text}
-                          </P>
+                        <View className="rounded-3xl border border-border bg-card p-5">
+                          <Text variant={'body'}>{attraction.editorialSummary.text}</Text>
                         </View>
                       </View>
                     )}
@@ -361,8 +376,10 @@ export function AttractionBottomSheet({
                     {attraction.addressDescriptor?.landmarks &&
                       attraction.addressDescriptor.landmarks.length > 0 && (
                         <View className="mb-6 ">
-                          <H4 className="mb-4">Nearby Landmarks</H4>
-                          <View className="overflow-hidden rounded-3xl border border-border bg-background">
+                          <Text variant={'subhead'} className="mb-4">
+                            Nearby Landmarks
+                          </Text>
+                          <View className="overflow-hidden rounded-3xl border border-border bg-card">
                             {attraction.addressDescriptor.landmarks
                               .slice(0, 3)
                               .map((landmark, index) => (
@@ -384,12 +401,12 @@ export function AttractionBottomSheet({
                                   }`}
                                 >
                                   <View className="flex-1">
-                                    <Large className="font-semibold">
+                                    <Text variant={'callout'} className="font-semibold">
                                       {landmark.displayName.text}
-                                    </Large>
-                                    <Small className="mt-1">
+                                    </Text>
+                                    <Text variant={'caption1'} className="mt-1">
                                       {Math.round(landmark.straightLineDistanceMeters)}m away
-                                    </Small>
+                                    </Text>
                                   </View>
                                   <View className="h-10 w-10 items-center justify-center rounded-2xl bg-card">
                                     <ArrowUpRight size={18} color={colors.foreground} />

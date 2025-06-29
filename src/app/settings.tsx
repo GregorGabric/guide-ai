@@ -1,11 +1,13 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { IconChevronRight, IconLogout, IconX } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
-import { TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LanguageSelect } from '~/src/components/settings/language-select';
 import { ThemeSelector } from '~/src/components/settings/theme-selector';
 import { Button } from '~/src/components/ui/button';
 import { ScrollView } from '~/src/components/ui/scroll-view';
+
 import { H2, Large, P } from '~/src/components/ui/typography';
 import { useColorScheme } from '~/src/lib/useColorScheme';
 
@@ -56,50 +58,13 @@ export default function SettingsModal() {
             <View className="gap-2">
               <View
                 style={{ borderCurve: 'continuous' }}
-                className=" border-border/30 rounded-2xl border p-1"
+                className=" border-border/30 rounded-2xl border bg-card p-1"
               >
                 <View className="p-4">
                   <ThemeSelector />
                 </View>
               </View>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={{ borderCurve: 'continuous' }}
-                className=" border-border/30 rounded-2xl border p-5"
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1">
-                    <Large className="mb-1">Voice</Large>
-                    <P>AI assistant voice</P>
-                  </View>
-                  <View className="flex-row items-center">
-                    <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
-                      <P className="text-sm text-foreground">Natural</P>
-                    </View>
-                    <IconChevronRight size={20} color={colors.foreground} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={{ borderCurve: 'continuous' }}
-                className=" border-border/30 rounded-2xl border p-5"
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1">
-                    <Large className="mb-1">Language</Large>
-                    <P>Interface language</P>
-                  </View>
-                  <View className="flex-row items-center">
-                    <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
-                      <P className="text-sm text-foreground">English</P>
-                    </View>
-                    <IconChevronRight size={20} color={colors.foreground} />
-                  </View>
-                </View>
-              </TouchableOpacity>
+              <LanguageSelect className="w-full bg-card" />
             </View>
           </View>
 
@@ -108,9 +73,9 @@ export default function SettingsModal() {
 
             <View
               style={{ borderCurve: 'continuous' }}
-              className=" border-border/30 overflow-hidden rounded-2xl border"
+              className=" border-border/30 overflow-hidden rounded-2xl border bg-card"
             >
-              <TouchableOpacity activeOpacity={0.7} className="border-border/20 border-b p-5">
+              {/* <TouchableOpacity activeOpacity={0.7} className="border-border/20 border-b p-5">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">
                     <Large className="mb-1">Notifications</Large>
@@ -123,7 +88,7 @@ export default function SettingsModal() {
                     <IconChevronRight size={20} color={colors.foreground} />
                   </View>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <TouchableOpacity activeOpacity={0.7} className="border-border/20 border-b p-5">
                 <View className="flex-row items-center justify-between">
@@ -150,17 +115,10 @@ export default function SettingsModal() {
           </View>
 
           <View className="mb-8">
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={handleSignOut}
-              style={{ borderCurve: 'continuous' }}
-              className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5"
-            >
-              <View className="flex-row items-center justify-center">
-                <IconLogout size={20} color={colors.destructive} />
-                <Large className="ml-3 text-destructive">Sign Out</Large>
-              </View>
-            </TouchableOpacity>
+            <Button size={'lg'} variant="destructive" onPress={handleSignOut}>
+              <IconLogout size={20} color={colors.foreground} />
+              <Text className="ml-3">Sign Out</Text>
+            </Button>
           </View>
         </ScrollView>
       </View>
