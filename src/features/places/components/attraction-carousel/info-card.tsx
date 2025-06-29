@@ -4,12 +4,14 @@ import { useAction } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, View } from 'react-native';
 import type NativeMapView from 'react-native-maps';
 import Animated, { useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import { Text } from '~/src/components/ui/text';
 import { api } from '~/src/convex/_generated/api';
 import { useSheetStore } from '~/src/features/places/components/attraction-bottom-sheet';
 import type { PlacesResponse } from '~/src/features/places/services/types';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 
 interface Props {
   place: PlacesResponse['places'][number];
@@ -154,6 +156,8 @@ export const InfoItem = ({
     };
   }, [mapRef, animateCamera, altitude, center, isSheetOpen]);
 
+  const { theme } = useTheme();
+
   return (
     <Animated.View style={{ opacity }} onLayout={onLayout}>
       <Pressable
@@ -171,7 +175,7 @@ export const InfoItem = ({
       >
         <BlurView
           experimentalBlurMethod="dimezisBlurView"
-          tint="extraLight"
+          tint={theme === 'dark' ? 'dark' : 'light'}
           style={[
             {
               borderRadius: 10,
@@ -196,16 +200,15 @@ export const InfoItem = ({
               />
             )}
           </View>
-          <View className="w-full flex-1 flex-col gap-1">
-            <Text className="text-lg font-semibold">{place.displayName.text}</Text>
+          <View className="w-full flex-1 flex-col gap-1 text-foreground">
+            <Text variant={'title3'}>{place.displayName.text}</Text>
+
             <View className="flex-row items-center gap-1">
-              <View className="flex-row items-center gap-1">
-                <Text className="text-sm font-semibold">{place.rating}</Text>
-                <IconStar size={12} fill="#FBBF24" stroke="#FBBF24" />
-                <Text className="text-xs font-semibold">
-                  ({Intl.NumberFormat('en-US').format(place.userRatingCount)})
-                </Text>
-              </View>
+              <Text variant="caption1">{place.rating}</Text>
+              <IconStar size={12} fill="#FBBF24" stroke="#FBBF24" />
+              <Text variant="caption1">
+                ({Intl.NumberFormat('en-US').format(place.userRatingCount)})
+              </Text>
             </View>
           </View>
         </BlurView>
