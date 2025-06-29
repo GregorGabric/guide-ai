@@ -15,14 +15,8 @@ export const getNearbyPlaces = action({
     forceRefresh: v.optional(v.boolean()),
   },
   returns: v.union(placesSchema, v.null()),
-  handler: async (ctx, args) => {
-    const {
-      latitude,
-      longitude,
-      radius = 5000,
-      maxResults = 20,
-      // includedTypes = ['tourist_attraction'],
-    } = args;
+  handler: async (_ctx, args) => {
+    const { latitude, longitude, radius = 5000, maxResults = 20 } = args;
 
     const searchParams = { latitude, longitude, radius };
 
@@ -82,7 +76,7 @@ export const getPlacesPhotoUrl = action({
     photoName: v.string(),
   },
   returns: v.union(v.string(), v.null()),
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     if (!API_KEY) {
       throw new Error('Google Places API key not configured');
     }

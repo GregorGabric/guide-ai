@@ -112,8 +112,10 @@ export function AttractionBottomSheet({
 
   const handleSheetChanges = useCallback(
     (index: number) => {
+      console.log('📋 Sheet state changed - index:', index, index > -1 ? 'OPEN' : 'CLOSED');
       setIsOpen(index > -1);
       if (index === -1) {
+        console.log('🚪 Sheet closed, calling onClose');
         onClose();
       }
     },

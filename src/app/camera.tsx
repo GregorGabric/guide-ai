@@ -1,13 +1,11 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useFocusEffect } from '@react-navigation/native';
 import { IconCircle } from '@tabler/icons-react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 import * as FileSystem from 'expo-file-system';
 import { useForegroundPermissions } from 'expo-location';
-import type { RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, Image, Modal, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Camera } from 'react-native-vision-camera';
 import {
@@ -17,58 +15,55 @@ import {
 } from 'react-native-vision-camera';
 import { Button } from '~/src/components/ui/button';
 import { ActivityIndicator } from '~/src/components/ui/loading-indicator';
-import { Sheet, useSheetRef } from '~/src/components/ui/sheet';
+import { ScrollView } from '~/src/components/ui/scroll-view';
+import { Text } from '~/src/components/ui/text';
 import { H2, P } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { colors } from '~/src/utils/theme';
 
-// Analysis Result Sheet Component
-function AnalysisResultSheet({
+// Analysis Result Modal Component using React Native Modal
+function AnalysisResultModal({
   analysisText,
-  sheetRef,
+  visible,
+  onClose,
 }: {
   analysisText: string;
-  sheetRef: RefObject<BottomSheetModal | null>;
+  visible: boolean;
+  onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const snapPoints = ['50%', '80%'];
 
   return (
-    <Sheet
-      ref={sheetRef}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      enableBlurKeyboardOnGesture
-      enableOverDrag={false}
-      enableDynamicSizing={false}
-      detached
-      bottomInset={insets.bottom}
-      topInset={insets.top}
-      style={{
-        borderCurve: 'continuous',
-        marginInline: insets.left + 8,
-      }}
-      backgroundStyle={{
-        borderRadius: 47 - (insets.left + 12),
-        backgroundColor: colors['card-background'],
-      }}
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
-      <View className="flex-1 overflow-clip rounded-3xl px-4 pb-4">
-        <View className="mb-6">
-          <H2 className="mb-4">Analysis Result</H2>
+      <View className="flex-1 bg-background">
+        {/* Header with close button */}
+        <View
+          style={{ paddingTop: insets.top + 10 }}
+          className="flex-row items-center justify-between border-b border-border bg-card px-4 pb-4"
+        >
+          <H2>Analysis Result</H2>
+          <TouchableOpacity onPress={onClose} className="rounded-full bg-secondary p-2">
+            <Text className="px-2">✕</Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Content */}
         <ScrollView
-          className="flex-1 overflow-clip pb-10"
+          className="flex-1 p-4"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         >
-          <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5 ">
+          <View className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
             <P className="font-medium leading-7 text-slate-700">{analysisText}</P>
           </View>
         </ScrollView>
       </View>
-    </Sheet>
+    </Modal>
   );
 }
 
@@ -77,8 +72,8 @@ export default function CameraAnalysis() {
   const device = useCameraDevice('back');
   const [locationPermissionStatus, requestLocationPermission] = useForegroundPermissions();
   const [analysisResult, setAnalysisResult] = useState('');
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const analysisSheetRef = useSheetRef();
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   // const tabBarHeight = useBottomTabBarHeight();
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -92,8 +87,9 @@ export default function CameraAnalysis() {
   // Handle tab focus to activate/deactivate camera
   useFocusEffect(
     useCallback(() => {
-      setIsCameraActive(true);
-      return () => setIsCameraActive(false);
+      return () => {
+        setCapturedPhoto(null); // Clear photo when leaving camera
+      };
     }, [])
   );
 
@@ -111,6 +107,9 @@ export default function CameraAnalysis() {
     try {
       if (camera.current) {
         const photo = await camera.current.takePhoto();
+
+        // Show captured photo immediately
+        setCapturedPhoto(photo.path);
 
         const base64 = await FileSystem.readAsStringAsync(photo.path, {
           encoding: FileSystem.EncodingType.Base64,
@@ -136,12 +135,18 @@ export default function CameraAnalysis() {
 
         // Show the analysis result sheet
         setAnalysisResult(analysis || 'No analysis available');
-        analysisSheetRef.current?.present();
+        setShowAnalysisModal(true);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
       Alert.alert('Error', 'Failed to take photo');
+      setCapturedPhoto(null); // Clear photo on error
     }
+  };
+
+  const handleRetakePhoto = () => {
+    setCapturedPhoto(null);
+    setAnalysisResult('');
   };
 
   if (!hasPermission) {
@@ -164,8 +169,9 @@ export default function CameraAnalysis() {
   }
 
   return (
-    <>
-      <View className="flex-1">
+    <View className="flex-1">
+      {/* Camera View */}
+      {!capturedPhoto && (
         <VisionCamera
           ref={camera}
           style={{
@@ -176,7 +182,33 @@ export default function CameraAnalysis() {
           photo
           enableLocation={locationPermissionStatus?.granted}
         />
+      )}
 
+      {/* Photo Preview */}
+      {capturedPhoto && (
+        <View className="flex-1">
+          <Image
+            source={{ uri: `file://${capturedPhoto}` }}
+            className="flex-1"
+            resizeMode="cover"
+          />
+
+          {/* Retake button overlay */}
+          <View
+            style={{
+              bottom: insets.bottom + 40,
+            }}
+            className="absolute inset-x-0 flex-row items-center justify-center px-16"
+          >
+            <Button onPress={handleRetakePhoto} variant="primary">
+              <Text>Retake</Text>
+            </Button>
+          </View>
+        </View>
+      )}
+
+      {/* Camera controls */}
+      {!capturedPhoto && (
         <View
           style={{
             bottom: insets.bottom,
@@ -194,30 +226,46 @@ export default function CameraAnalysis() {
             </Button>
           </View>
         </View>
+      )}
 
-        {/* Optional location permission banner */}
-        {!locationPermissionStatus?.granted && (
-          <View className="absolute inset-x-0 top-0 bg-yellow-500/90 p-3">
-            <Text className="text-center text-sm text-white">
-              Enable location for better analysis results
-            </Text>
-            <Button
-              onPress={() => requestLocationPermission()}
-              variant="secondary"
-              size="sm"
-              className="mt-2"
-            >
-              <Text className="text-xs">Enable Location</Text>
-            </Button>
+      {/* Optional location permission banner */}
+      {!locationPermissionStatus?.granted && !capturedPhoto && (
+        <View className="absolute inset-x-0 top-0 bg-yellow-500/90 p-3" style={{ zIndex: 10 }}>
+          <Text className="text-center text-sm text-white">
+            Enable location for better analysis results
+          </Text>
+          <Button
+            onPress={() => requestLocationPermission()}
+            variant="secondary"
+            size="sm"
+            className="mt-2"
+          >
+            <Text>Enable Location</Text>
+          </Button>
+        </View>
+      )}
+
+      {/* Loading Overlay - Fixed positioning and z-index */}
+      {analyzeImage.isPending && (
+        <View
+          className="bg-background/50 absolute inset-0 items-center justify-center"
+          style={{ zIndex: 100 }}
+        >
+          <View className="items-center">
+            <ActivityIndicator />
+            <Text className="mt-4 font-medium ">Analyzing photo...</Text>
           </View>
-        )}
+        </View>
+      )}
 
-        {/* Loading Overlay */}
-        {analyzeImage.isPending && <ActivityIndicator />}
-      </View>
-
-      {/* Analysis Result Sheet */}
-      <AnalysisResultSheet analysisText={analysisResult} sheetRef={analysisSheetRef} />
-    </>
+      {/* Analysis Result Sheet - Rendered directly as sibling */}
+      <AnalysisResultModal
+        analysisText={analysisResult}
+        visible={showAnalysisModal}
+        onClose={() => {
+          setShowAnalysisModal(false);
+        }}
+      />
+    </View>
   );
 }

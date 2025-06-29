@@ -38,8 +38,8 @@ export const InfoItem = ({
 
   const center = useMemo(
     () => ({
-      latitude: selectedAttraction?.location.latitude,
-      longitude: selectedAttraction?.location.longitude,
+      latitude: selectedAttraction?.location.latitude ?? 0,
+      longitude: selectedAttraction?.location.longitude ?? 0,
     }),
     [selectedAttraction]
   );
@@ -63,42 +63,66 @@ export const InfoItem = ({
     latitude: place.location.latitude,
     longitude: place.location.longitude,
   });
-  const interval = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
-  const animatingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const interval = useRef<number | null>(null);
 
   const pitch = 60;
-  const speed = 0.03;
+  const speed = 0.05;
   const altitude = 1000;
 
   const animateCamera = useCallback(() => {
     if (process.env.EXPO_OS === 'web') {
       return;
     }
+
+    if (!isSheetOpen) {
+      if (interval.current) {
+        cancelAnimationFrame(interval.current);
+        interval.current = null;
+      }
+      return;
+    }
+
+    if (!selectedAttraction?.location.latitude || !selectedAttraction.location.longitude) {
+      return;
+    }
+
     if (!mapRef.current) {
       return;
     }
 
-    if (!isSheetOpen) {
-      return;
+    const cameraCenter = {
+      latitude: selectedAttraction.location.latitude,
+      longitude: selectedAttraction.location.longitude,
+    };
+
+    try {
+      mapRef.current.setCamera({
+        center: cameraCenter,
+        pitch,
+        altitude,
+        heading: (heading.current = (heading.current - speed) % 360),
+      });
+
+      if (isSheetOpen) {
+        interval.current = requestAnimationFrame(animateCamera);
+      }
+    } catch (error) {
+      console.error('❌ Error during camera animation:', error);
+      if (interval.current) {
+        cancelAnimationFrame(interval.current);
+        interval.current = null;
+      }
     }
+  }, [selectedAttraction, mapRef, isSheetOpen, pitch, altitude, speed]);
 
-    const cameraCenter =
-      center.latitude && center.longitude
-        ? {
-            latitude: center.latitude + 0.003,
-            longitude: center.longitude,
-          }
-        : center;
-
-    mapRef.current.setCamera({
-      center: cameraCenter,
-      pitch,
-      altitude,
-      heading: (heading.current = (heading.current - speed) % 360),
-    });
-
-    interval.current = requestAnimationFrame(animateCamera);
-  }, [center, mapRef, isSheetOpen]);
+  useEffect(() => {
+    if (!isSheetOpen) {
+      if (interval.current) {
+        cancelAnimationFrame(interval.current);
+        interval.current = null;
+      }
+    }
+  }, [isSheetOpen]);
 
   useEffect(() => {
     const off = AppState.addEventListener('change', (state) => {
@@ -106,7 +130,8 @@ export const InfoItem = ({
         animateCamera();
       } else {
         if (interval.current) {
-          clearInterval(interval.current);
+          cancelAnimationFrame(interval.current);
+          interval.current = null;
         }
       }
     });
@@ -118,41 +143,30 @@ export const InfoItem = ({
 
   useEffect(() => {
     if (interval.current) {
-      clearInterval(interval.current);
-    }
-    if (animatingRef.current) {
-      clearTimeout(animatingRef.current);
+      cancelAnimationFrame(interval.current);
     }
 
-    if (mapRef.current && previousCenter.current !== center) {
+    if (!center.latitude || !center.longitude) {
+      return;
+    }
+
+    if (
+      previousCenter.current.latitude !== center.latitude ||
+      previousCenter.current.longitude !== center.longitude
+    ) {
       previousCenter.current = center;
 
-      mapRef.current.animateCamera(
-        {
-          center: {
-            latitude: center.latitude ?? 0,
-            longitude: center.longitude ?? 0,
-          },
-          pitch,
-          altitude,
-          heading: heading.current,
-        },
-        {
-          duration: 1000,
-        }
-      );
-
       if (isSheetOpen) {
-        animatingRef.current = setTimeout(() => {
-          animateCamera();
-        }, 1000);
+        animateCamera();
       }
     } else if (isSheetOpen && center.latitude && center.longitude) {
       animateCamera();
     }
 
     return () => {
-      clearInterval(interval.current);
+      if (interval.current) {
+        cancelAnimationFrame(interval.current);
+      }
     };
   }, [mapRef, animateCamera, altitude, center, isSheetOpen]);
 
