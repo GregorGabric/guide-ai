@@ -2,8 +2,8 @@ import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 
 import { useRef, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { Dimensions, Platform, Text, useWindowDimensions, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { BottomTabs } from '~/src/components/bottom-tabs';
 import { FloatingProfileButton } from '~/src/components/floating-profile-button';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
@@ -14,14 +14,19 @@ import { MapMarker, MapView } from '../components/ui/map.native';
 import { IconNavigation } from '@tabler/icons-react-native';
 import type NativeMapView from 'react-native-maps';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
-import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
+import {
+  AttractionBottomSheet,
+  useSheetStore,
+} from '~/src/features/places/components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { currentLocation as getCurrentLocation } from '~/src/services/queries';
 const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
+const { height } = Dimensions.get('window');
 
 export default function MapScreen() {
   const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
+  const isSheetOpen = useSheetStore((state) => state.isOpen);
 
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
@@ -46,6 +51,56 @@ export default function MapScreen() {
   const sheetRef = useSheetRef();
 
   const [open, setOpen] = useState(false);
+  const bottomSheetPosition = useSharedValue<number>(0);
+
+  const dimensions = useWindowDimensions();
+
+  const mapAnimatedStyle = useAnimatedStyle(() => {
+    const currentPosition = bottomSheetPosition.value;
+    const sheetShouldBeOpen = isSheetOpen;
+
+    console.log(
+      '🎨 mapAnimatedStyle - position:',
+      currentPosition,
+      'sheetOpen:',
+      sheetShouldBeOpen
+    );
+
+    // If sheet is not supposed to be open, use full height
+    if (!sheetShouldBeOpen) {
+      console.log('📐 Sheet not open - using full height:', dimensions.height);
+      return {
+        height: dimensions.height,
+      };
+    }
+
+    // bottomSheetPosition represents Y coordinate of sheet's top edge
+    // Higher values = sheet is lower/more closed, map should be larger
+    // Lower values = sheet is higher/more open, map should be smaller
+
+    // When sheet is effectively closed (position near screen height), use full screen
+    const isSheetClosed = currentPosition >= dimensions.height * 0.9;
+
+    // For open/opening states, the map height should be the position value
+    // (since position is where the sheet top starts)
+    // But ensure minimum height when sheet is opening (position might be 0 initially)
+    const height = isSheetClosed
+      ? dimensions.height
+      : Math.max(currentPosition, dimensions.height * 0.35); // Minimum 35% of screen height
+
+    console.log(
+      '📐 Calculated height:',
+      height,
+      'Sheet closed:',
+      isSheetClosed,
+      'Position:',
+      currentPosition
+    );
+
+    return {
+      height: height,
+    };
+  });
 
   const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
     console.log('🎬 animateCameraToAttraction called for:', attraction.displayName.text);
@@ -98,7 +153,6 @@ export default function MapScreen() {
   const handleAttractionSelection = (attraction: PlacesResponse['places'][number]) => {
     if (selectedAttraction?.id === attraction.id) {
       sheetRef.current?.present();
-
       return;
     }
 
@@ -118,6 +172,7 @@ export default function MapScreen() {
   };
 
   const closeBottomSheet = () => {
+    console.log('🚪 Closing bottom sheet');
     setSelectedAttraction(null);
     sheetRef.current?.dismiss();
   };
@@ -178,45 +233,48 @@ export default function MapScreen() {
 
   return (
     <View className="flex-1">
-      <MapView
-        ref={mapRef}
-        provider={Platform.OS === 'ios' ? undefined : 'google'}
-        initialRegion={{
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        style={{
-          flex: 1,
-        }}
-        showsBuildings
-      >
-        <AnimatedMapMarker
-          coordinate={{
+      {/* Animated Map Container */}
+      <Animated.View style={mapAnimatedStyle}>
+        <MapView
+          ref={mapRef}
+          provider={Platform.OS === 'ios' ? undefined : 'google'}
+          initialRegion={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
           }}
-          title="Your Location"
+          style={{
+            flex: 1,
+          }}
+          showsBuildings
         >
-          <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
-            <IconNavigation size={18} color="#fff" />
-          </View>
-        </AnimatedMapMarker>
-
-        {validAttractions.map((attraction, index) => (
-          <StaggeredMapMarker
-            key={attraction.id}
-            isSelected={selectedAttraction?.id === attraction.id}
-            attraction={attraction}
-            index={index}
-            count={validAttractions.length}
-            onPress={() => {
-              handleAttractionPress(attraction);
+          <AnimatedMapMarker
+            coordinate={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
             }}
-          />
-        ))}
-      </MapView>
+            title="Your Location"
+          >
+            <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
+              <IconNavigation size={18} color="#fff" />
+            </View>
+          </AnimatedMapMarker>
+
+          {validAttractions.map((attraction, index) => (
+            <StaggeredMapMarker
+              key={attraction.id}
+              isSelected={selectedAttraction?.id === attraction.id}
+              attraction={attraction}
+              index={index}
+              count={validAttractions.length}
+              onPress={() => {
+                handleAttractionPress(attraction);
+              }}
+            />
+          ))}
+        </MapView>
+      </Animated.View>
 
       {validAttractions.length > 0 && (
         <AttractionCarousel
@@ -250,6 +308,7 @@ export default function MapScreen() {
           sheetRef={sheetRef}
           attraction={selectedAttraction}
           onClose={closeBottomSheet}
+          animatedPosition={bottomSheetPosition}
         />
       )}
 

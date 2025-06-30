@@ -14,6 +14,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
@@ -80,6 +81,7 @@ interface AttractionBottomSheetProps {
   attraction: PlacesResponse['places'][number] | null;
   onClose: () => void;
   sheetRef: React.RefObject<BottomSheetModal | null>;
+  animatedPosition: SharedValue<number>;
 }
 const snapPoints = ['65%', '100%'];
 
@@ -101,6 +103,7 @@ export function AttractionBottomSheet({
   attraction,
   onClose,
   sheetRef,
+  animatedPosition,
 }: AttractionBottomSheetProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
@@ -113,13 +116,14 @@ export function AttractionBottomSheet({
   const handleSheetChanges = useCallback(
     (index: number) => {
       console.log('📋 Sheet state changed - index:', index, index > -1 ? 'OPEN' : 'CLOSED');
+      console.log('📋 Current animatedPosition value:', animatedPosition.value);
       setIsOpen(index > -1);
       if (index === -1) {
         console.log('🚪 Sheet closed, calling onClose');
         onClose();
       }
     },
-    [onClose, setIsOpen]
+    [onClose, setIsOpen, animatedPosition]
   );
 
   const userMessages =
@@ -151,7 +155,7 @@ export function AttractionBottomSheet({
       // Update translation with bounds
       translateX.set(Math.max(-maxTranslation, Math.min(maxTranslation, translationX)));
 
-      // Update gesture progress (-1 to 1, where -1 is left swipe, 1 is right swipe)
+      // Update gestureprogress (-1 to 1, where -1 is left swipe, 1 is right swipe)
       gestureProgress.set(translateX.value / maxTranslation);
     })
     .onEnd((event) => {
@@ -268,6 +272,7 @@ export function AttractionBottomSheet({
       enablePanDownToClose
       enableBlurKeyboardOnGesture
       enableOverDrag={false}
+      animatedPosition={animatedPosition}
       backgroundStyle={{
         borderRadius: 47 - (insets.left + 12),
         backgroundColor: colors.card,
@@ -297,9 +302,6 @@ export function AttractionBottomSheet({
               >
                 <Pressable
                   onPress={() => {
-                    if (!attraction.location) {
-                      return;
-                    }
                     openMapsNavigation(
                       attraction.location.latitude,
                       attraction.location.longitude,

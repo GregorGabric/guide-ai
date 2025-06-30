@@ -1,65 +1,133 @@
+import { useQuery } from 'convex/react';
 import { useRef, useState } from 'react';
-import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
+import type NativeMapView from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MapMarker, MapView } from '~/src/components/ui/map.native';
 import { ScrollView } from '~/src/components/ui/scroll-view';
+import { Text } from '~/src/components/ui/text';
 import { H2, H4 } from '~/src/components/ui/typography';
+import { api } from '~/src/convex/_generated/api';
 import { cn } from '~/src/lib/utils';
 
-// Placeholder data for visited places
-const PLACEHOLDER_DATA = {
-  stats: {
-    countriesVisited: 23,
-    totalCountries: 195,
-    citiesVisited: 67,
-    continentsVisited: 5,
-    totalContinents: 7,
-    totalTrips: 34,
-    totalMiles: 156780,
-    favoriteMonth: 'September',
-  },
-  visitedPlaces: [
-    {
-      _id: '1',
-      placeName: 'Paris, France',
-      country: 'France',
-      latitude: 48.8566,
-      longitude: 2.3522,
-      visitedAt: '2024-06-15',
-      notes: 'Amazing trip to the City of Light!',
-      category: 'City',
-      duration: 5,
-      rating: 5,
-    },
-    {
-      _id: '2',
-      placeName: 'Tokyo, Japan',
-      country: 'Japan',
-      latitude: 35.6762,
-      longitude: 139.6503,
-      visitedAt: '2024-03-22',
-      notes: 'Incredible culture and food',
-      category: 'City',
-      duration: 8,
-      rating: 5,
-    },
-  ],
-};
-
 type ViewMode = 'map' | 'list';
+
+type VisitedPlace = {
+  _id: string;
+  placeName: string;
+  placeAddress?: string;
+  latitude: number;
+  longitude: number;
+  visitedAt: number;
+  notes?: string;
+  country?: string;
+};
 
 export default function VisitedPlacesScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<typeof MapView>(null);
-  const { stats, visitedPlaces } = PLACEHOLDER_DATA;
+  const mapRef = useRef<NativeMapView>(null);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const visitedPlaces = useQuery(api.visitedPlaces.getVisitedPlaces);
+  const visitStats = useQuery(api.visitedPlaces.getVisitStats);
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
+  };
+
+  const animateCameraToPlace = (place: VisitedPlace) => {
+    if (mapRef.current) {
+      mapRef.current.animateCamera(
+        {
+          altitude: 1000,
+          pitch: 60,
+          center: {
+            latitude: place.latitude,
+            longitude: place.longitude,
+          },
+          zoom: 15,
+        },
+        { duration: 1000 }
+      );
+    }
+  };
+
+  const handlePlacePress = (place: VisitedPlace) => {
+    if (viewMode === 'list') {
+      setViewMode('map');
+    }
+    animateCameraToPlace(place);
+  };
+
+  if (visitedPlaces === undefined || visitStats === undefined) {
+    return (
+      <View className="flex-1">
+        <View className="flex-1 bg-gray-100">
+          <View className="h-80 animate-pulse bg-gray-200" />
+        </View>
+
+        <View
+          className="bg-white"
+          style={{
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingBottom: insets.bottom,
+          }}
+        >
+          <View className="items-center py-3">
+            <View className="h-1 w-10 rounded-full bg-gray-300" />
+          </View>
+
+          <View className="px-6 pb-4">
+            <View className="mb-2 h-8 w-40 animate-pulse rounded-lg bg-gray-200" />
+            <View className="bg-gray-150 h-4 w-32 animate-pulse rounded" />
+          </View>
+
+          <View className="mx-4 mb-4 h-14 animate-pulse rounded-2xl bg-gray-200" />
+
+          <View className="px-4 pb-4">
+            <View className="bg-gray-150 h-12 animate-pulse rounded-xl" />
+          </View>
+
+          <View className="space-y-3 px-4">
+            {[1, 2, 3].map((i) => (
+              <View key={i} className="rounded-lg bg-gray-100 p-4">
+                <View className="mb-2 h-5 w-3/4 animate-pulse rounded bg-gray-200" />
+                <View className="bg-gray-150 mb-1 h-4 w-1/2 animate-pulse rounded" />
+                <View className="bg-gray-150 h-3 w-1/4 animate-pulse rounded" />
+              </View>
+            ))}
+          </View>
+
+          <View className="items-center px-4 pt-6">
+            <View className="flex-row items-center space-x-2">
+              <View className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+              <View
+                className="h-2 w-2 animate-pulse rounded-full bg-gray-300"
+                style={{ animationDelay: '0.2s' }}
+              />
+              <View
+                className="h-2 w-2 animate-pulse rounded-full bg-gray-300"
+                style={{ animationDelay: '0.4s' }}
+              />
+            </View>
+            <Text variant="footnote" color="tertiary" className="mt-3">
+              Loading your travel memories...
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  const stats = {
+    countriesVisited: visitStats?.countriesVisited.length || 0,
+    citiesVisited: visitStats?.citiesVisited.length || 0,
+    totalTrips: visitStats?.totalVisits || 0,
   };
 
   return (
@@ -68,8 +136,8 @@ export default function VisitedPlacesScreen() {
         ref={mapRef}
         mapType={Platform.OS === 'ios' ? 'hybridFlyover' : 'satellite'}
         initialRegion={{
-          latitude: 20,
-          longitude: 0,
+          latitude: visitedPlaces.length > 0 ? visitedPlaces[0].latitude : 20,
+          longitude: visitedPlaces.length > 0 ? visitedPlaces[0].longitude : 0,
           latitudeDelta: 80,
           longitudeDelta: 80,
         }}
@@ -85,7 +153,10 @@ export default function VisitedPlacesScreen() {
               longitude: place.longitude,
             }}
             title={place.placeName}
-            description={place.country}
+            description={place.placeAddress || place.country || 'Unknown location'}
+            onPress={() => {
+              handlePlacePress(place);
+            }}
           />
         ))}
       </MapView>
@@ -104,54 +175,94 @@ export default function VisitedPlacesScreen() {
 
         <View className="px-6 pb-4">
           <H2 className="mb-1 text-foreground">My Travels</H2>
-          <Text className="text-sm text-muted-foreground">
+          <Text variant="subhead" color="tertiary">
             {stats.countriesVisited} countries • {stats.citiesVisited} cities
           </Text>
         </View>
 
-        <View className="mx-4 mb-4 rounded-2xl bg-primary p-4">
-          <Text className="text-center text-lg font-bold text-white">
-            {stats.countriesVisited} Countries • {stats.citiesVisited} Cities
-          </Text>
-        </View>
+        {visitedPlaces.length > 0 ? (
+          <>
+            <View className="mx-4 mb-4 rounded-2xl bg-primary p-4">
+              <Text variant="body" className="text-center font-bold text-white">
+                {stats.countriesVisited} Countries • {stats.citiesVisited} Cities
+              </Text>
+            </View>
 
-        <View className="px-4 pb-4">
-          <View className="flex-row rounded-xl bg-gray-100 p-1">
-            <TouchableOpacity
-              className={cn(
-                'flex-1 items-center justify-center rounded-lg py-3',
-                viewMode === 'map' && 'bg-primary'
-              )}
-              onPress={() => {
-                setViewMode('map');
-              }}
-            >
-              <Text className={viewMode === 'map' ? 'text-white' : 'text-black'}>Map</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={cn(
-                'flex-1 items-center justify-center rounded-lg py-3',
-                viewMode === 'list' && 'bg-primary'
-              )}
-              onPress={() => {
-                setViewMode('list');
-              }}
-            >
-              <Text className={viewMode === 'list' ? 'text-white' : 'text-black'}>List</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {viewMode === 'list' && (
-          <ScrollView className="max-h-60 px-4">
-            {visitedPlaces.map((visit) => (
-              <View key={visit._id} className="mb-3 rounded-lg bg-gray-50 p-4">
-                <H4 className="mb-1">{visit.placeName}</H4>
-                <Text className="text-sm text-gray-600">{visit.country}</Text>
-                <Text className="text-sm text-gray-500">{formatDate(visit.visitedAt)}</Text>
+            <View className="px-4 pb-4">
+              <View className="flex-row rounded-xl bg-gray-100 p-1">
+                <TouchableOpacity
+                  className={cn(
+                    'flex-1 items-center justify-center rounded-lg py-3',
+                    viewMode === 'map' && 'bg-primary'
+                  )}
+                  onPress={() => {
+                    setViewMode('map');
+                  }}
+                >
+                  <Text
+                    variant="callout"
+                    className={viewMode === 'map' ? 'text-white' : 'text-black'}
+                  >
+                    Map
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={cn(
+                    'flex-1 items-center justify-center rounded-lg py-3',
+                    viewMode === 'list' && 'bg-primary'
+                  )}
+                  onPress={() => {
+                    setViewMode('list');
+                  }}
+                >
+                  <Text
+                    variant="callout"
+                    className={viewMode === 'list' ? 'text-white' : 'text-black'}
+                  >
+                    List
+                  </Text>
+                </TouchableOpacity>
               </View>
-            ))}
-          </ScrollView>
+            </View>
+
+            {viewMode === 'list' && (
+              <ScrollView className="max-h-60 px-4">
+                {visitedPlaces.map((visit) => (
+                  <TouchableOpacity
+                    key={visit._id}
+                    className="mb-3 rounded-lg bg-gray-50 p-4"
+                    onPress={() => {
+                      handlePlacePress(visit);
+                    }}
+                  >
+                    <H4 className="mb-1">{visit.placeName}</H4>
+                    <Text variant="subhead" color="secondary">
+                      {visit.placeAddress || visit.country || 'Unknown location'}
+                    </Text>
+                    <Text variant="footnote" color="tertiary">
+                      {formatDate(visit.visitedAt)}
+                    </Text>
+                    {visit.notes && (
+                      <Text variant="footnote" className="mt-1">
+                        {visit.notes}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </>
+        ) : (
+          <View className="px-4 pb-8">
+            <View className="items-center py-8">
+              <Text variant="body" color="tertiary">
+                No travels recorded yet
+              </Text>
+              <Text variant="subhead" color="quarternary" className="mt-2 text-center">
+                Start exploring places and they&apos;ll appear here automatically!
+              </Text>
+            </View>
+          </View>
         )}
       </View>
     </View>
