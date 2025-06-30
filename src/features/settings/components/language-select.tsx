@@ -34,8 +34,8 @@ export function LanguageSelect({ className }: Props) {
         >
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
-              <Large className="mb-1">Language</Large>
-              <P>Interface language</P>
+              <Large className="mb-1">Guide Language</Large>
+              <P>Language for the guide</P>
             </View>
             <View className="flex-row items-center">
               <View className="bg-primary/10 mr-3 rounded-full px-3 py-2">
