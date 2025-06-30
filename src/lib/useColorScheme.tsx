@@ -7,8 +7,6 @@ import { COLORS } from '~/src/lib/theme/colors';
 function useColorScheme() {
   const theme = useNativewindColorScheme();
 
-  console.log(theme.colorScheme, 'theme.colorScheme');
-
   async function setColorScheme(colorScheme: 'light' | 'dark') {
     theme.setColorScheme(colorScheme);
     if (Platform.OS !== 'android') {

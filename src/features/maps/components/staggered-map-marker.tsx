@@ -73,10 +73,10 @@ export function StaggeredMapMarker({
     >
       <Button
         size={'icon'}
-        className={cn('native:rounded-full bg-background p-2 shadow')}
+        className={cn('native:rounded-full bg-background p-2 shadow', isSelected && 'bg-primary')}
         onPress={onPress}
       >
-        <IconMapPin size={16} color={colors.foreground} />
+        <IconMapPin size={16} color={isSelected ? colors.background : colors.foreground} />
       </Button>
     </AnimatedMapMarker>
   );

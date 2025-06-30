@@ -131,8 +131,6 @@ export default function CameraAnalysis() {
           location,
         });
 
-        console.log('Analysis result:', analysis);
-
         // Show the analysis result sheet
         setAnalysisResult(analysis || 'No analysis available');
         setShowAnalysisModal(true);

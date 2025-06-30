@@ -44,23 +44,6 @@ export const clearMessages = mutation({
   },
 });
 
-// export const sendMessage = mutation({
-//   args: {
-//     prompt: v.string(),
-//     attraction: v.optional(attractionSchema),
-//   },
-//   handler: async (ctx, args) => {
-//     const responseStreamId = await streamingComponent.createStream(ctx);
-//     console.log({ responseStreamId });
-//     const chatId = await ctx.db.insert('userMessages', {
-//       attraction: args.attraction,
-//       prompt: args.prompt,
-//       responseStreamId,
-//     });
-//     return chatId;
-//   },
-// });
-
 export const getHistory = internalQuery({
   args: {},
   handler: async (ctx) => {

@@ -12,7 +12,6 @@ export const getNearbyPlaces = action({
     radius: v.optional(v.number()),
     maxResults: v.optional(v.number()),
     includedTypes: v.optional(v.array(v.string())),
-    forceRefresh: v.optional(v.boolean()),
   },
   returns: v.union(placesSchema, v.null()),
   handler: async (_ctx, args) => {
@@ -32,6 +31,7 @@ export const getNearbyPlaces = action({
           radius,
         },
       },
+      rankPreference: 'DISTANCE',
       maxResultCount: Number(maxResults),
     };
 

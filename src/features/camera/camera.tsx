@@ -122,8 +122,6 @@ export default function CameraView({ isOpen, setIsOpen }: PropsWithChildren<Came
           },
         });
 
-        console.log('Analysis result:', analysis);
-
         // Show the analysis result sheet
         setAnalysisResult(analysis || 'No analysis available');
         analysisSheetRef.current?.present();

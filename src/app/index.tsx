@@ -2,14 +2,14 @@ import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 
 import { useRef, useState } from 'react';
-import { Dimensions, Platform, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { BottomTabs } from '~/src/components/bottom-tabs';
 import { FloatingProfileButton } from '~/src/components/floating-profile-button';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import { MapMarker, MapView } from '../components/ui/map.native';
+import { MapView } from '../components/ui/map.native';
 // import { Camera } from '~/src/features/camera/camera';
 import { IconNavigation } from '@tabler/icons-react-native';
 import type NativeMapView from 'react-native-maps';
@@ -21,8 +21,7 @@ import {
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { currentLocation as getCurrentLocation } from '~/src/services/queries';
-const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
-const { height } = Dimensions.get('window');
+// const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
 
 export default function MapScreen() {
   const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
@@ -35,17 +34,22 @@ export default function MapScreen() {
   const action = useAction(api.placesActions.getNearbyPlaces);
 
   const placesQuery = useQuery({
-    queryKey: ['places'],
+    queryKey: ['places', location?.coords.latitude, location?.coords.longitude],
     queryFn: location
-      ? () => {
+      ? ({ queryKey }) => {
+          const [_i, latitude, longitude] = queryKey;
           return action({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
+            latitude: latitude as number,
+            longitude: longitude as number,
           });
         }
       : skipToken,
+    select(data) {
+      return data.places;
+    },
   });
-  const data = placesQuery.data?.places;
+  const attractions = placesQuery.data;
+  console.log(JSON.stringify(attractions, null, 2));
 
   const mapRef = useRef<NativeMapView>(null);
   const sheetRef = useSheetRef();
@@ -59,16 +63,8 @@ export default function MapScreen() {
     const currentPosition = bottomSheetPosition.value;
     const sheetShouldBeOpen = isSheetOpen;
 
-    console.log(
-      '🎨 mapAnimatedStyle - position:',
-      currentPosition,
-      'sheetOpen:',
-      sheetShouldBeOpen
-    );
-
     // If sheet is not supposed to be open, use full height
     if (!sheetShouldBeOpen) {
-      console.log('📐 Sheet not open - using full height:', dimensions.height);
       return {
         height: dimensions.height,
       };
@@ -88,30 +84,13 @@ export default function MapScreen() {
       ? dimensions.height
       : Math.max(currentPosition, dimensions.height * 0.35); // Minimum 35% of screen height
 
-    console.log(
-      '📐 Calculated height:',
-      height,
-      'Sheet closed:',
-      isSheetClosed,
-      'Position:',
-      currentPosition
-    );
-
     return {
       height: height,
     };
   });
 
   const animateCameraToAttraction = (attraction: PlacesResponse['places'][number]) => {
-    console.log('🎬 animateCameraToAttraction called for:', attraction.displayName.text);
-
-    if (mapRef.current && attraction.location?.latitude && attraction.location?.longitude) {
-      console.log('📍 Animating camera to location:', {
-        lat: attraction.location.latitude,
-        lng: attraction.location.longitude,
-        open: open,
-      });
-
+    if (mapRef.current && attraction.location.latitude && attraction.location.longitude) {
       if (open) {
         mapRef.current.animateCamera(
           {
@@ -143,10 +122,6 @@ export default function MapScreen() {
           duration: 1000,
         }
       );
-
-      console.log('✅ Initial camera animation started, panning will begin when sheet opens');
-    } else {
-      console.log('❌ Cannot animate camera - missing mapRef or location data');
     }
   };
 
@@ -156,7 +131,6 @@ export default function MapScreen() {
       return;
     }
 
-    console.log('🆕 New attraction selected, animating camera and opening sheet');
     // Different attraction - set new selection, animate camera, and open sheet
     setSelectedAttraction(attraction);
     animateCameraToAttraction(attraction);
@@ -172,22 +146,9 @@ export default function MapScreen() {
   };
 
   const closeBottomSheet = () => {
-    console.log('🚪 Closing bottom sheet');
     setSelectedAttraction(null);
     sheetRef.current?.dismiss();
   };
-
-  // Filter and type guard for valid attractions
-  const validAttractions =
-    data?.filter(
-      (
-        attraction
-      ): attraction is PlacesResponse['places'][number] & {
-        name: string;
-        location: { latitude: number; longitude: number };
-      } =>
-        Boolean(attraction.name && attraction.location?.latitude && attraction.location?.longitude)
-    ) ?? [];
 
   if (isLocationPending) {
     return <LoadingOverlay message="Discovering amazing places nearby..." />;
@@ -248,8 +209,10 @@ export default function MapScreen() {
             flex: 1,
           }}
           showsBuildings
+          showsUserLocation
+          showsCompass={false}
         >
-          <AnimatedMapMarker
+          {/* <AnimatedMapMarker
             coordinate={{
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
@@ -259,15 +222,15 @@ export default function MapScreen() {
             <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
               <IconNavigation size={18} color="#fff" />
             </View>
-          </AnimatedMapMarker>
+          </AnimatedMapMarker> */}
 
-          {validAttractions.map((attraction, index) => (
+          {attractions?.map((attraction, index) => (
             <StaggeredMapMarker
               key={attraction.id}
               isSelected={selectedAttraction?.id === attraction.id}
               attraction={attraction}
               index={index}
-              count={validAttractions.length}
+              count={attractions.length}
               onPress={() => {
                 handleAttractionPress(attraction);
               }}
@@ -276,9 +239,9 @@ export default function MapScreen() {
         </MapView>
       </Animated.View>
 
-      {validAttractions.length > 0 && (
+      {attractions?.length > 0 && (
         <AttractionCarousel
-          data={validAttractions}
+          data={attractions}
           setSelectedAttraction={setSelectedAttraction}
           onPressOut={animateCameraToAttraction}
           onAttractionPress={handleAttractionPressOnMap}

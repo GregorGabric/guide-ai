@@ -1,5 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { IconBrandGoogle, IconMap } from '@tabler/icons-react-native';
+import { IconBrandGoogle, IconMap, IconMapPin } from '@tabler/icons-react-native';
 import { makeRedirectUri } from 'expo-auth-session';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -9,11 +9,13 @@ import { Button } from '~/src/components/ui/button';
 import { ScrollView } from '~/src/components/ui/scroll-view';
 import { Text } from '~/src/components/ui/text';
 import { H2, Lead, P, Small } from '~/src/components/ui/typography';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 
 const redirectTo = makeRedirectUri();
 
 export function SignIn() {
   const router = useRouter();
+  const { colors } = useTheme();
   const { signIn } = useAuthActions();
   const handleSignIn = async () => {
     const { redirect } = await signIn('google', { redirectTo });
@@ -31,7 +33,6 @@ export function SignIn() {
       const { url } = result;
 
       const code = new URL(url).searchParams.get('code');
-      console.log('code', code, url, result, redirect);
       if (!code) {
         console.error('No authorization code received');
         return;
@@ -70,7 +71,7 @@ export function SignIn() {
           {/* Modern app icon container */}
           <View className="bg-primary/10 border-primary/5 mb-8 h-20 w-20 items-center justify-center rounded-3xl border">
             <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary">
-              <IconMap size={24} color="white" strokeWidth={2} />
+              <IconMap size={24} color={colors.background} strokeWidth={2} />
             </View>
           </View>
 
@@ -85,9 +86,7 @@ export function SignIn() {
           </P>
         </View>
 
-        {/* Modern sign-in card */}
         <View className="w-full max-w-sm">
-          {/* Primary action button with modern design */}
           <View className="mb-8">
             <Button
               onPress={handleSignIn}
@@ -96,8 +95,8 @@ export function SignIn() {
               className="h-14 w-full rounded-2xl shadow-lg"
             >
               <View className="flex-row items-center justify-center gap-4">
-                <IconBrandGoogle size={20} color="white" strokeWidth={2} />
-                <Text className="text-lg font-semibold text-white">Continue with Google</Text>
+                <IconBrandGoogle size={20} color={colors.background} strokeWidth={2} />
+                <Text className="text-lg font-semibold text-background">Continue with Google</Text>
               </View>
             </Button>
           </View>
@@ -118,12 +117,22 @@ export function SignIn() {
           </Small>
         </View>
 
-        {/* Modern floating elements */}
-        <View className="bg-primary/3 absolute left-12 top-24 h-32 w-32 rounded-full blur-2xl" />
-        <View className="bg-secondary/4 absolute bottom-32 right-12 h-24 w-24 rounded-full blur-xl" />
-        <View className="bg-primary/10 absolute right-8 top-1/3 h-4 w-4 rounded-full" />
-        <View className="bg-secondary/15 absolute bottom-1/4 left-8 h-3 w-3 rounded-full" />
-        <View className="bg-accent/20 absolute left-1/4 top-2/3 h-2 w-2 rounded-full" />
+        {/* Floating map pin icons */}
+        <View className="absolute left-12 top-24">
+          <IconMapPin size={32} color="rgba(251, 146, 60, 0.3)" strokeWidth={1.5} />
+        </View>
+        <View className="absolute bottom-32 right-12">
+          <IconMapPin size={24} color="rgba(20, 184, 166, 0.4)" strokeWidth={1.5} />
+        </View>
+        <View className="absolute right-8 top-1/3">
+          <IconMapPin size={16} color="rgba(244, 63, 94, 0.5)" strokeWidth={2} />
+        </View>
+        <View className="absolute bottom-1/4 left-8">
+          <IconMapPin size={14} color="rgba(168, 85, 247, 0.4)" strokeWidth={2} />
+        </View>
+        <View className="absolute left-1/4 top-2/3">
+          <IconMapPin size={12} color="rgba(34, 197, 94, 0.6)" strokeWidth={2} />
+        </View>
       </View>
     </ScrollView>
   );
