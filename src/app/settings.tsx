@@ -3,10 +3,10 @@ import { IconChevronRight, IconLogout, IconX } from '@tabler/icons-react-native'
 import { router } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LanguageSelect } from '~/src/components/settings/language-select';
-import { ThemeSelector } from '~/src/components/settings/theme-selector';
 import { Button } from '~/src/components/ui/button';
 import { ScrollView } from '~/src/components/ui/scroll-view';
+import { LanguageSelect } from '~/src/features/settings/components/language-select';
+import { ThemeSelector } from '~/src/features/settings/components/theme-selector';
 
 import { H2, Large, P } from '~/src/components/ui/typography';
 import { useColorScheme } from '~/src/lib/useColorScheme';

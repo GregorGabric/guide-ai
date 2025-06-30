@@ -113,11 +113,6 @@ export interface PlaceDetailsRequest {
   languageCode?: string;
 }
 
-// Simple API key check for development
-export const hasGooglePlacesApiKey = (): boolean => {
-  return !!API_KEY;
-};
-
 // Helper function to make API requests
 const makeGooglePlacesRequest = async <T>(
   endpoint: string,

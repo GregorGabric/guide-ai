@@ -1,31 +1,34 @@
 import { skipToken, useQuery } from '@tanstack/react-query';
 import { useAction } from 'convex/react';
 
+import { IconMap2 } from '@tabler/icons-react-native';
 import { useRef, useState } from 'react';
-import { Platform, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, useWindowDimensions, View } from 'react-native';
+import type NativeMapView from 'react-native-maps';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { BottomTabs } from '~/src/components/bottom-tabs';
 import { FloatingProfileButton } from '~/src/components/floating-profile-button';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
 import { useSheetRef } from '~/src/components/ui/sheet';
 import { api } from '~/src/convex/_generated/api';
-import { MapView } from '../components/ui/map.native';
-// import { Camera } from '~/src/features/camera/camera';
-import { IconNavigation } from '@tabler/icons-react-native';
-import type NativeMapView from 'react-native-maps';
 import { StaggeredMapMarker } from '~/src/features/maps/components/staggered-map-marker';
-import {
-  AttractionBottomSheet,
-  useSheetStore,
-} from '~/src/features/places/components/attraction-bottom-sheet';
+import { AttractionBottomSheet } from '~/src/features/places/components/attraction-bottom-sheet';
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
+import { useSheetStore } from '~/src/features/places/store';
 import { currentLocation as getCurrentLocation } from '~/src/services/queries';
-// const AnimatedMapMarker = Animated.createAnimatedComponent(MapMarker);
+import { colors } from '~/src/utils/theme';
+import { MapView } from '../components/ui/map.native';
+import { Text } from '../components/ui/text';
 
 export default function MapScreen() {
   const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
   const isSheetOpen = useSheetStore((state) => state.isOpen);
+  const mapRef = useRef<NativeMapView>(null);
+  const sheetRef = useSheetRef();
+  const [open, setOpen] = useState(false);
+  const bottomSheetPosition = useSharedValue<number>(0);
+  const dimensions = useWindowDimensions();
 
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
@@ -37,7 +40,7 @@ export default function MapScreen() {
     queryKey: ['places', location?.coords.latitude, location?.coords.longitude],
     queryFn: location
       ? ({ queryKey }) => {
-          const [_i, latitude, longitude] = queryKey;
+          const [_id, latitude, longitude] = queryKey;
           return action({
             latitude: latitude as number,
             longitude: longitude as number,
@@ -49,15 +52,6 @@ export default function MapScreen() {
     },
   });
   const attractions = placesQuery.data;
-  console.log(JSON.stringify(attractions, null, 2));
-
-  const mapRef = useRef<NativeMapView>(null);
-  const sheetRef = useSheetRef();
-
-  const [open, setOpen] = useState(false);
-  const bottomSheetPosition = useSharedValue<number>(0);
-
-  const dimensions = useWindowDimensions();
 
   const mapAnimatedStyle = useAnimatedStyle(() => {
     const currentPosition = bottomSheetPosition.value;
@@ -85,7 +79,7 @@ export default function MapScreen() {
       : Math.max(currentPosition, dimensions.height * 0.35); // Minimum 35% of screen height
 
     return {
-      height: height,
+      height,
     };
   });
 
@@ -107,7 +101,6 @@ export default function MapScreen() {
         return;
       }
 
-      // Animate to location and then signal completion for panning to start
       mapRef.current.animateCamera(
         {
           altitude: 1000,
@@ -159,34 +152,20 @@ export default function MapScreen() {
       <View className="flex-1 bg-background">
         <View className="flex-1 items-center justify-center px-6">
           <View className="items-center">
-            <View
-              className="bg-warning/8 mb-6 h-20 w-20 items-center justify-center rounded-3xl"
-              style={{
-                shadowColor: '#F59E0B',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 16,
-                elevation: 4,
-              }}
-            >
-              <IconNavigation size={28} color="#F59E0B" strokeWidth={2.5} />
+            <View className="bg-primary/10 border-primary/5 mb-8 h-20 w-20 items-center justify-center rounded-3xl border">
+              <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary">
+                <IconMap2 size={24} color={colors.background} />
+              </View>
             </View>
-            <Text
-              className="font-quicksand-bold text-text mb-3 text-center text-xl"
-              style={{ letterSpacing: -0.3 }}
-            >
+            <Text variant={'largeTitle'} className="mb-4 text-center">
               Location Required
             </Text>
-            <Text
-              className="text-text-tertiary font-quicksand max-w-sm text-center text-sm"
-              style={{ letterSpacing: 0.1 }}
-            >
+            <Text className="text-center" variant={'body'}>
               Please enable location services to discover amazing places around you.
             </Text>
           </View>
         </View>
 
-        {/* Floating Profile Button */}
         <FloatingProfileButton />
       </View>
     );
@@ -194,7 +173,6 @@ export default function MapScreen() {
 
   return (
     <View className="flex-1">
-      {/* Animated Map Container */}
       <Animated.View style={mapAnimatedStyle}>
         <MapView
           ref={mapRef}
@@ -212,18 +190,6 @@ export default function MapScreen() {
           showsUserLocation
           showsCompass={false}
         >
-          {/* <AnimatedMapMarker
-            coordinate={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            }}
-            title="Your Location"
-          >
-            <View className="size-11 items-center justify-center rounded-full border-2 border-white bg-primary">
-              <IconNavigation size={18} color="#fff" />
-            </View>
-          </AnimatedMapMarker> */}
-
           {attractions?.map((attraction, index) => (
             <StaggeredMapMarker
               key={attraction.id}
@@ -239,7 +205,7 @@ export default function MapScreen() {
         </MapView>
       </Animated.View>
 
-      {attractions?.length > 0 && (
+      {(attractions?.length ?? 0) > 0 && (
         <AttractionCarousel
           data={attractions}
           setSelectedAttraction={setSelectedAttraction}

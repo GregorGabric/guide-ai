@@ -1,7 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import type { LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { LegendList } from '@legendapp/list';
-import { IconTrash } from '@tabler/icons-react-native';
 import { useMutation as useTanstackMutation } from '@tanstack/react-query';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
@@ -17,7 +16,6 @@ import type { Doc } from '~/src/convex/_generated/dataModel';
 import { AiChatInput } from '~/src/features/chat/components/ai-chat/ai-chat-input';
 import { AIMessage, UserMessage } from '~/src/features/chat/components/ai-chat/ai-chat-message';
 import { languageStore } from '~/src/features/settings/store';
-import { AudioLinesIcon } from '~/src/lib/icons/audio-lines';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
 import { useTheme } from '~/src/lib/theme/theme-provider';
 import { getUserId } from '~/src/lib/userId';
@@ -377,7 +375,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             }}
           >
             <Text>Clear</Text>
-            <IconTrash size={16} color={colors.background} />
           </Button>
           <Button
             onPress={() => {
@@ -393,9 +390,8 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
             }}
             disabled={!lastAiMessage}
           >
-            <AudioLinesIcon size={16} color={colors.background} />
             {isGeneratingAudio ? (
-              <LoaderIcon className="animate-spin" />
+              <LoaderIcon className="animate-spin" color={colors.background} />
             ) : isPlaying ? (
               <Text>Stop</Text>
             ) : (

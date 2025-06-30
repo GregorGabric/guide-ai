@@ -4,13 +4,13 @@ import { useAction } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { AppState, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type NativeMapView from 'react-native-maps';
 import Animated, { useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { Text } from '~/src/components/ui/text';
 import { api } from '~/src/convex/_generated/api';
-import { useSheetStore } from '~/src/features/places/components/attraction-bottom-sheet';
 import type { PlacesResponse } from '~/src/features/places/services/types';
+import { useSheetStore } from '~/src/features/places/store';
 import { useTheme } from '~/src/lib/theme/theme-provider';
 
 interface Props {
@@ -35,6 +35,7 @@ export const InfoItem = ({
   const hasAnimated = useRef(false);
   const photoUrl = useAction(api.placesActions.getPlacesPhotoUrl);
   const isSheetOpen = useSheetStore((state) => state.isOpen);
+  const { theme } = useTheme();
 
   const center = useMemo(
     () => ({
@@ -67,7 +68,7 @@ export const InfoItem = ({
 
   const pitch = 60;
   const speed = 0.05;
-  const altitude = 1000;
+  const altitude = 400;
 
   const animateCamera = useCallback(() => {
     if (process.env.EXPO_OS === 'web') {
@@ -125,23 +126,6 @@ export const InfoItem = ({
   }, [isSheetOpen]);
 
   useEffect(() => {
-    const off = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && isSheetOpen) {
-        animateCamera();
-      } else {
-        if (interval.current) {
-          cancelAnimationFrame(interval.current);
-          interval.current = null;
-        }
-      }
-    });
-
-    return () => {
-      off.remove();
-    };
-  }, [animateCamera, isSheetOpen]);
-
-  useEffect(() => {
     if (interval.current) {
       cancelAnimationFrame(interval.current);
     }
@@ -169,8 +153,6 @@ export const InfoItem = ({
       }
     };
   }, [mapRef, animateCamera, altitude, center, isSheetOpen]);
-
-  const { theme } = useTheme();
 
   return (
     <Animated.View style={{ opacity }} onLayout={onLayout}>

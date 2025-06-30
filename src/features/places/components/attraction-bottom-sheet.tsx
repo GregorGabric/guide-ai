@@ -21,7 +21,6 @@ import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
 
 import { IconInfoCircle } from '@tabler/icons-react-native';
-import { create } from 'zustand';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
@@ -29,6 +28,7 @@ import { Text } from '~/src/components/ui/text';
 import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
+import { useSheetStore } from '~/src/features/places/store';
 import { useTheme } from '~/src/lib/theme/theme-provider';
 
 const extractCountryFromAddress = (address?: string): string | undefined => {
@@ -88,16 +88,6 @@ const snapPoints = ['65%', '100%'];
 const { width: screenWidth } = Dimensions.get('window');
 
 const TAB_TRANSITION_DURATION = 150;
-
-export const useSheetStore = create<{
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}>((set) => ({
-  isOpen: false,
-  setIsOpen: (isOpen) => {
-    set({ isOpen });
-  },
-}));
 
 export function AttractionBottomSheet({
   attraction,
@@ -307,7 +297,7 @@ export function AttractionBottomSheet({
                   }}
                 >
                   <Text>{distance} away</Text>
-                  <ArrowUpRight size={16} />
+                  <ArrowUpRight size={16} color={colors.background} />
                 </Pressable>
               </Badge>
             )}
@@ -342,7 +332,7 @@ export function AttractionBottomSheet({
                   className="flex-1 flex-row gap-2 rounded-full bg-transparent"
                 >
                   <MessageCircleIcon size={14} color={colors.foreground} />
-                  <Text className="native:text-sm">AI Chat</Text>
+                  <Text className="native:text-sm">AI Guide</Text>
                 </TabsTrigger>
               </View>
               <Animated.View

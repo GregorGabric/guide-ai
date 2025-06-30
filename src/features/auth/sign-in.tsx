@@ -1,5 +1,5 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { IconBrandGoogle, IconMap, IconMapPin } from '@tabler/icons-react-native';
+import { IconBrandGoogle, IconMap, IconMapPin, IconShield } from '@tabler/icons-react-native';
 import { makeRedirectUri } from 'expo-auth-session';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -52,7 +52,6 @@ export function SignIn() {
       className="flex-1"
       contentContainerClassName="flex-1 items-center justify-center mb-40"
     >
-      {/* Modern ambient background */}
       <LinearGradient
         colors={[
           'rgba(251, 146, 60, 0.02)',
@@ -64,11 +63,8 @@ export function SignIn() {
         className="absolute inset-0"
       />
 
-      {/* Content container with modern spacing */}
       <View className="flex-1 items-center justify-center px-6">
-        {/* Hero section */}
         <View className="mb-12 items-center">
-          {/* Modern app icon container */}
           <View className="bg-primary/10 border-primary/5 mb-8 h-20 w-20 items-center justify-center rounded-3xl border">
             <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary">
               <IconMap size={24} color={colors.background} strokeWidth={2} />
@@ -101,15 +97,11 @@ export function SignIn() {
             </Button>
           </View>
 
-          {/* Security badge */}
-          {/* <View className="bg-card/50 border-border/50 mb-6 rounded-2xl border p-4">
-            <View className="flex-row items-center justify-center gap-3">
-              <IconShield size={16} className="text-muted-foreground" strokeWidth={2} />
-              <P className="font-medium text-muted-foreground">Secure authentication with Google</P>
-            </View>
-          </View> */}
+          <View className="flex-row items-center justify-center gap-3">
+            <IconShield size={16} className="text-muted-foreground" strokeWidth={2} />
+            <P className="font-medium text-muted-foreground">Secure authentication with Google</P>
+          </View>
 
-          {/* Terms */}
           <Small className="px-4 text-center leading-6 text-muted-foreground">
             By continuing, you agree to our{' '}
             <Small className="font-medium text-primary">Terms of Service</Small> and{' '}
@@ -117,7 +109,6 @@ export function SignIn() {
           </Small>
         </View>
 
-        {/* Floating map pin icons */}
         <View className="absolute left-12 top-24">
           <IconMapPin size={32} color="rgba(251, 146, 60, 0.3)" strokeWidth={1.5} />
         </View>
