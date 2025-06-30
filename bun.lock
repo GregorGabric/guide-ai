@@ -41,7 +41,7 @@
         "expo-av": "^15.1.6",
         "expo-blur": "~14.1.5",
         "expo-constants": "~17.1.4",
-        "expo-dev-client": "~5.2.1",
+        "expo-dev-client": "~5.2.2",
         "expo-file-system": "~18.1.10",
         "expo-font": "~13.3.1",
         "expo-haptics": "~14.1.4",
@@ -1185,9 +1185,9 @@
 
     "expo-crypto": ["expo-crypto@14.1.5", "", { "dependencies": { "base64-js": "^1.3.0" }, "peerDependencies": { "expo": "*" } }, "sha512-ZXJoUMoUeiMNEoSD4itItFFz3cKrit6YJ/BR0hjuwNC+NczbV9rorvhvmeJmrU9O2cFQHhJQQR1fjQnt45Vu4Q=="],
 
-    "expo-dev-client": ["expo-dev-client@5.2.1", "", { "dependencies": { "expo-dev-launcher": "5.1.13", "expo-dev-menu": "6.1.12", "expo-dev-menu-interface": "1.10.0", "expo-manifests": "~0.16.5", "expo-updates-interface": "~1.1.0" }, "peerDependencies": { "expo": "*" } }, "sha512-SzrHvXeyTGawzc/7ZIHFmaUYiCeRJagL9bJo/yTPmxdycFFOOdLs1FNMFXyYhB6YY4u5EKTCO6g1fug+0GV9sQ=="],
+    "expo-dev-client": ["expo-dev-client@5.2.2", "", { "dependencies": { "expo-dev-launcher": "5.1.14", "expo-dev-menu": "6.1.12", "expo-dev-menu-interface": "1.10.0", "expo-manifests": "~0.16.5", "expo-updates-interface": "~1.1.0" }, "peerDependencies": { "expo": "*" } }, "sha512-shOMVwnfpq8ptpix+KveFz9UWv4SNxqxFYkEvRfsgyLiUG8O1vXE0FaZUNZgF+idOPGuO6C34YZM6pLzE0Dd6A=="],
 
-    "expo-dev-launcher": ["expo-dev-launcher@5.1.13", "", { "dependencies": { "ajv": "8.11.0", "expo-dev-menu": "6.1.12", "expo-manifests": "~0.16.5", "resolve-from": "^5.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-EAxkI0MOZk1E9tkk+QpyDhqlCjUqAr8q+mobcC3ZJIIi7KejhaQlGVlF1kUUITsYLvFvbT8egRgrsMO57T6uDA=="],
+    "expo-dev-launcher": ["expo-dev-launcher@5.1.14", "", { "dependencies": { "ajv": "8.11.0", "expo-dev-menu": "6.1.12", "expo-manifests": "~0.16.5", "resolve-from": "^5.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-pxXqn8xCgOuc+W32mRJ9DiVK7O0zmGTG/ePd3kw53Xg1PKB9iOeYNty53qZEkIWjt8xdqS0JdECQT4qjgA2d1g=="],
 
     "expo-dev-menu": ["expo-dev-menu@6.1.12", "", { "dependencies": { "expo-dev-menu-interface": "1.10.0" }, "peerDependencies": { "expo": "*" } }, "sha512-Bz8yjZ6a+u7ZrZWzfn3aCgBwAX+QB0ktQyV7QMS5/agyesKiqM43+VdwNQqrm8w9tS8HZ2sf6RTvdek8YgOEHg=="],
 
