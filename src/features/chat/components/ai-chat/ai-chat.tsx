@@ -18,7 +18,6 @@ import { AIMessage, UserMessage } from '~/src/features/chat/components/ai-chat/a
 import { languageStore } from '~/src/features/settings/store';
 import { LoaderIcon } from '~/src/lib/icons/loader-icon';
 import { useTheme } from '~/src/lib/theme/theme-provider';
-import { getUserId } from '~/src/lib/userId';
 import { getConvexSiteUrl } from '~/src/lib/utils';
 
 export type Attraction = {
@@ -51,24 +50,12 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
   const [drivenIds, setDrivenIds] = useState<Set<string>>(() => new Set());
   const scrollViewRef = useRef<ScrollView | null>(null);
   const player = useAudioPlayer();
-  const [userId, setUserId] = useState<string | null>(null);
+
   const voiceId = useStore(languageStore, (state) => state.language.voiceId);
 
   const playerStatus = useAudioPlayerStatus(player);
   const isPlaying = playerStatus.playing;
-
   const attractionId = attraction?.id ?? '';
-
-  // Initialize user ID
-  useEffect(() => {
-    getUserId()
-      .then(setUserId)
-      .catch((error: unknown) => {
-        console.error('Failed to get user ID:', error);
-      });
-  }, []);
-
-  // Get user trial info for UI display
   const userTrialInfo = useQuery(api.ttsRequests.getUserTrialInfo);
 
   const { messages, error, append, status } = useChat({
@@ -141,10 +128,6 @@ export function AiChat({ attraction, userMessages }: AiChatProps) {
 
   const { mutateAsync, isPending: isGeneratingAudio } = useTanstackMutation({
     mutationFn: async (text: string) => {
-      if (!userId) {
-        throw new Error('User ID not initialized');
-      }
-
       const textHash = btoa(text).slice(0, 16);
       const cacheKey = `tts_${textHash}`;
 
