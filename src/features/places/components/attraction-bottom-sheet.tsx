@@ -1,11 +1,13 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useMutation, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 
+import { IconInfoCircle } from '@tabler/icons-react-native';
+import { useQuery as useTanstackQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
-import { Alert, Dimensions, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Dimensions, Linking, Platform, Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -17,10 +19,6 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
-import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
-
-import { IconInfoCircle } from '@tabler/icons-react-native';
 import { Badge } from '~/src/components/ui/badge';
 import { Sheet } from '~/src/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/src/components/ui/tabs';
@@ -29,7 +27,10 @@ import { api } from '~/src/convex/_generated/api';
 import { AiChat } from '~/src/features/chat/components/ai-chat/ai-chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { useSheetStore } from '~/src/features/places/store';
+import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
+import { MessageCircleIcon } from '~/src/lib/icons/message-circle-icon';
 import { useTheme } from '~/src/lib/theme/theme-provider';
+import { AttractionOverview } from './attraction-overview';
 
 const extractCountryFromAddress = (address?: string): string | undefined => {
   if (!address) {
@@ -112,6 +113,25 @@ export function AttractionBottomSheet({
     },
     [onClose, setIsOpen]
   );
+
+  const getLocationHistoryAction = useAction(api.chat.getLocationHistory);
+
+  const getLocationHistory = useTanstackQuery({
+    queryKey: ['getLocationHistory', attraction?.id],
+    queryFn: () => {
+      if (!attraction) {
+        return null;
+      }
+      return getLocationHistoryAction({
+        attraction: {
+          displayName: attraction.displayName.text || '',
+          formattedAddress: attraction.formattedAddress || '',
+          summary: '',
+        },
+      });
+    },
+    enabled: !!attraction,
+  });
 
   const userMessages =
     useQuery(api.messages.listMessagesByLocationId, {
@@ -351,65 +371,14 @@ export function AttractionBottomSheet({
               className="flex-1"
               style={{ backgroundColor: 'transparent' }}
             >
-              <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                <GestureDetector gesture={panGesture}>
-                  <View className="flex-1">
-                    {/* Enhanced Description */}
-                    {attraction.editorialSummary?.text && (
-                      <View className="mb-6 ">
-                        <View className="rounded-3xl border border-border bg-card p-5">
-                          <Text variant={'body'}>{attraction.editorialSummary.text}</Text>
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Enhanced Nearby Landmarks */}
-                    {attraction.addressDescriptor?.landmarks &&
-                      attraction.addressDescriptor.landmarks.length > 0 && (
-                        <View className="mb-6 ">
-                          <Text variant={'subhead'} className="mb-4">
-                            Nearby Landmarks
-                          </Text>
-                          <View className="overflow-hidden rounded-3xl border border-border bg-card">
-                            {attraction.addressDescriptor.landmarks
-                              .slice(0, 3)
-                              .map((landmark, index) => (
-                                <Pressable
-                                  onPress={() => {
-                                    openMapsNavigation(
-                                      attraction.location.latitude,
-                                      attraction.location.longitude,
-                                      landmark.displayName.text
-                                    );
-                                  }}
-                                  key={landmark.placeId}
-                                  className={`flex-row items-center p-4 ${
-                                    index <
-                                      (attraction.addressDescriptor?.landmarks?.length ?? 0) - 1 &&
-                                    index < 2
-                                      ? 'border-b border-border'
-                                      : ''
-                                  }`}
-                                >
-                                  <View className="flex-1">
-                                    <Text variant={'callout'} className="font-semibold">
-                                      {landmark.displayName.text}
-                                    </Text>
-                                    <Text variant={'caption1'} className="mt-1">
-                                      {Math.round(landmark.straightLineDistanceMeters)}m away
-                                    </Text>
-                                  </View>
-                                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-card">
-                                    <ArrowUpRight size={18} color={colors.foreground} />
-                                  </View>
-                                </Pressable>
-                              ))}
-                          </View>
-                        </View>
-                      )}
-                  </View>
-                </GestureDetector>
-              </ScrollView>
+              <GestureDetector gesture={panGesture}>
+                <AttractionOverview
+                  attraction={attraction}
+                  locationHistory={getLocationHistory.data}
+                  isLoadingHistory={getLocationHistory.isLoading}
+                  historyError={getLocationHistory.error?.message || null}
+                />
+              </GestureDetector>
             </TabsContent>
           </Tabs>
         </View>

@@ -107,3 +107,5 @@ const COLORS =
       : WEB_COLORS;
 
 export { COLORS };
+
+export type PossibleThemeColors = (typeof COLORS)['dark'];

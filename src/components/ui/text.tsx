@@ -43,7 +43,7 @@ function Text({
   color,
   ...props
 }: React.ComponentPropsWithoutRef<typeof UITextView> & VariantProps<typeof textVariants>) {
-  const textClassName = React.useContext(TextClassContext);
+  const textClassName = React.use(TextClassContext);
   return (
     <UITextView
       className={cn(textVariants({ variant, color }), textClassName, className)}
