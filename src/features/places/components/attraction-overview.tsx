@@ -225,8 +225,8 @@ export function AttractionOverview({ attraction }: AttractionOverviewProps) {
                             RELATED EVENTS
                           </Text>
                           {significance.relatedEvents.slice(0, 2).map((event, index) => (
-                            <View key={index} className="mb-1 flex-row items-start gap-2">
-                              <View className="mt-2 h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                            <View key={index} className="mb-1 flex-row items-center gap-2">
+                              <View className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                               <Text variant={'caption1'} className="flex-1 text-muted-foreground">
                                 {event}
                               </Text>

@@ -131,7 +131,7 @@ export default function VisitedPlacesScreen() {
   };
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1 overflow-hidden">
       <MapView
         ref={mapRef}
         mapType={Platform.OS === 'ios' ? 'hybridFlyover' : 'satellite'}
@@ -164,8 +164,6 @@ export default function VisitedPlacesScreen() {
       <View
         className="bg-background"
         style={{
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
           paddingBottom: insets.bottom,
         }}
       >
@@ -184,8 +182,8 @@ export default function VisitedPlacesScreen() {
 
         {visitedPlaces.length > 0 ? (
           <>
-            <View className="mx-4 mb-4 rounded-2xl bg-primary p-4">
-              <Text variant="body" className="text-center font-bold text-foreground">
+            <View className="mx-4 mb-4 rounded-2xl bg-card p-4">
+              <Text variant="body" className="text-center font-bold">
                 {stats.countriesVisited} Countries • {stats.citiesVisited} Cities
               </Text>
             </View>
