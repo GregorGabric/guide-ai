@@ -98,6 +98,7 @@ export function AttractionBottomSheet({
   const [activeTab, setActiveTab] = useState('overview');
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+
   const translateX = useSharedValue(0);
   const gestureProgress = useSharedValue(0);
   const tabTransition = useSharedValue(activeTab === 'overview' ? 1 : 0);
