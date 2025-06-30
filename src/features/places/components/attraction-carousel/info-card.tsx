@@ -199,13 +199,15 @@ export const InfoItem = ({
           <View className="w-full flex-1 flex-col gap-1 text-foreground">
             <Text variant={'title3'}>{place.displayName.text}</Text>
 
-            <View className="flex-row items-center gap-1">
-              <Text variant="caption1">{place.rating}</Text>
-              <IconStar size={12} fill="#FBBF24" stroke="#FBBF24" />
-              <Text variant="caption1">
-                ({Intl.NumberFormat('en-US').format(place.userRatingCount)})
-              </Text>
-            </View>
+            {place.rating ? (
+              <View className="flex-row items-center gap-1">
+                <Text variant="caption1">{place.rating}</Text>
+                <IconStar size={12} fill="#FBBF24" stroke="#FBBF24" />
+                <Text variant="caption1">
+                  ({Intl.NumberFormat('en-US').format(place.userRatingCount)})
+                </Text>
+              </View>
+            ) : null}
           </View>
         </BlurView>
       </Pressable>
