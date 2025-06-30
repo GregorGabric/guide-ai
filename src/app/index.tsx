@@ -3,9 +3,10 @@ import { useAction } from 'convex/react';
 
 import { IconMap2 } from '@tabler/icons-react-native';
 import { useRef, useState } from 'react';
-import { Platform, useWindowDimensions, View } from 'react-native';
+import { Image, Platform, useWindowDimensions, View } from 'react-native';
 import type NativeMapView from 'react-native-maps';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabs } from '~/src/components/bottom-tabs';
 import { FloatingProfileButton } from '~/src/components/floating-profile-button';
 import { LoadingOverlay } from '~/src/components/loading-overlay';
@@ -16,10 +17,17 @@ import { AttractionBottomSheet } from '~/src/features/places/components/attracti
 import { AttractionCarousel } from '~/src/features/places/components/attraction-carousel/attraction-carousel';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { useSheetStore } from '~/src/features/places/store';
+import { useTheme } from '~/src/lib/theme/theme-provider';
 import { currentLocation as getCurrentLocation } from '~/src/services/queries';
 import { colors } from '~/src/utils/theme';
 import { MapView } from '../components/ui/map.native';
 import { Text } from '../components/ui/text';
+
+// Import the logo images
+// @ts-expect-error - Asset imports
+import boltWhite from '~/src/assets/bolt-white.png';
+// @ts-expect-error - Asset imports
+import boltBlack from '~/src/assets/bolt-black.png';
 
 export default function MapScreen() {
   const { data: location, isPending: isLocationPending } = useQuery(getCurrentLocation);
@@ -29,6 +37,8 @@ export default function MapScreen() {
   const [open, setOpen] = useState(false);
   const bottomSheetPosition = useSharedValue<number>(0);
   const dimensions = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   const [selectedAttraction, setSelectedAttraction] = useState<
     PlacesResponse['places'][number] | null
@@ -173,6 +183,25 @@ export default function MapScreen() {
 
   return (
     <View className="flex-1">
+      {/* Bolt Logo - positioned in top right corner */}
+      <View
+        style={{
+          position: 'absolute',
+          top: insets.top + 16,
+          right: 16,
+          zIndex: 1000,
+        }}
+      >
+        <Image
+          source={theme === 'dark' ? boltWhite : boltBlack}
+          style={{
+            width: 32,
+            height: 32,
+          }}
+          resizeMode="contain"
+        />
+      </View>
+
       <Animated.View style={mapAnimatedStyle}>
         <MapView
           ref={mapRef}
