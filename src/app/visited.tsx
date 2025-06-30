@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MapMarker, MapView } from '~/src/components/ui/map.native';
 import { ScrollView } from '~/src/components/ui/scroll-view';
 import { Text } from '~/src/components/ui/text';
-import { H2, H4 } from '~/src/components/ui/typography';
+import { H4 } from '~/src/components/ui/typography';
 import { api } from '~/src/convex/_generated/api';
 import { cn } from '~/src/lib/utils';
 
@@ -93,7 +93,7 @@ export default function VisitedPlacesScreen() {
             <View className="bg-gray-150 h-12 animate-pulse rounded-xl" />
           </View>
 
-          <View className="space-y-3 px-4">
+          <View className="gap-3 px-4">
             {[1, 2, 3].map((i) => (
               <View key={i} className="rounded-lg bg-gray-100 p-4">
                 <View className="mb-2 h-5 w-3/4 animate-pulse rounded bg-gray-200" />
@@ -162,7 +162,7 @@ export default function VisitedPlacesScreen() {
       </MapView>
 
       <View
-        className="bg-white"
+        className="bg-background"
         style={{
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
@@ -174,7 +174,9 @@ export default function VisitedPlacesScreen() {
         </View>
 
         <View className="px-6 pb-4">
-          <H2 className="mb-1 text-foreground">My Travels</H2>
+          <Text variant={'largeTitle'} className="mb-1 ">
+            My Travels
+          </Text>
           <Text variant="subhead" color="tertiary">
             {stats.countriesVisited} countries • {stats.citiesVisited} cities
           </Text>
@@ -183,13 +185,13 @@ export default function VisitedPlacesScreen() {
         {visitedPlaces.length > 0 ? (
           <>
             <View className="mx-4 mb-4 rounded-2xl bg-primary p-4">
-              <Text variant="body" className="text-center font-bold text-white">
+              <Text variant="body" className="text-center font-bold text-foreground">
                 {stats.countriesVisited} Countries • {stats.citiesVisited} Cities
               </Text>
             </View>
 
             <View className="px-4 pb-4">
-              <View className="flex-row rounded-xl bg-gray-100 p-1">
+              <View className="flex-row rounded-xl bg-card p-1">
                 <TouchableOpacity
                   className={cn(
                     'flex-1 items-center justify-center rounded-lg py-3',
@@ -201,7 +203,7 @@ export default function VisitedPlacesScreen() {
                 >
                   <Text
                     variant="callout"
-                    className={viewMode === 'map' ? 'text-white' : 'text-black'}
+                    className={viewMode === 'map' ? 'text-background' : 'text-foreground'}
                   >
                     Map
                   </Text>
@@ -217,7 +219,7 @@ export default function VisitedPlacesScreen() {
                 >
                   <Text
                     variant="callout"
-                    className={viewMode === 'list' ? 'text-white' : 'text-black'}
+                    className={viewMode === 'list' ? 'text-background' : 'text-foreground'}
                   >
                     List
                   </Text>
@@ -230,16 +232,16 @@ export default function VisitedPlacesScreen() {
                 {visitedPlaces.map((visit) => (
                   <TouchableOpacity
                     key={visit._id}
-                    className="mb-3 rounded-lg bg-gray-50 p-4"
+                    className="mb-3 rounded-lg bg-card p-4"
                     onPress={() => {
                       handlePlacePress(visit);
                     }}
                   >
                     <H4 className="mb-1">{visit.placeName}</H4>
-                    <Text variant="subhead" color="secondary">
+                    <Text variant="subhead" color="tertiary">
                       {visit.placeAddress || visit.country || 'Unknown location'}
                     </Text>
-                    <Text variant="footnote" color="tertiary">
+                    <Text variant="footnote" color="quarternary">
                       {formatDate(visit.visitedAt)}
                     </Text>
                     {visit.notes && (
@@ -255,10 +257,10 @@ export default function VisitedPlacesScreen() {
         ) : (
           <View className="px-4 pb-8">
             <View className="items-center py-8">
-              <Text variant="body" color="tertiary">
+              <Text variant="body" color="secondary">
                 No travels recorded yet
               </Text>
-              <Text variant="subhead" color="quarternary" className="mt-2 text-center">
+              <Text variant="subhead" color="tertiary" className="mt-2 text-center">
                 Start exploring places and they&apos;ll appear here automatically!
               </Text>
             </View>
