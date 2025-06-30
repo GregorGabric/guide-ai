@@ -248,7 +248,6 @@ export function AttractionBottomSheet({
     <Sheet
       enableDynamicSizing={false}
       detached
-      // bottomInset={insets.bottom}
       topInset={insets.top}
       style={{
         borderCurve: 'continuous',
