@@ -1,8 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 
 import { IconInfoCircle } from '@tabler/icons-react-native';
-import { useQuery as useTanstackQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -113,25 +112,6 @@ export function AttractionBottomSheet({
     },
     [onClose, setIsOpen]
   );
-
-  const getLocationHistoryAction = useAction(api.chat.getLocationHistory);
-
-  const getLocationHistory = useTanstackQuery({
-    queryKey: ['getLocationHistory', attraction?.id],
-    queryFn: () => {
-      if (!attraction) {
-        return null;
-      }
-      return getLocationHistoryAction({
-        attraction: {
-          displayName: attraction.displayName.text || '',
-          formattedAddress: attraction.formattedAddress || '',
-          summary: '',
-        },
-      });
-    },
-    enabled: !!attraction,
-  });
 
   const userMessages =
     useQuery(api.messages.listMessagesByLocationId, {
@@ -372,12 +352,7 @@ export function AttractionBottomSheet({
               style={{ backgroundColor: 'transparent' }}
             >
               <GestureDetector gesture={panGesture}>
-                <AttractionOverview
-                  attraction={attraction}
-                  locationHistory={getLocationHistory.data}
-                  isLoadingHistory={getLocationHistory.isLoading}
-                  historyError={getLocationHistory.error?.message || null}
-                />
+                <AttractionOverview attraction={attraction} />
               </GestureDetector>
             </TabsContent>
           </Tabs>

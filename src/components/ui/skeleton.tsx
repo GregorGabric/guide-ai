@@ -49,74 +49,39 @@ export function Skeleton({ className, width = '100%', height = 20 }: SkeletonPro
 export function HistoricalSignificanceSkeleton({ sectionTitle }: { sectionTitle: string }) {
   return (
     <View className="mb-6">
-      {/* Section Title Skeleton */}
-      {/* <Skeleton width={180} height={20} className="mb-4"> */}
-      <Text>{sectionTitle}</Text>
-      {/* </Skeleton> */}
+      {/* Section Title */}
+      <Text className="mb-4 text-xl font-semibold">{sectionTitle}</Text>
 
-      {/* Summary Skeleton */}
-      <View className="mb-4 rounded-3xl border border-border bg-card p-5">
+      {/* Introductory paragraph skeleton */}
+      <View className="mb-6 gap-4">
         <Skeleton width="100%" height={16} className="mb-2" />
-        <Skeleton width="90%" height={16} className="mb-2" />
-        <Skeleton width="95%" height={16} />
+        <Skeleton width="100%" height={16} className="mb-2" />
+        <Skeleton width="100%" height={16} className="mb-2" />
+        <Skeleton width="100%" height={16} className="mb-2" />
+        <Skeleton width="85%" height={16} />
       </View>
 
-      {/* Historical Significance Cards Skeleton */}
-      <View className="space-y-3">
-        {[1, 2, 3].map((index) => (
-          <View key={index} className="overflow-hidden rounded-3xl border border-border bg-card">
-            <View className="p-5">
-              {/* Header with significance type and score */}
-              <View className="mb-3 flex-row items-center justify-between">
+      {/* Historical Significance Items Skeleton */}
+      <View className="gap-4">
+        {[1, 2, 3, 4].map((index) => (
+          <View key={index} className="flex-row items-center justify-between gap-4">
+            {/* Left side - Icon and title */}
+            <View className="flex-1 flex-row items-center gap-4">
+              <Skeleton width={24} height={24} className="rounded-sm" />
+              <View className="flex-1 gap-2">
+                <Skeleton width="90%" height={18} className="mb-2" />
                 <View className="flex-row items-center gap-2">
-                  <Skeleton width={32} height={32} className="rounded-full" />
-                  <Skeleton width={80} height={20} className="rounded-full" />
-                </View>
-                <View className="flex-row items-center gap-1">
-                  <Skeleton width={16} height={16} className="rounded-sm" />
-                  <Skeleton width={30} height={16} />
-                </View>
-              </View>
-
-              {/* Title */}
-              <Skeleton width="85%" height={18} className="mb-2" />
-
-              {/* Period */}
-              <View className="mb-3 flex-row items-center gap-2">
-                <Skeleton width={14} height={14} className="rounded-sm" />
-                <Skeleton width={120} height={14} />
-              </View>
-
-              {/* Description */}
-              <View className="mb-4">
-                <Skeleton width="100%" height={16} className="mb-2" />
-                <Skeleton width="100%" height={16} className="mb-2" />
-                <Skeleton width="75%" height={16} />
-              </View>
-
-              {/* Related Events */}
-              <View className="mb-3">
-                <Skeleton width={100} height={12} className="mb-2" />
-                <View className="mb-1 flex-row items-start gap-2">
-                  <Skeleton width={6} height={6} className="mt-1 rounded-full" />
-                  <Skeleton width="90%" height={12} />
-                </View>
-                <View className="flex-row items-start gap-2">
-                  <Skeleton width={6} height={6} className="mt-1 rounded-full" />
-                  <Skeleton width="85%" height={12} />
-                </View>
-              </View>
-
-              {/* Key Figures */}
-              <View>
-                <Skeleton width={80} height={12} className="mb-2" />
-                <View className="flex-row flex-wrap gap-2">
                   <Skeleton width={60} height={20} className="rounded-full" />
-                  <Skeleton width={80} height={20} className="rounded-full" />
-                  <Skeleton width={70} height={20} className="rounded-full" />
+                  <View className="flex-row items-center gap-1">
+                    <Skeleton width={16} height={16} className="rounded-sm" />
+                    <Skeleton width={30} height={16} />
+                  </View>
                 </View>
               </View>
             </View>
+
+            {/* Right side - Chevron */}
+            <Skeleton width={20} height={20} className="rounded-sm" />
           </View>
         ))}
       </View>

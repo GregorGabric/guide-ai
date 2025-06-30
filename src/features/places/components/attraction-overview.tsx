@@ -1,4 +1,6 @@
 import { IconCalendar, IconGlobe, IconTrophy } from '@tabler/icons-react-native';
+import { skipToken, useQuery } from '@tanstack/react-query';
+import { useAction } from 'convex/react';
 import { Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import {
   Accordion,
@@ -9,48 +11,15 @@ import {
 import { Badge } from '~/src/components/ui/badge';
 import { HistoricalSignificanceSkeleton } from '~/src/components/ui/skeleton';
 import { Text } from '~/src/components/ui/text';
+import { api } from '~/src/convex/_generated/api';
 import type { LocationHistorySignificance } from '~/src/convex/chat';
 import type { PlacesResponse } from '~/src/features/places/services/types';
 import { ArrowUpRight } from '~/src/lib/icons/arrow-up-right';
 import type { PossibleThemeColors } from '~/src/lib/theme/colors';
 import { useTheme } from '~/src/lib/theme/theme-provider';
 
-type LocationHistoryData = {
-  location: {
-    name: string;
-    address: string;
-  };
-  historicalSignificances: Array<{
-    id: string;
-    title: string;
-    description: string;
-    period: string;
-    significance:
-      | 'architectural'
-      | 'cultural'
-      | 'political'
-      | 'religious'
-      | 'economic'
-      | 'social'
-      | 'military'
-      | 'artistic'
-      | 'scientific';
-    yearRange?: {
-      start?: number;
-      end?: number;
-    };
-    keyFigures?: Array<string>;
-    relatedEvents?: Array<string>;
-    popularityScore: number;
-  }>;
-  summary: string;
-};
-
 interface AttractionOverviewProps {
-  attraction: PlacesResponse['places'][number];
-  locationHistory?: LocationHistoryData | null;
-  isLoadingHistory?: boolean;
-  historyError?: string | null;
+  attraction: PlacesResponse['places'][number] | undefined;
 }
 
 const openMapsNavigation = (latitude: number, longitude: number, label: string) => {
@@ -122,13 +91,33 @@ const getSignificanceColor = (significance: LocationHistorySignificance) => {
   }
 };
 
-export function AttractionOverview({
-  attraction,
-  locationHistory,
-  isLoadingHistory,
-  historyError,
-}: AttractionOverviewProps) {
+export function AttractionOverview({ attraction }: AttractionOverviewProps) {
+  const getLocationHistoryAction = useAction(api.chat.getLocationHistory);
   const { colors } = useTheme();
+
+  const getLocationHistory = useQuery({
+    queryKey: ['getLocationHistory', attraction?.id],
+    queryFn: attraction
+      ? () => {
+          return getLocationHistoryAction({
+            attraction: {
+              displayName: attraction.displayName.text || '',
+              formattedAddress: attraction.formattedAddress || '',
+              summary: '',
+            },
+          });
+        }
+      : skipToken,
+    enabled: !!attraction,
+  });
+
+  const locationHistory = getLocationHistory.data;
+  const isLoadingHistory = getLocationHistory.isLoading;
+  const historyError = getLocationHistory.error?.message || null;
+
+  if (!attraction) {
+    return null;
+  }
 
   return (
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
