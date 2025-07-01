@@ -13,6 +13,7 @@ import type * as chat from "../chat.js";
 import type * as http from "../http.js";
 import type * as image from "../image.js";
 import type * as messages from "../messages.js";
+import type * as photoCache from "../photoCache.js";
 import type * as placesActions from "../placesActions.js";
 import type * as streaming from "../streaming.js";
 import type * as textToSpeech from "../textToSpeech.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   image: typeof image;
   messages: typeof messages;
+  photoCache: typeof photoCache;
   placesActions: typeof placesActions;
   streaming: typeof streaming;
   textToSpeech: typeof textToSpeech;

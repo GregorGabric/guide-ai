@@ -122,6 +122,21 @@ export default defineSchema({
   })
     .index('email', ['email'])
     .index('phone', ['phone']),
+
+  // Photo cache table for Google Places API cost optimization
+  photoCache: defineTable({
+    googleMapsUri: v.optional(v.string()),
+    photoName: v.string(), // Google Photos API photo name (unique key)
+    photoUrl: v.string(), // Cached photo URL
+    cachedAt: v.number(), // Timestamp when cached
+    expiresAt: v.number(), // When cache expires (7 days)
+    maxWidthPx: v.number(), // Size parameter for cache key
+    requestCount: v.optional(v.number()), // Track usage for analytics
+  })
+    .index('by_google_maps_uri_and_size', ['googleMapsUri', 'maxWidthPx'])
+    .index('by_photo_name_and_size', ['photoName', 'maxWidthPx'])
+    .index('by_expires_at', ['expiresAt']),
+
   messages: defineTable({
     role: v.union(v.literal('user'), v.literal('assistant')),
     content: v.string(),
