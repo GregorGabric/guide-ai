@@ -48,6 +48,7 @@ export const InfoItem = ({
   const imageQuery = useQuery({
     queryKey: ['places', 'photo', place.id],
     queryFn: () => photoUrl({ photoName: place.photos[0].name }),
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   useEffect(() => {
